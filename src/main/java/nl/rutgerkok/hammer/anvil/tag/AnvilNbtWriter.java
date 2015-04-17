@@ -65,7 +65,7 @@ public class AnvilNbtWriter {
         }
     }
 
-    static <T> void writePayload(DataOutput dataOutput, TagType<? extends T> tagType, T value) throws IOException {
+    private static <T> void writePayload(DataOutput dataOutput, TagType<? extends T> tagType, T value) throws IOException {
         if (tagType == TagType.BYTE) {
             dataOutput.writeByte((Byte) value);
         } else if (tagType == TagType.COMPOUND) {
@@ -110,7 +110,7 @@ public class AnvilNbtWriter {
      * @throws IOException
      *             If writing fails.
      */
-    static void writeUncompressedToStream(DataOutput dataOutput, CompoundTag tag) throws IOException {
+    private static void writeUncompressedToStream(DataOutput dataOutput, CompoundTag tag) throws IOException {
         TagType.COMPOUND.write(dataOutput);
         dataOutput.writeUTF(""); // Required for NBT format
         writeCompound(dataOutput, tag);

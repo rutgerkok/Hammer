@@ -2,6 +2,7 @@ package nl.rutgerkok.hammer.tag;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Constants of the various tag types supported by {@link CompoundTag} and
@@ -147,5 +148,17 @@ public final class TagType<T> {
      */
     public void write(DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(marker);
+    }
+
+    /**
+     * Writes the marker of this type to the given stream.
+     *
+     * @param outputStream
+     *            Stream to write to.
+     * @throws IOException
+     *             If the marker could not be written.
+     */
+    public void write(OutputStream outputStream) throws IOException {
+        outputStream.write(marker & 0xff);
     }
 }

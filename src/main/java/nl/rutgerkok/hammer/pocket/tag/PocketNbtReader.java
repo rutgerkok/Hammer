@@ -1,23 +1,23 @@
-package nl.rutgerkok.hammer.anvil.tag;
+package nl.rutgerkok.hammer.pocket.tag;
 
 import java.io.BufferedInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.zip.GZIPInputStream;
 
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
 import nl.rutgerkok.hammer.tag.TagType;
 
+import com.google.common.io.LittleEndianDataInputStream;
+
 /**
- * Contains methods to read NBT streams in the PC level format.
+ * Contains methods to read NBT streams in the MCPE level format.
  *
  */
-public final class AnvilNbtReader {
+public final class PocketNbtReader {
 
     private static final int MAX_ARRAY_SIZE = 100000;
 
@@ -30,10 +30,10 @@ public final class AnvilNbtReader {
      * @throws IOException
      *             If an IO error occurs.
      */
-    private static final CompoundTag readCompoundTag(DataInput input) throws IOException {
+    private static final CompoundTag readCompoundTag(InputStream input) throws IOException {
         CompoundTag tag = new CompoundTag();
         while (true) {
-            byte marker = input.readByte();
+            byte marker = LittleEndian.readByte(input);
             if (marker == 0) {
                 // End of tag
                 return tag;
@@ -41,7 +41,7 @@ public final class AnvilNbtReader {
 
             @SuppressWarnings("unchecked")
             TagType<Object> type = (TagType<Object>) TagType.fromByte(marker);
-            String tagName = input.readUTF();
+            String tagName = LittleEndian.readUTF(input);
             tag.set(CompoundKey.of(tagName), type, readPayload(input, type));
         }
     }
@@ -55,8 +55,9 @@ public final class AnvilNbtReader {
      * @throws IOException
      *             If the file format is invalid.
      */
-    public static CompoundTag readFromCompressedFile(Path path) throws IOException {
-        try (DataInputStream dataInput = new DataInputStream(new BufferedInputStream(new GZIPInputStream(Files.newInputStream(path))))) {
+    public static CompoundTag readFromUncompressedFile(Path path) throws IOException {
+        try (LittleEndianDataInputStream dataInput = new LittleEndianDataInputStream(
+                new BufferedInputStream(Files.newInputStream(path)))) {
             return readFromUncompressedStream(dataInput);
         }
     }
@@ -64,27 +65,37 @@ public final class AnvilNbtReader {
     /**
      * Reads the tag from the uncompressed stream.
      *
-     * @param dataInput
+     * @param inputStream
      *            Stream to read from.
      * @return The stream.
      * @throws IOException
      *             If an IO error occurs.
      */
-    public static CompoundTag readFromUncompressedStream(DataInput dataInput) throws IOException {
+    public static CompoundTag readFromUncompressedStream(InputStream inputStream) throws IOException {
+
+        // Read version
+        int version = LittleEndian.readInt(inputStream);
+        if (version > PocketTagFormat.VERSION) {
+            throw new IOException("Found NBT version of " + version + ", but highest supported is " + PocketTagFormat.VERSION);
+        }
+
+        // Read length
+        LittleEndian.readInt(inputStream);
+
         // Verify that we have a compound tag
-        byte tagMarker = dataInput.readByte();
+        byte tagMarker = LittleEndian.readByte(inputStream);
         if (TagType.fromByte(tagMarker) != TagType.COMPOUND) {
             throw new IOException("Root tag must be a compound tag, found byte " + (tagMarker & 0xff) + " instead");
         }
         // Skip name
-        dataInput.readUTF();
+        LittleEndian.readUTF(inputStream);
         // Read the rest
-        return readCompoundTag(dataInput);
+        return readCompoundTag(inputStream);
     }
 
-    private static ListTag<?> readListTag(DataInput stream) throws IOException {
-        byte typeByte = stream.readByte();
-        int size = stream.readInt();
+    private static ListTag<?> readListTag(InputStream dataInput) throws IOException {
+        byte typeByte = LittleEndian.readByte(dataInput);
+        int size = LittleEndian.readInt(dataInput);
 
         TagType<?> tagType;
         if (typeByte == 0) {
@@ -101,7 +112,7 @@ public final class AnvilNbtReader {
 
         ListTag<Object> tag = new ListTag<>(tagType);
         for (int i = 0; i < size; i++) {
-            tag.add(AnvilNbtReader.readPayload(stream, tag.getListType()));
+            tag.add(PocketNbtReader.readPayload(dataInput, tag.getListType()));
         }
         return tag;
     }
@@ -119,30 +130,30 @@ public final class AnvilNbtReader {
      * @throws IOException
      *             If an io error occurs.
      */
-    private static <T> T readPayload(DataInput dataInput, TagType<T> type) throws IOException {
+    private static <T> T readPayload(InputStream dataInput, TagType<T> type) throws IOException {
         if (type == TagType.BYTE) {
-            return type.cast(dataInput.readByte());
+            return type.cast(LittleEndian.readByte(dataInput));
         }
         if (type == TagType.COMPOUND) {
             return type.cast(readCompoundTag(dataInput));
         }
         if (type == TagType.DOUBLE) {
-            return type.cast(dataInput.readDouble());
+            return type.cast(LittleEndian.readDouble(dataInput));
         }
         if (type == TagType.FLOAT) {
-            return type.cast(dataInput.readFloat());
+            return type.cast(LittleEndian.readFloat(dataInput));
         }
         if (type == TagType.INT) {
-            return type.cast(dataInput.readInt());
+            return type.cast(LittleEndian.readInt(dataInput));
         }
         if (type == TagType.INT_ARRAY) {
-            int size = dataInput.readInt();
+            int size = LittleEndian.readInt(dataInput);
             if (size < 0 || size > MAX_ARRAY_SIZE) {
                 throw new IOException("Invalid int array size: " + size);
             }
             int[] array = new int[size];
             for (int i = 0; i < size; i++) {
-                array[i] = dataInput.readInt();
+                array[i] = LittleEndian.readInt(dataInput);
             }
             return type.cast(array);
         }
@@ -150,19 +161,19 @@ public final class AnvilNbtReader {
             return type.cast(readListTag(dataInput));
         }
         if (type == TagType.LONG) {
-            return type.cast(dataInput.readLong());
+            return type.cast(LittleEndian.readLong(dataInput));
         }
         if (type == TagType.BYTE_ARRAY) {
-            int blobSize = dataInput.readInt();
+            int blobSize = LittleEndian.readInt(dataInput);
             byte[] result = new byte[blobSize];
-            dataInput.readFully(result);
+            LittleEndian.readFully(dataInput, result);
             return type.cast(result);
         }
         if (type == TagType.SHORT) {
-            return type.cast(dataInput.readShort());
+            return type.cast(LittleEndian.readShort(dataInput));
         }
         if (type == TagType.STRING) {
-            return type.cast(dataInput.readUTF());
+            return type.cast(LittleEndian.readUTF(dataInput));
         }
         throw new IOException("Unknown type: " + type);
     }

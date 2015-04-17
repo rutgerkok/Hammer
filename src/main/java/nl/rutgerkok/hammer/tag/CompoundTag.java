@@ -598,6 +598,11 @@ public final class CompoundTag implements JSONAware {
         return JSONObject.toJSONString(map);
     }
 
+    @Override
+    public String toString() {
+        return toJSONString();
+    }
+
     private boolean valueEquals(Object obj1, Object obj2) {
         if (obj1 == null) {
             return obj2 == null;
