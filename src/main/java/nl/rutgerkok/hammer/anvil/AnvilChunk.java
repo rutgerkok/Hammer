@@ -1,11 +1,11 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_BIOMES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_ENTITIES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_SECTIONS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_TILE_ENTITIES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_X_POS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_Z_POS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_BIOMES_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_ENTITIES_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_SECTIONS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_TILE_ENTITIES_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_X_POS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_Z_POS_TAG;
 
 import java.util.List;
 

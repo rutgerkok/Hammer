@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
-import nl.rutgerkok.hammer.anvil.tag.FormatConstants;
+import nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Result;
@@ -25,7 +25,7 @@ public class PlayerFileWalkTest {
         @Override
         public Result accept(PlayerFile value, Progress progress) {
             CompoundTag tag = value.getTag();
-            assertTrue("Tag must contain inventory subtag", tag.containsKey(FormatConstants.PLAYER_INVENTORY));
+            assertTrue("Tag must contain inventory subtag", tag.containsKey(AnvilTagFormat.PLAYER_INVENTORY));
             fileCount++;
             return Result.NO_CHANGES;
         }

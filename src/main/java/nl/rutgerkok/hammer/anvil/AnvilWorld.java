@@ -1,8 +1,8 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.LFML_ITEM_DATA_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.LR_FML_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.LR_MINECRAFT_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LFML_ITEM_DATA_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_FML_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_MINECRAFT_TAG;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;

@@ -9,7 +9,7 @@ import java.util.Objects;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.anvil.tag.FormatConstants;
+import nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.DirectoryUtil;
 import nl.rutgerkok.hammer.util.Progress;
@@ -33,7 +33,7 @@ class AnvilPlayerFilesWalk {
 
     private int calculateotalUnits() throws IOException {
         int size = DirectoryUtil.countFiles(world.getPlayerDirectory());
-        if (world.getLevelTag().containsKey(FormatConstants.LEVEL_PLAYER_TAG)) {
+        if (world.getLevelTag().containsKey(AnvilTagFormat.LEVEL_PLAYER_TAG)) {
             size++;
         }
 
@@ -48,11 +48,11 @@ class AnvilPlayerFilesWalk {
 
     private void walkLevelDatTag(Visitor<PlayerFile> consumer, UnitsProgress progress) throws IOException {
         CompoundTag levelTag = world.getLevelTag();
-        if (!levelTag.containsKey(FormatConstants.LEVEL_PLAYER_TAG)) {
+        if (!levelTag.containsKey(AnvilTagFormat.LEVEL_PLAYER_TAG)) {
             return;
         }
 
-        CompoundTag playerTag = levelTag.getCompound(FormatConstants.LEVEL_PLAYER_TAG);
+        CompoundTag playerTag = levelTag.getCompound(AnvilTagFormat.LEVEL_PLAYER_TAG);
         PlayerFile playerFile = new PlayerFile(world.getMaterialMap(), playerTag);
         Result result = consumer.accept(playerFile, progress);
         switch (result) {

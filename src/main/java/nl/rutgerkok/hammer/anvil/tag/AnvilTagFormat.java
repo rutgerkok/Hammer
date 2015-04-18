@@ -6,7 +6,7 @@ import nl.rutgerkok.hammer.tag.CompoundKey;
  * Names of the various NBT tags of Minecraft's chunk format.
  *
  */
-public final class FormatConstants {
+public final class AnvilTagFormat {
 
     // Chunk format
     public static final CompoundKey CHUNK_BIOMES_TAG = CompoundKey.of("Biomes");

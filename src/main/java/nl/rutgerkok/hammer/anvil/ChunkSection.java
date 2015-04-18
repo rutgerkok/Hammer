@@ -1,10 +1,10 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.CHUNK_SECTIONS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.SECTION_BLOCK_DATA_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.SECTION_BLOCK_IDS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.SECTION_EXT_BLOCK_IDS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.FormatConstants.SECTION_Y_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_SECTIONS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_BLOCK_DATA_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_BLOCK_IDS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_EXT_BLOCK_IDS_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_Y_TAG;
 
 import java.util.List;
 
