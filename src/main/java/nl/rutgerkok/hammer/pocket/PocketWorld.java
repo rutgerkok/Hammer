@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
@@ -15,9 +16,10 @@ import nl.rutgerkok.hammer.util.Visitor;
 
 public class PocketWorld implements World {
 
+    private static final String LEVEL_DB_FOLDER = "db";
     private final Path levelDat;
+    private final PocketLevelDb levelDb;
     private final MaterialMap materialMap;
-
     private final CompoundTag rootLevelTag;
 
     /**
@@ -34,6 +36,9 @@ public class PocketWorld implements World {
 
         // Use the same material map as Anvil for now
         this.materialMap = new VanillaMaterialMap();
+
+        Path levelDbFolder = levelDat.resolveSibling(LEVEL_DB_FOLDER);
+        this.levelDb = new PocketLevelDb(levelDbFolder);
     }
 
     @Override
@@ -54,9 +59,26 @@ public class PocketWorld implements World {
     }
 
     @Override
+    public void walkChunks(Visitor<Chunk> visitor) throws IOException {
+        new ChunkFilesWalk(this.levelDb).forEach(visitor);
+    }
+
+    @Override
     public void walkPlayerFiles(Visitor<PlayerFile> visitor) throws IOException {
         // TODO Auto-generated method stub
 
     }
 
+    /**
+     * Same as {@link #walkChunks(Visitor)}, but may save you from casting the
+     * chunks.
+     *
+     * @param visitor
+     *            The visitor.
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    public void walkPocketChunks(Visitor<PocketChunk> visitor) throws IOException {
+        new ChunkFilesWalk(this.levelDb).forEach(visitor);
+    }
 }

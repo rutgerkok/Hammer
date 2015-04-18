@@ -33,6 +33,17 @@ public interface World {
     void saveLevelTag() throws IOException;
 
     /**
+     * Gets a walk along all chunks in the world.
+     *
+     * @param visitor
+     *            The method {@link Visitor#accept(Object, Progress)} is called
+     *            for every chunk in the world.
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    void walkChunks(Visitor<Chunk> visitor) throws IOException;
+
+    /**
      * Gets a walk along all player files in the world.
      *
      * @param visitor

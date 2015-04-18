@@ -10,6 +10,25 @@ import org.junit.Test;
 
 public class LittleEndianTest {
 
+    private ByteArrayInputStream flip(ByteArrayOutputStream outputStream) {
+        return new ByteArrayInputStream(outputStream.toByteArray());
+    }
+
+    @Test
+    public void testFloat() throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        LittleEndian.writeFloat(outputStream, 3.3f);
+        LittleEndian.writeFloat(outputStream, Float.MAX_VALUE);
+        LittleEndian.writeFloat(outputStream, Float.NaN);
+        LittleEndian.writeFloat(outputStream, Float.NEGATIVE_INFINITY);
+
+        ByteArrayInputStream inputStream = flip(outputStream);
+        assertEquals(3.3f, LittleEndian.readFloat(inputStream), 0.001);
+        assertEquals(Float.MAX_VALUE, LittleEndian.readFloat(inputStream), 0.001);
+        assertEquals(Float.NaN, LittleEndian.readFloat(inputStream), 0.001);
+        assertEquals(Float.NEGATIVE_INFINITY, LittleEndian.readFloat(inputStream), 0.001);
+    }
+
     @Test
     public void testInt() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -34,24 +53,5 @@ public class LittleEndianTest {
         assertEquals(10, LittleEndian.readLong(inputStream));
         assertEquals(Long.MAX_VALUE, LittleEndian.readLong(inputStream));
         assertEquals(Long.MIN_VALUE, LittleEndian.readLong(inputStream));
-    }
-
-    @Test
-    public void testFloat() throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        LittleEndian.writeFloat(outputStream, 3.3f);
-        LittleEndian.writeFloat(outputStream, Float.MAX_VALUE);
-        LittleEndian.writeFloat(outputStream, Float.NaN);
-        LittleEndian.writeFloat(outputStream, Float.NEGATIVE_INFINITY);
-
-        ByteArrayInputStream inputStream = flip(outputStream);
-        assertEquals(3.3f, LittleEndian.readFloat(inputStream), 0.001);
-        assertEquals(Float.MAX_VALUE, LittleEndian.readFloat(inputStream), 0.001);
-        assertEquals(Float.NaN, LittleEndian.readFloat(inputStream), 0.001);
-        assertEquals(Float.NEGATIVE_INFINITY, LittleEndian.readFloat(inputStream), 0.001);
-    }
-
-    private ByteArrayInputStream flip(ByteArrayOutputStream outputStream) {
-        return new ByteArrayInputStream(outputStream.toByteArray());
     }
 }

@@ -11,8 +11,6 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
 import nl.rutgerkok.hammer.tag.TagType;
 
-import com.google.common.io.LittleEndianDataInputStream;
-
 /**
  * Contains methods to read NBT streams in the MCPE level format.
  *
@@ -56,9 +54,17 @@ public final class PocketNbtReader {
      *             If the file format is invalid.
      */
     public static CompoundTag readFromUncompressedFile(Path path) throws IOException {
-        try (LittleEndianDataInputStream dataInput = new LittleEndianDataInputStream(
-                new BufferedInputStream(Files.newInputStream(path)))) {
-            return readFromUncompressedStream(dataInput);
+        try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(path))) {
+            // Read version
+            int version = LittleEndian.readInt(inputStream);
+            if (version > PocketTagFormat.VERSION) {
+                throw new IOException("Found NBT version of " + version + ", but highest supported is " + PocketTagFormat.VERSION);
+            }
+
+            // Read length
+            LittleEndian.readInt(inputStream);
+
+            return readFromUncompressedStream(inputStream);
         }
     }
 
@@ -72,16 +78,6 @@ public final class PocketNbtReader {
      *             If an IO error occurs.
      */
     public static CompoundTag readFromUncompressedStream(InputStream inputStream) throws IOException {
-
-        // Read version
-        int version = LittleEndian.readInt(inputStream);
-        if (version > PocketTagFormat.VERSION) {
-            throw new IOException("Found NBT version of " + version + ", but highest supported is " + PocketTagFormat.VERSION);
-        }
-
-        // Read length
-        LittleEndian.readInt(inputStream);
-
         // Verify that we have a compound tag
         byte tagMarker = LittleEndian.readByte(inputStream);
         if (TagType.fromByte(tagMarker) != TagType.COMPOUND) {

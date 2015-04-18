@@ -11,7 +11,7 @@ import java.util.List;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
+import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
@@ -125,7 +125,7 @@ public final class AnvilChunk implements Chunk {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, AnvilMaterialData materialData) {
+    public void setBlock(int x, int y, int z, MaterialData materialData) {
         if (isOutOfBounds(x, y, z)) {
             return;
         }

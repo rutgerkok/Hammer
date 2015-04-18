@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 
+import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
@@ -163,6 +164,12 @@ public class AnvilWorld implements World {
     @Override
     public void saveLevelTag() throws IOException {
         AnvilNbtWriter.writeCompressedToFile(levelDat, tag);
+    }
+
+    @Override
+    public void walkChunks(Visitor<Chunk> visitor) throws IOException {
+        // TODO Auto-generated method stub
+
     }
 
     @Override

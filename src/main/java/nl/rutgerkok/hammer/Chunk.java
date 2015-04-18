@@ -3,7 +3,7 @@ package nl.rutgerkok.hammer;
 import java.util.List;
 
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
+import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
@@ -110,6 +110,6 @@ public interface Chunk {
      * @param materialData
      *            Material to set.
      */
-    void setBlock(int x, int y, int z, AnvilMaterialData materialData);
+    void setBlock(int x, int y, int z, MaterialData materialData);
 
 }

@@ -2,7 +2,6 @@ package nl.rutgerkok.hammer.pocket.tag;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -30,30 +29,6 @@ public class PocketNbtWriter {
         }
         // Close tag with a null byte
         LittleEndian.writeByte(outputStream, (byte) 0);
-    }
-
-    /**
-     * Writes a compound tag to a file.
-     *
-     * @param path
-     *            The file to write to. Will be created if it doesn't exist yet.
-     * @param tag
-     *            The tag to write.
-     * @throws IOException
-     *             If an IO error occurs.
-     */
-    public static void writeUncompressedToFile(Path path, CompoundTag tag) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path.getParent());
-            try {
-                Files.createFile(path);
-            } catch (FileAlreadyExistsException e) {
-                // Cannot create file atomically, so this error is possible
-            }
-        }
-        try (DataOutputStream dataOutput = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(path)))) {
-            writeUncompressedToStream(dataOutput, tag);
-        }
     }
 
     private static void writeList(OutputStream outputStream, ListTag<?> list) throws IOException {
@@ -100,6 +75,40 @@ public class PocketNbtWriter {
     }
 
     /**
+     * Writes a compound tag to a file.
+     *
+     * @param path
+     *            The file to write to. Will be created if it doesn't exist yet.
+     * @param tag
+     *            The tag to write.
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    public static void writeUncompressedToFile(Path path, CompoundTag tag) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createDirectories(path.getParent());
+            try {
+                Files.createFile(path);
+            } catch (FileAlreadyExistsException e) {
+                // Cannot create file atomically, so this error is possible
+            }
+        }
+        try (OutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(path))) {
+            // Use a buffer to capture the length
+            ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream();
+            writeUncompressedToStream(bufferedOutput, tag);
+            byte[] buffered = bufferedOutput.toByteArray();
+
+            // Write the header
+            LittleEndian.writeInt(outputStream, PocketTagFormat.VERSION);
+            LittleEndian.writeInt(outputStream, buffered.length);
+
+            // Write the data
+            outputStream.write(buffered);
+        }
+    }
+
+    /**
      * Writes the compound tag with its header to the given stream, without
      * extra compression.
      *
@@ -111,17 +120,8 @@ public class PocketNbtWriter {
      *             If writing fails.
      */
     public static void writeUncompressedToStream(OutputStream outputStream, CompoundTag tag) throws IOException {
-        LittleEndian.writeInt(outputStream, PocketTagFormat.VERSION);
-
-        // Write tag to memory buffer, so that length can be captured
-        ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
-        TagType.COMPOUND.write(byteArrayStream);
-        LittleEndian.writeUTF(byteArrayStream, ""); // Required for NBT format
-        writeCompound(byteArrayStream, tag);
-
-        // Write tag to stream
-        byte[] bytes = byteArrayStream.toByteArray();
-        LittleEndian.writeInt(outputStream, bytes.length);
-        outputStream.write(bytes);
+        TagType.COMPOUND.write(outputStream);
+        LittleEndian.writeUTF(outputStream, ""); // Required for NBT format
+        writeCompound(outputStream, tag);
     }
 }
