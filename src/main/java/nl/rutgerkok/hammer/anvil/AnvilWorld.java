@@ -5,11 +5,8 @@ import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_FML_TAG;
 import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_MINECRAFT_TAG;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.PlayerFile;
@@ -34,18 +31,6 @@ public class AnvilWorld implements World {
     private static final String PLAYER_DIRECTORY = "playerdata";
     private static final String PLAYER_DIRECTORY_OLD = "players";
     private static final String REGION_FOLDER_NAME = "region";
-
-    private static DirectoryStream.Filter<Path> worldDirectoriesStartingWith(final String prefix) {
-        return new DirectoryStream.Filter<Path>() {
-
-            @Override
-            public boolean accept(Path path) throws IOException {
-                return Files.isDirectory(path)
-                        && path.getFileName().toString().startsWith(prefix)
-                        && Files.isDirectory(path.resolve(REGION_FOLDER_NAME));
-            }
-        };
-    }
 
     private final Path levelDat;
     private final MaterialMap materialMap;
@@ -113,33 +98,6 @@ public class AnvilWorld implements World {
     }
 
     /**
-     * Gets all region folders of all dimensions of this world.
-     *
-     * @return All region folders.
-     * @throws IOException
-     *             If the folders cannot be read.
-     */
-    public Collection<Path> getRegionFolders() throws IOException {
-        Collection<Path> regionFolders = new HashSet<>();
-        Path levelDirectory = levelDat.getParent();
-
-        // Search for region folder next to level.dat
-        Path normalRegionFolder = getDirectory(REGION_FOLDER_NAME);
-        if (normalRegionFolder != null) {
-            regionFolders.add(normalRegionFolder);
-        }
-
-        // Search for other dimensions next to level.dat
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(levelDirectory, worldDirectoriesStartingWith("DIM"))) {
-            for (Path file : stream) {
-                regionFolders.add(file.resolve(REGION_FOLDER_NAME));
-            }
-        }
-
-        return regionFolders;
-    }
-
-    /**
      * Scans the level.dat for a Forge name->id map, if found it used that,
      * otherwise it uses the vanilla ids.
      *
@@ -168,8 +126,7 @@ public class AnvilWorld implements World {
 
     @Override
     public void walkChunks(Visitor<Chunk> visitor) throws IOException {
-        // TODO Auto-generated method stub
-
+        new ChunkWalk(materialMap, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
     }
 
     @Override

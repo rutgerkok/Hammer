@@ -307,7 +307,7 @@ public final class CompoundTag implements JSONAware {
         Object value = map.get(key);
         if (value instanceof ListTag) {
             ListTag<?> listTag = (ListTag<?>) value;
-            if (listTag.getListType().getValueType().equals(type)) {
+            if (listTag.getListType().equals(type)) {
                 return (ListTag<T>) listTag;
             }
         }

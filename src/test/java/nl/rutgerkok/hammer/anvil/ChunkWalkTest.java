@@ -1,4 +1,4 @@
-package nl.rutgerkok.hammer.pocket;
+package nl.rutgerkok.hammer.anvil;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,20 +13,21 @@ import org.junit.Test;
 
 public class ChunkWalkTest {
 
-    private PocketWorld world;
+    private AnvilWorld world;
 
     @Before
     public void loadWorld() throws IOException {
-        Path levelDat = TestFile.get("pocket_0_10_4/level.dat");
-        world = new PocketWorld(levelDat);
+        Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
+        world = new AnvilWorld(levelDat);
     }
 
     @Test
     public void testStatistics() throws IOException {
         CountingChunkVisitor chunkVisitor = new CountingChunkVisitor();
+        chunkVisitor.log = true;
         world.walkChunks(chunkVisitor);
-        assertEquals(124, chunkVisitor.chunksSeen.get());
-        assertEquals(22, chunkVisitor.entitiesSeen.get());
-        assertEquals(3, chunkVisitor.tileEntitiesSeen.get());
+        assertEquals(575, chunkVisitor.chunksSeen.get());
+        assertEquals(611, chunkVisitor.entitiesSeen.get());
+        assertEquals(17, chunkVisitor.tileEntitiesSeen.get());
     }
 }

@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
@@ -56,21 +57,23 @@ public final class AnvilNbtReader {
      *             If the file format is invalid.
      */
     public static CompoundTag readFromCompressedFile(Path path) throws IOException {
-        try (DataInputStream dataInput = new DataInputStream(new BufferedInputStream(new GZIPInputStream(Files.newInputStream(path))))) {
-            return readFromUncompressedStream(dataInput);
+        try (InputStream inputStream = new BufferedInputStream(new GZIPInputStream(Files.newInputStream(path)))) {
+            return readFromUncompressedStream(inputStream);
         }
     }
 
     /**
      * Reads the tag from the uncompressed stream.
      *
-     * @param dataInput
+     * @param stream
      *            Stream to read from.
      * @return The stream.
      * @throws IOException
      *             If an IO error occurs.
      */
-    public static CompoundTag readFromUncompressedStream(DataInput dataInput) throws IOException {
+    public static CompoundTag readFromUncompressedStream(InputStream stream) throws IOException {
+        DataInputStream dataInput = new DataInputStream(stream);
+
         // Verify that we have a compound tag
         byte tagMarker = dataInput.readByte();
         if (TagType.fromByte(tagMarker) != TagType.COMPOUND) {

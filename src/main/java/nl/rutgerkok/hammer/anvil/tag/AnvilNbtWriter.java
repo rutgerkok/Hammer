@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,8 +52,8 @@ public class AnvilNbtWriter {
                 // Cannot create file atomically, so this error is possible
             }
         }
-        try (DataOutputStream dataOutput = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(path))))) {
-            writeUncompressedToStream(dataOutput, tag);
+        try (OutputStream outputStream = new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(path)))) {
+            writeUncompressedToStream(outputStream, tag);
         }
     }
 
@@ -103,14 +104,15 @@ public class AnvilNbtWriter {
      * Writes the compound tag with its header to the given stream, without
      * extra compression.
      *
-     * @param dataOutput
+     * @param outputStream
      *            Stream to write to.
      * @param tag
      *            Tag to write.
      * @throws IOException
      *             If writing fails.
      */
-    private static void writeUncompressedToStream(DataOutput dataOutput, CompoundTag tag) throws IOException {
+    public static void writeUncompressedToStream(OutputStream outputStream, CompoundTag tag) throws IOException {
+        DataOutput dataOutput = new DataOutputStream(outputStream);
         TagType.COMPOUND.write(dataOutput);
         dataOutput.writeUTF(""); // Required for NBT format
         writeCompound(dataOutput, tag);

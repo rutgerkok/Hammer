@@ -17,6 +17,9 @@ public final class AnvilTagFormat {
     public static final CompoundKey CHUNK_X_POS_TAG = CompoundKey.of("xPos");
     public static final CompoundKey CHUNK_Z_POS_TAG = CompoundKey.of("zPos");
 
+    // Chunk root tag format
+    public static final CompoundKey CR_MINECRAFT_TAG = CompoundKey.of("Level");
+
     // Level.dat Data tag format
     public static final CompoundKey LEVEL_PLAYER_TAG = CompoundKey.of("Player");
 
