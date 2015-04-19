@@ -76,7 +76,7 @@ public abstract class Progress {
         return new UnitsProgress(totalUnits);
     }
 
-    private List<Runnable> listeners = new CopyOnWriteArrayList<>();
+    private List<Consumer<Progress>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Adds a new listener to this progress indicator.
@@ -84,7 +84,7 @@ public abstract class Progress {
      * @param listener
      *            The listener.
      */
-    public final void addListener(Runnable listener) {
+    public final void addListener(Consumer<Progress> listener) {
         this.listeners.add(listener);
     }
 
@@ -149,8 +149,8 @@ public abstract class Progress {
      * Subclasses must call this any time the progress is updated.
      */
     protected final void notifyListeners() {
-        for (Runnable runnable : listeners) {
-            runnable.run();
+        for (Consumer<Progress> consumer : listeners) {
+            consumer.accept(this);
         }
     }
 
