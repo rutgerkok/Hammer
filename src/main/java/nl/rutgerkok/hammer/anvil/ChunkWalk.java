@@ -1,7 +1,5 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.AnvilFormat.CR_MINECRAFT_TAG;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.GameFactory;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -40,7 +39,7 @@ final class ChunkWalk {
             if (stream == null) {
                 return;
             }
-            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(CR_MINECRAFT_TAG);
+            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(ChunkRootTag.MINECRAFT);
 
             AnvilChunk chunk = new AnvilChunk(gameFactory, chunkTag);
             Result result = visitor.accept(chunk, progress);
@@ -48,7 +47,9 @@ final class ChunkWalk {
                 case CHANGED:
                     // Save the chunk
                     try (OutputStream outputStream = region.getChunkDataOutputStream(chunkX, chunkZ)) {
-                        AnvilNbtWriter.writeUncompressedToStream(outputStream, chunk.getTag());
+                        CompoundTag root = new CompoundTag();
+                        root.setCompound(ChunkRootTag.MINECRAFT, chunk.getTag());
+                        AnvilNbtWriter.writeUncompressedToStream(outputStream, root);
                     }
                     break;
                 case DELETE:

@@ -11,6 +11,13 @@ import com.google.common.collect.ImmutableList;
 public final class AnvilFormat {
 
     /**
+     * Chunk root tag format
+     */
+    public static class ChunkRootTag {
+        public static final CompoundKey MINECRAFT = CompoundKey.of("Level");
+    }
+
+    /**
      * Format of the base chunk tag.
      */
     public static class ChunkTag {
@@ -77,10 +84,6 @@ public final class AnvilFormat {
         public static final ImmutableList<CompoundKey> SIGN_LINE_NAMES = ImmutableList.of(
                 CompoundKey.of("Text1"), CompoundKey.of("Text2"), CompoundKey.of("Text3"), CompoundKey.of("Text4"));
     }
-
-    // Chunk root tag format
-    public static final CompoundKey CR_MINECRAFT_TAG = CompoundKey.of("Level");
-
     // Level.dat Forge Mod Loader tag format
     public static final CompoundKey LFML_ITEM_DATA_TAG = CompoundKey.of("ItemData");
 }
