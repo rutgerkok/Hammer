@@ -251,6 +251,12 @@ public class RegionFile implements Closeable {
         }
     }
 
+    public OutputStream getChunkDataOutputStream(int x, int z) {
+        checkBounds(x, z);
+
+        return new DeflaterOutputStream(new ChunkBuffer(x, z));
+    }
+
     /**
      * Gets an (uncompressed) stream representing the chunk data returns null if
      * the chunk is not found.
@@ -304,12 +310,6 @@ public class RegionFile implements Closeable {
         }
 
         throw new IOException("Unknown version " + version);
-    }
-
-    public OutputStream getChunkDataOutputStream(int x, int z) {
-        checkBounds(x, z);
-
-        return new DeflaterOutputStream(new ChunkBuffer(x, z));
     }
 
     private int getOffset(int x, int z) {

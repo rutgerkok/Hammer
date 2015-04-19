@@ -100,7 +100,7 @@ public class PocketNbtWriter {
             byte[] buffered = bufferedOutput.toByteArray();
 
             // Write the header
-            LittleEndian.writeInt(outputStream, PocketTagFormat.VERSION);
+            LittleEndian.writeInt(outputStream, PocketFormat.VERSION);
             LittleEndian.writeInt(outputStream, buffered.length);
 
             // Write the data

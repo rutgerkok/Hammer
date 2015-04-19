@@ -9,7 +9,7 @@ import java.util.Objects;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelTag;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.DirectoryUtil;
 import nl.rutgerkok.hammer.util.Progress;
@@ -23,17 +23,17 @@ import nl.rutgerkok.hammer.util.Visitor;
  *
  * @see AnvilWorld#walkPlayerFiles(Visitor) The public API.
  */
-class AnvilPlayerFilesWalk {
+final class PlayerFilesWalk {
 
     private final AnvilWorld world;
 
-    AnvilPlayerFilesWalk(AnvilWorld world) {
+    PlayerFilesWalk(AnvilWorld world) {
         this.world = Objects.requireNonNull(world);
     }
 
     private int calculateotalUnits() throws IOException {
         int size = DirectoryUtil.countFiles(world.getPlayerDirectory());
-        if (world.getLevelTag().containsKey(AnvilTagFormat.LEVEL_PLAYER_TAG)) {
+        if (world.getLevelTag().containsKey(LevelTag.PLAYER)) {
             size++;
         }
 
@@ -48,12 +48,12 @@ class AnvilPlayerFilesWalk {
 
     private void walkLevelDatTag(Visitor<PlayerFile> consumer, UnitsProgress progress) throws IOException {
         CompoundTag levelTag = world.getLevelTag();
-        if (!levelTag.containsKey(AnvilTagFormat.LEVEL_PLAYER_TAG)) {
+        if (!levelTag.containsKey(LevelTag.PLAYER)) {
             return;
         }
 
-        CompoundTag playerTag = levelTag.getCompound(AnvilTagFormat.LEVEL_PLAYER_TAG);
-        PlayerFile playerFile = new PlayerFile(world.getMaterialMap(), playerTag);
+        CompoundTag playerTag = levelTag.getCompound(LevelTag.PLAYER);
+        PlayerFile playerFile = new PlayerFile(world.getGameFactory(), playerTag);
         Result result = consumer.accept(playerFile, progress);
         switch (result) {
             case CHANGED:
@@ -75,7 +75,7 @@ class AnvilPlayerFilesWalk {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(world.getPlayerDirectory())) {
             for (Path file : stream) {
                 CompoundTag tag = AnvilNbtReader.readFromCompressedFile(file);
-                PlayerFile playerFile = new PlayerFile(world.getMaterialMap(), tag);
+                PlayerFile playerFile = new PlayerFile(world.getGameFactory(), tag);
                 Result result = consumer.accept(playerFile, progress);
                 switch (result) {
                     case CHANGED:

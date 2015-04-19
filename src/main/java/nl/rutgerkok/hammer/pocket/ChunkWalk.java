@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.pocket.PocketLevelDb.ChunkKeyType;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
@@ -17,12 +18,14 @@ import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Result;
 import nl.rutgerkok.hammer.util.Visitor;
 
-class ChunkFilesWalk {
+class ChunkWalk {
 
+    private final GameFactory gameFactory;
     private final PocketLevelDb pocketLevelDb;
 
-    ChunkFilesWalk(PocketLevelDb db) {
-        this.pocketLevelDb = Objects.requireNonNull(db);
+    ChunkWalk(GameFactory gameFactory, PocketLevelDb db) {
+        this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
+        this.pocketLevelDb = Objects.requireNonNull(db, "db");
     }
 
     private void deleteChunk(PocketChunk chunk) {
@@ -72,7 +75,7 @@ class ChunkFilesWalk {
         byte[] bytes = entry.getValue();
         byte[] entityBytes = pocketLevelDb.getBytes(ChunkKeyType.ENTITY, chunkX, chunkZ);
         byte[] tileEntityBytes = pocketLevelDb.getBytes(ChunkKeyType.TILE_ENTITY, chunkX, chunkZ);
-        return new PocketChunk(chunkZ, chunkZ, bytes,
+        return new PocketChunk(gameFactory, chunkZ, chunkZ, bytes,
                 readFromBytes(entityBytes), readFromBytes(tileEntityBytes));
     }
 

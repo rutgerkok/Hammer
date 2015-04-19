@@ -14,8 +14,8 @@ public final class CountingChunkVisitor implements Visitor<Chunk> {
 
     public final AtomicInteger chunksSeen = new AtomicInteger(0);
     public final AtomicInteger entitiesSeen = new AtomicInteger(0);
-    public final AtomicInteger tileEntitiesSeen = new AtomicInteger(0);
     public boolean log = false;
+    public final AtomicInteger tileEntitiesSeen = new AtomicInteger(0);
 
     @Override
     public Result accept(Chunk chunk, Progress progress) {

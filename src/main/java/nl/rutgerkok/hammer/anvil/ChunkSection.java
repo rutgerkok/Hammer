@@ -1,14 +1,10 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_SECTIONS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_BLOCK_DATA_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_BLOCK_IDS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_EXT_BLOCK_IDS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.SECTION_Y_TAG;
-
 import java.util.List;
 
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
 import nl.rutgerkok.hammer.util.NibbleArray;
@@ -31,7 +27,7 @@ final class ChunkSection {
         if (y < 0 || y >= AnvilChunk.CHUNK_Y_SIZE) {
             return null;
         }
-        List<CompoundTag> sections = chunkTag.getList(CHUNK_SECTIONS_TAG, TagType.COMPOUND);
+        List<CompoundTag> sections = chunkTag.getList(ChunkTag.SECTIONS, TagType.COMPOUND);
 
         int sectionIndex = y >>> SECTION_Y_BITS;
 
@@ -39,14 +35,14 @@ final class ChunkSection {
             // Do a guess (correct only if no chunk sections are omitted at
             // and below this section index)
             CompoundTag section = sections.get(sectionIndex);
-            if (section != null && section.getByte(SECTION_Y_TAG) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.Y_POS) == sectionIndex) {
                 return section;
             }
         }
 
         // Search for section
         for (CompoundTag section : sections) {
-            if (section != null && section.getByte(SECTION_Y_TAG) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.Y_POS) == sectionIndex) {
                 return section;
             }
         }
@@ -77,8 +73,8 @@ final class ChunkSection {
         int yInSection = y & (SECTION_Y_SIZE - 1);
         int position = getPositionInSectionArray(x, yInSection, z);
 
-        byte[] blocks = section.getByteArray(SECTION_BLOCK_IDS_TAG, TOTAL_SIZE);
-        byte[] extBlocks = section.getByteArray(SECTION_EXT_BLOCK_IDS_TAG, TOTAL_SIZE_NIBBLE);
+        byte[] blocks = section.getByteArray(SectionTag.BLOCK_IDS, TOTAL_SIZE);
+        byte[] extBlocks = section.getByteArray(SectionTag.EXT_BLOCK_IDS, TOTAL_SIZE_NIBBLE);
 
         int blockId = blocks[position] & 0xff;
         if (extBlocks.length != 0) {
@@ -117,7 +113,7 @@ final class ChunkSection {
         int yInSection = y & (SECTION_Y_SIZE - 1);
         int position = getPositionInSectionArray(x, yInSection, z);
 
-        byte[] dataArray = section.getByteArray(SECTION_BLOCK_DATA_TAG, TOTAL_SIZE_NIBBLE);
+        byte[] dataArray = section.getByteArray(SectionTag.BLOCK_DATA, TOTAL_SIZE_NIBBLE);
         NibbleArray.setInArray(dataArray, position, data);
     }
 
@@ -147,17 +143,17 @@ final class ChunkSection {
         int position = getPositionInSectionArray(x, yInSection, z);
 
         // Set low id
-        byte[] blocks = section.getByteArray(SECTION_BLOCK_IDS_TAG, TOTAL_SIZE);
+        byte[] blocks = section.getByteArray(SectionTag.BLOCK_IDS, TOTAL_SIZE);
         blocks[position] = (byte) id;
 
         // Set high id
         if (id > 0xff) {
             int highId = id >>> Byte.SIZE;
-            byte[] extBlocks = section.getByteArray(SECTION_EXT_BLOCK_IDS_TAG, TOTAL_SIZE);
+            byte[] extBlocks = section.getByteArray(SectionTag.EXT_BLOCK_IDS, TOTAL_SIZE);
             if (extBlocks.length == 0) {
                 // Create array for this high id
                 extBlocks = new NibbleArray(SECTION_X_SIZE * SECTION_Y_SIZE * SECTION_Z_SIZE).getHandle();
-                section.setByteArray(SECTION_EXT_BLOCK_IDS_TAG, extBlocks);
+                section.setByteArray(SectionTag.EXT_BLOCK_IDS, extBlocks);
             }
             NibbleArray.setInArray(extBlocks, position, (byte) highId);
         }

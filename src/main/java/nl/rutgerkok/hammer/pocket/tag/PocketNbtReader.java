@@ -57,8 +57,8 @@ public final class PocketNbtReader {
         try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(path))) {
             // Read version
             int version = LittleEndian.readInt(inputStream);
-            if (version > PocketTagFormat.VERSION) {
-                throw new IOException("Found NBT version of " + version + ", but highest supported is " + PocketTagFormat.VERSION);
+            if (version > PocketFormat.VERSION) {
+                throw new IOException("Found NBT version of " + version + ", but highest supported is " + PocketFormat.VERSION);
             }
 
             // Read length

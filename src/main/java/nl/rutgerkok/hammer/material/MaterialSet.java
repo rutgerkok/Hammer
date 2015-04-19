@@ -4,24 +4,22 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
-
 /**
  * Specialized set for materials. It is faster than a general HashSet, as it
  * keeps a BitSet with all material ids.
  *
  */
-public final class MaterialSet extends HashSet<AnvilMaterial> {
+public final class MaterialSet extends HashSet<Material> {
 
     /**
      * Iterator that keeps the BitSet in sync.
      *
      */
-    private class MaterialIterator implements Iterator<AnvilMaterial> {
-        private AnvilMaterial current;
-        private Iterator<AnvilMaterial> parent;
+    private class MaterialIterator implements Iterator<Material> {
+        private Material current;
+        private Iterator<Material> parent;
 
-        MaterialIterator(Iterator<AnvilMaterial> parent) {
+        MaterialIterator(Iterator<Material> parent) {
             this.parent = parent;
         }
 
@@ -31,7 +29,7 @@ public final class MaterialSet extends HashSet<AnvilMaterial> {
         }
 
         @Override
-        public AnvilMaterial next() {
+        public Material next() {
             current = parent.next();
             return current;
         }
@@ -46,7 +44,7 @@ public final class MaterialSet extends HashSet<AnvilMaterial> {
     private final BitSet bitSet = new BitSet();
 
     @Override
-    public boolean add(AnvilMaterial material) {
+    public boolean add(Material material) {
         short id = material.getId();
         if (!bitSet.get(id)) {
             bitSet.set(id);
@@ -77,7 +75,7 @@ public final class MaterialSet extends HashSet<AnvilMaterial> {
     }
 
     @Override
-    public Iterator<AnvilMaterial> iterator() {
+    public Iterator<Material> iterator() {
         return new MaterialIterator(super.iterator());
     }
 

@@ -1,8 +1,6 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LFML_ITEM_DATA_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_FML_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.LR_MINECRAFT_TAG;
+import static nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LFML_ITEM_DATA_TAG;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +14,7 @@ import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
 import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
@@ -33,8 +32,8 @@ public class AnvilWorld implements World {
     private static final String PLAYER_DIRECTORY_OLD = "players";
     private static final String REGION_FOLDER_NAME = "region";
 
-    private final Path levelDat;
     private final GameFactory gameFactory;
+    private final Path levelDat;
     private final CompoundTag tag;
 
     public AnvilWorld(Path levelDat) throws IOException {
@@ -105,8 +104,8 @@ public class AnvilWorld implements World {
      * @return The id map.
      */
     private MaterialMap initMaterialMap() {
-        if (tag.containsKey(LR_FML_TAG)) {
-            CompoundTag fmlTag = tag.getCompound(LR_FML_TAG);
+        if (tag.containsKey(LevelRootTag.FML)) {
+            CompoundTag fmlTag = tag.getCompound(LevelRootTag.FML);
             if (fmlTag.containsKey(LFML_ITEM_DATA_TAG)) {
                 return new ForgeMaterialMap(fmlTag.getList(LFML_ITEM_DATA_TAG, TagType.COMPOUND));
             }
@@ -145,7 +144,7 @@ public class AnvilWorld implements World {
 
     @Override
     public void walkPlayerFiles(Visitor<PlayerFile> visitor) throws IOException {
-        new AnvilPlayerFilesWalk(this).forEach(visitor);
+        new PlayerFilesWalk(this).forEach(visitor);
     }
 
 }

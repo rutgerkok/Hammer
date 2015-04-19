@@ -1,18 +1,12 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_BIOMES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_ENTITIES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_SECTIONS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_TILE_ENTITIES_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_X_POS_TAG;
-import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_Z_POS_TAG;
-
 import java.util.List;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
@@ -118,7 +112,7 @@ public final class AnvilChunk implements Chunk {
 
     @Override
     public List<CompoundTag> getTileEntities() {
-        return chunkTag.getList(CHUNK_TILE_ENTITIES_TAG, TagType.COMPOUND);
+        return chunkTag.getList(ChunkTag.TILE_ENTITIES, TagType.COMPOUND);
     }
 
     private boolean isOutOfBounds(int x, int y, int z) {

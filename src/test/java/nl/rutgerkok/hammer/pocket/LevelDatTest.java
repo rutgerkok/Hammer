@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import nl.rutgerkok.hammer.pocket.tag.PocketTagFormat;
+import nl.rutgerkok.hammer.pocket.tag.PocketFormat;
 import nl.rutgerkok.hammer.util.TestFile;
 
 import org.junit.Before;
@@ -23,6 +23,6 @@ public class LevelDatTest {
 
     @Test
     public void testLevelName() throws IOException {
-        assertEquals("PocketTest", world.getLevelTag().getString(PocketTagFormat.LEVEL_NAME));
+        assertEquals("PocketTest", world.getLevelTag().getString(PocketFormat.LEVEL_NAME));
     }
 }

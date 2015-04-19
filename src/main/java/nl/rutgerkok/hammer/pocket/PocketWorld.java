@@ -5,10 +5,10 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
-import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -17,9 +17,9 @@ import nl.rutgerkok.hammer.util.Visitor;
 public class PocketWorld implements World {
 
     private static final String LEVEL_DB_FOLDER = "db";
+    private final GameFactory gameFactory;
     private final Path levelDat;
     private final PocketLevelDb levelDb;
-    private final GameFactory gameFactory;
     private final CompoundTag rootLevelTag;
 
     /**
@@ -60,7 +60,7 @@ public class PocketWorld implements World {
 
     @Override
     public void walkChunks(Visitor<Chunk> visitor) throws IOException {
-        new ChunkFilesWalk(this.levelDb).forEach(visitor);
+        new ChunkWalk(this.gameFactory, this.levelDb).forEach(visitor);
     }
 
     @Override
@@ -79,6 +79,6 @@ public class PocketWorld implements World {
      *             If an IO error occurs.
      */
     public void walkPocketChunks(Visitor<PocketChunk> visitor) throws IOException {
-        new ChunkFilesWalk(this.levelDb).forEach(visitor);
+        new ChunkWalk(gameFactory, levelDb).forEach(visitor);
     }
 }
