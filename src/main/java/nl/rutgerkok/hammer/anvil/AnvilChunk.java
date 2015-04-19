@@ -8,11 +8,12 @@ import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_X_POS_TAG;
 import static nl.rutgerkok.hammer.anvil.tag.AnvilTagFormat.CHUNK_Z_POS_TAG;
 
 import java.util.List;
+import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
 import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
 import nl.rutgerkok.hammer.tag.TagType;
@@ -33,19 +34,19 @@ public final class AnvilChunk implements Chunk {
     public static final int MAX_BIOME_ID = 254;
 
     private final CompoundTag chunkTag;
-    private final MaterialMap materialMap;
+    private final GameFactory gameFactory;
 
     /**
      * Creates a new chunk from the given data tag.
      *
-     * @param materialMap
-     *            Map for materials, for interpreting the raw data.
+     * @param gameFactory
+     *            Game factory, for interpreting the raw data.
      * @param chunkTag
      *            The data tag, with child tags like Biomes, Sections, etc.
      */
-    public AnvilChunk(MaterialMap materialMap, CompoundTag chunkTag) {
-        this.materialMap = materialMap;
-        this.chunkTag = chunkTag;
+    public AnvilChunk(GameFactory gameFactory, CompoundTag chunkTag) {
+        this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
+        this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
     }
 
     /**
@@ -55,7 +56,7 @@ public final class AnvilChunk implements Chunk {
      * @return The biome array.
      */
     public byte[] getBiomeArray() {
-        return chunkTag.getByteArray(CHUNK_BIOMES_TAG, CHUNK_X_SIZE * CHUNK_Z_SIZE);
+        return chunkTag.getByteArray(ChunkTag.BIOMES, CHUNK_X_SIZE * CHUNK_Z_SIZE);
     }
 
     /**
@@ -64,22 +65,27 @@ public final class AnvilChunk implements Chunk {
      * @return The tags.
      */
     public ListTag<CompoundTag> getChunkSections() {
-        return chunkTag.getList(CHUNK_SECTIONS_TAG, TagType.COMPOUND);
+        return chunkTag.getList(ChunkTag.SECTIONS, TagType.COMPOUND);
     }
 
     @Override
     public int getChunkX() {
-        return chunkTag.getInt(CHUNK_X_POS_TAG);
+        return chunkTag.getInt(ChunkTag.X_POS);
     }
 
     @Override
     public int getChunkZ() {
-        return chunkTag.getInt(CHUNK_Z_POS_TAG);
+        return chunkTag.getInt(ChunkTag.Z_POS);
     }
 
     @Override
     public List<CompoundTag> getEntities() {
-        return chunkTag.getList(CHUNK_ENTITIES_TAG, TagType.COMPOUND);
+        return chunkTag.getList(ChunkTag.ENTITIES, TagType.COMPOUND);
+    }
+
+    @Override
+    public GameFactory getGameFactory() {
+        return gameFactory;
     }
 
     @Override
@@ -88,11 +94,6 @@ public final class AnvilChunk implements Chunk {
             return AnvilMaterial.AIR_ID;
         }
         return ChunkSection.getMaterialId(chunkTag, x, y, z);
-    }
-
-    @Override
-    public MaterialMap getMaterialMap() {
-        return materialMap;
     }
 
     @Override

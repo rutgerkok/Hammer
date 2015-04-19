@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
@@ -33,7 +34,7 @@ public class AnvilWorld implements World {
     private static final String REGION_FOLDER_NAME = "region";
 
     private final Path levelDat;
-    private final MaterialMap materialMap;
+    private final GameFactory gameFactory;
     private final CompoundTag tag;
 
     public AnvilWorld(Path levelDat) throws IOException {
@@ -42,7 +43,7 @@ public class AnvilWorld implements World {
         }
         this.levelDat = levelDat.toAbsolutePath();
         this.tag = AnvilNbtReader.readFromCompressedFile(levelDat);
-        this.materialMap = initMaterialMap();
+        this.gameFactory = new AnvilGameFactory(initMaterialMap());
     }
 
     /**
@@ -61,6 +62,16 @@ public class AnvilWorld implements World {
     }
 
     /**
+     * Gets the material map of this world.
+     *
+     * @return The material map.
+     */
+    @Override
+    public GameFactory getGameFactory() {
+        return gameFactory;
+    }
+
+    /**
      * Gets access to the main tag of the level.dat file, with subtags like
      * SpawnX and GameRules.
      *
@@ -68,17 +79,7 @@ public class AnvilWorld implements World {
      */
     @Override
     public CompoundTag getLevelTag() {
-        return tag.getCompound(LR_MINECRAFT_TAG);
-    }
-
-    /**
-     * Gets the material map of this world.
-     *
-     * @return The material map.
-     */
-    @Override
-    public MaterialMap getMaterialMap() {
-        return materialMap;
+        return tag.getCompound(LevelRootTag.MINECRAFT);
     }
 
     /**
@@ -124,9 +125,22 @@ public class AnvilWorld implements World {
         AnvilNbtWriter.writeCompressedToFile(levelDat, tag);
     }
 
+    /**
+     * Same as {@link #walkChunks(Visitor)}, but may save you from casting the
+     * chunks.
+     *
+     * @param visitor
+     *            The visitor.
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    public void walkAnvilChunks(Visitor<AnvilChunk> visitor) throws IOException {
+        new ChunkWalk(gameFactory, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
+    }
+
     @Override
     public void walkChunks(Visitor<Chunk> visitor) throws IOException {
-        new ChunkWalk(materialMap, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
+        new ChunkWalk(gameFactory, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
     }
 
     @Override

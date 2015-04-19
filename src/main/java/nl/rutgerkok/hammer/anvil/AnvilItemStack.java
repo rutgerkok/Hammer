@@ -2,6 +2,7 @@ package nl.rutgerkok.hammer.anvil;
 
 import java.util.Objects;
 
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.ItemStack;
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
 import nl.rutgerkok.hammer.material.Material;
@@ -12,14 +13,25 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 
-public final class AnvilItemStack implements ItemStack {
+/**
+ * Implementation of {@link ItemStack} for Anvil worlds.
+ *
+ * <p>
+ * Both the Minecraft 1.8+ format with named ids and the Minecraft 1.2 - 1.7
+ * format with numeric ids are supported.
+ * </p>
+ * 
+ * @see GameFactory#createItemStack(CompoundTag)
+ *
+ */
+final class AnvilItemStack implements ItemStack {
     private static final CompoundKey BLOCK_DATA_TAG = CompoundKey.of("Damage");
     private static final CompoundKey BLOCK_ID_TAG = CompoundKey.of("id");
 
     private final MaterialMap materialMap;
     private final CompoundTag tag;
 
-    public AnvilItemStack(MaterialMap materialMap, CompoundTag tag) {
+    AnvilItemStack(MaterialMap materialMap, CompoundTag tag) {
         this.materialMap = Objects.requireNonNull(materialMap);
         this.tag = Objects.requireNonNull(tag);
     }

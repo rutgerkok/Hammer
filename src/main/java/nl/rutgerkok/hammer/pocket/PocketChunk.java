@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 public final class PocketChunk implements Chunk {
@@ -18,9 +18,12 @@ public final class PocketChunk implements Chunk {
     private final int chunkX;
     private final int chunkZ;
     private final List<CompoundTag> entities;
+    private final GameFactory gameFactory;
     private final List<CompoundTag> tileEntities;
 
-    PocketChunk(int chunkX, int chunkZ, byte[] bytes, List<CompoundTag> entities, List<CompoundTag> tileEntities) {
+    PocketChunk(GameFactory gameFactory, int chunkX, int chunkZ,
+            byte[] bytes, List<CompoundTag> entities, List<CompoundTag> tileEntities) {
+        this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
         this.bytes = Objects.requireNonNull(bytes, "bytes");
@@ -53,15 +56,14 @@ public final class PocketChunk implements Chunk {
     }
 
     @Override
-    public short getMaterialId(int x, int y, int z) {
-        // TODO Auto-generated method stub
-        return 0;
+    public GameFactory getGameFactory() {
+        return gameFactory;
     }
 
     @Override
-    public MaterialMap getMaterialMap() {
+    public short getMaterialId(int x, int y, int z) {
         // TODO Auto-generated method stub
-        return null;
+        return 0;
     }
 
     @Override

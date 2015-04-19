@@ -8,7 +8,7 @@ import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
-import nl.rutgerkok.hammer.material.MaterialMap;
+import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -19,7 +19,7 @@ public class PocketWorld implements World {
     private static final String LEVEL_DB_FOLDER = "db";
     private final Path levelDat;
     private final PocketLevelDb levelDb;
-    private final MaterialMap materialMap;
+    private final GameFactory gameFactory;
     private final CompoundTag rootLevelTag;
 
     /**
@@ -35,10 +35,15 @@ public class PocketWorld implements World {
         this.rootLevelTag = PocketNbtReader.readFromUncompressedFile(levelDat);
 
         // Use the same material map as Anvil for now
-        this.materialMap = new VanillaMaterialMap();
+        this.gameFactory = new PocketGameFactory(new VanillaMaterialMap());
 
         Path levelDbFolder = levelDat.resolveSibling(LEVEL_DB_FOLDER);
         this.levelDb = new PocketLevelDb(levelDbFolder);
+    }
+
+    @Override
+    public GameFactory getGameFactory() {
+        return gameFactory;
     }
 
     @Override
@@ -46,11 +51,6 @@ public class PocketWorld implements World {
         // In the pocket edition, the root tag is the tag with all the
         // information
         return rootLevelTag;
-    }
-
-    @Override
-    public MaterialMap getMaterialMap() {
-        return materialMap;
     }
 
     @Override

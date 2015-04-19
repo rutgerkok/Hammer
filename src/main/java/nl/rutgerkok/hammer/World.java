@@ -2,12 +2,18 @@ package nl.rutgerkok.hammer;
 
 import java.io.IOException;
 
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Visitor;
 
 public interface World {
+
+    /**
+     * Gets the game factory of this world.
+     *
+     * @return The game factory.
+     */
+    GameFactory getGameFactory();
 
     /**
      * Gets access to the main tag of the level.dat file, with subtags like
@@ -16,13 +22,6 @@ public interface World {
      * @return The NBT root tag.
      */
     CompoundTag getLevelTag();
-
-    /**
-     * Gets the material map of this world.
-     *
-     * @return The material map.
-     */
-    MaterialMap getMaterialMap();
 
     /**
      * Saves the level.dat tag.

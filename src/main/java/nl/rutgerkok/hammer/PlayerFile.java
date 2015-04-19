@@ -2,7 +2,6 @@ package nl.rutgerkok.hammer;
 
 import java.util.Objects;
 
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
@@ -11,17 +10,19 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
  */
 public final class PlayerFile {
 
-    private final MaterialMap materialMap;
+    private final GameFactory gameFactory;
     private final CompoundTag tag;
 
     /**
      * Creates a data file
      *
-     * @param materialMap
+     * @param gameFactory
+     *            The game factory for the world.
      * @param tag
+     *            The tag.
      */
-    public PlayerFile(MaterialMap materialMap, CompoundTag tag) {
-        this.materialMap = Objects.requireNonNull(materialMap);
+    public PlayerFile(GameFactory gameFactory, CompoundTag tag) {
+        this.gameFactory = Objects.requireNonNull(gameFactory);
         this.tag = Objects.requireNonNull(tag);
     }
 
@@ -30,8 +31,8 @@ public final class PlayerFile {
      *
      * @return The material map.
      */
-    public MaterialMap getMaterialMap() {
-        return materialMap;
+    public GameFactory getGameFactory() {
+        return gameFactory;
     }
 
     /**

@@ -4,7 +4,6 @@ import java.util.List;
 
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
 import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
@@ -35,6 +34,13 @@ public interface Chunk {
     List<CompoundTag> getEntities();
 
     /**
+     * Gets the game factory used for this chunk.
+     *
+     * @return The game factory.
+     */
+    GameFactory getGameFactory();
+
+    /**
      * Gets the material id at the given position.
      *
      * @param x
@@ -50,13 +56,6 @@ public interface Chunk {
      *         out of bounds.
      */
     short getMaterialId(int x, int y, int z);
-
-    /**
-     * Gets the material map used for this chunk.
-     *
-     * @return The material map.
-     */
-    MaterialMap getMaterialMap();
 
     /**
      * Gets the size of the chunk on the x-axis.
