@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.PlayerFile;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelTag;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.DirectoryUtil;
 import nl.rutgerkok.hammer.util.Progress;
@@ -31,7 +31,7 @@ final class PlayerFilesWalk {
         this.world = Objects.requireNonNull(world);
     }
 
-    private int calculateotalUnits() throws IOException {
+    private int calculateTotalUnits() throws IOException {
         int size = DirectoryUtil.countFiles(world.getPlayerDirectory());
         if (world.getLevelTag().containsKey(LevelTag.PLAYER)) {
             size++;
@@ -41,7 +41,11 @@ final class PlayerFilesWalk {
     }
 
     void forEach(Visitor<PlayerFile> consumer) throws IOException {
-        UnitsProgress progress = Progress.ofUnits(calculateotalUnits());
+        int totalUnits = calculateTotalUnits();
+        if (totalUnits == 0) {
+            return;
+        }
+        UnitsProgress progress = Progress.ofUnits(totalUnits);
         walkPlayerFiles(consumer, progress);
         walkLevelDatTag(consumer, progress);
     }
