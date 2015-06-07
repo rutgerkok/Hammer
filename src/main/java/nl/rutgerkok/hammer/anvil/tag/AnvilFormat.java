@@ -83,6 +83,9 @@ public final class AnvilFormat {
         public static final CompoundKey PISTON_BLOCK_ID = CompoundKey.of("blockId");
         public static final ImmutableList<CompoundKey> SIGN_LINE_NAMES = ImmutableList.of(
                 CompoundKey.of("Text1"), CompoundKey.of("Text2"), CompoundKey.of("Text3"), CompoundKey.of("Text4"));
+        public static final CompoundKey X_POS = CompoundKey.of("x");
+        public static final CompoundKey Y_POS = CompoundKey.of("y");
+        public static final CompoundKey Z_POS = CompoundKey.of("z");
     }
     // Level.dat Forge Mod Loader tag format
     public static final CompoundKey LFML_ITEM_DATA_TAG = CompoundKey.of("ItemData");
