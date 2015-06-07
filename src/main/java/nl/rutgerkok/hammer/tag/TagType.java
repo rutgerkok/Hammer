@@ -4,6 +4,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.google.common.base.CaseFormat;
+
 /**
  * Constants of the various tag types supported by {@link CompoundTag} and
  * {@link ListTag}.
@@ -135,7 +137,7 @@ public final class TagType<T> {
 
     @Override
     public String toString() {
-        return this.clazz.getSimpleName().toUpperCase();
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName());
     }
 
     /**

@@ -587,6 +587,16 @@ public final class CompoundTag implements JSONAware {
     }
 
     /**
+     * Gets a string describing all information from the compound tag. No
+     * guarantees are made about the format of the tag.
+     *
+     * @return The string.
+     */
+    public String toDebugString() {
+        return TagDebug.toDebugString(this);
+    }
+
+    /**
      * Writes this object as a JSON string. int[] and byte[] tags will not be
      * serialized correctly because the JSON representation of those would be
      * really inefficient.
@@ -600,7 +610,7 @@ public final class CompoundTag implements JSONAware {
 
     @Override
     public String toString() {
-        return toJSONString();
+        return toDebugString();
     }
 
     private boolean valueEquals(Object obj1, Object obj2) {
