@@ -24,7 +24,6 @@ public class ChunkWalkTest {
     @Test
     public void testStatistics() throws IOException {
         CountingChunkVisitor chunkVisitor = new CountingChunkVisitor();
-        chunkVisitor.log = true;
         world.walkChunks(chunkVisitor);
         assertEquals(575, chunkVisitor.chunksSeen.get());
         assertEquals(611, chunkVisitor.entitiesSeen.get());

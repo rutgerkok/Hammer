@@ -14,7 +14,6 @@ public final class CountingChunkVisitor implements Visitor<Chunk> {
 
     public final AtomicInteger chunksSeen = new AtomicInteger(0);
     public final AtomicInteger entitiesSeen = new AtomicInteger(0);
-    public boolean log = false;
     public final AtomicInteger tileEntitiesSeen = new AtomicInteger(0);
 
     @Override
@@ -22,6 +21,7 @@ public final class CountingChunkVisitor implements Visitor<Chunk> {
         chunksSeen.incrementAndGet();
         entitiesSeen.addAndGet(chunk.getEntities().size());
         tileEntitiesSeen.addAndGet(chunk.getTileEntities().size());
+
         return Result.NO_CHANGES;
     }
 }
