@@ -10,9 +10,21 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
 
 public final class PocketChunk implements Chunk {
 
-    private static final int CHUNK_X_SIZE = 16;
-    private static final int CHUNK_Y_SIZE = 128;
-    private static final int CHUNK_Z_SIZE = 16;
+    private static final int CHUNK_X_BITS = 4;
+    private static final int CHUNK_X_SIZE = 1 << CHUNK_X_BITS;
+
+    private static final int CHUNK_Y_BITS = 7;
+    private static final int CHUNK_Y_SIZE = 1 << CHUNK_Y_BITS;
+
+    private static final int CHUNK_Z_BITS = 4;
+    private static final int CHUNK_Z_SIZE = 1 << CHUNK_Z_BITS;
+
+    private static final int OFFSET_BLOCK_DATA = 32_768;
+    private static final int OFFSET_BLOCK_IDS = 0;
+    private static final int OFFSET_BLOCKLIGHT_DATA = 32_768 + 16_384 + 16_384;
+    private static final int OFFSET_COLOR_DATA = 32_768 + 16_384 + 16_384 + 16_384 + 256;
+    private static final int OFFSET_MARKER_DATA = 32_768 + 16_384 + 16_384 + 16_384;
+    private static final int OFFSET_SKYLIGHT_DATA = 32_768 + 16_384;
 
     private final byte[] bytes;
     private final int chunkX;
@@ -62,8 +74,7 @@ public final class PocketChunk implements Chunk {
 
     @Override
     public short getMaterialId(int x, int y, int z) {
-        // TODO Auto-generated method stub
-        return 0;
+        return bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))];
     }
 
     @Override
@@ -94,8 +105,7 @@ public final class PocketChunk implements Chunk {
 
     @Override
     public void setBlock(int x, int y, int z, MaterialData materialData) {
-        // TODO Auto-generated method stub
-
+        bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))] = (byte) materialData.getMaterial().getId();
     }
 
 }
