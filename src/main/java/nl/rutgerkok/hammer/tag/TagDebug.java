@@ -30,6 +30,15 @@ final class TagDebug {
         return JSONObject.toJSONString(toTypedMap(tag));
     }
 
+    private static List<Object> toTypedList(ListTag<?> tag) {
+        List<Object> typedList = new ArrayList<>();
+        typedList.add(tag.getListType().toString());
+        for (Object entry : tag) {
+            typedList.add(toTypedValue(entry));
+        }
+        return typedList;
+    }
+
     private static Map<String, Object> toTypedMap(CompoundTag tag) {
         Map<String, Object> typedMap = new LinkedHashMap<>();
         for (Entry<CompoundKey, Object> entry : tag.entrySet()) {
@@ -40,15 +49,6 @@ final class TagDebug {
             typedMap.put(keyName + "_type", TagType.ofObject(value).toString());
         }
         return typedMap;
-    }
-
-    private static List<Object> toTypedList(ListTag<?> tag) {
-        List<Object> typedList = new ArrayList<>();
-        typedList.add(tag.getListType().toString());
-        for (Object entry : tag) {
-            typedList.add(toTypedValue(entry));
-        }
-        return typedList;
     }
 
     private static Object toTypedValue(Object value) {

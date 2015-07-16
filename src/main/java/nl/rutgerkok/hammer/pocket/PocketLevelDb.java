@@ -83,8 +83,9 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
     /**
      * This method needs to be called to make sure the database is open.
      * 
-     * @return
+     * @return A lock, when closed it will call {@link #release()}.
      * @throws IOException
+     *             When the database cannot be opened.
      */
     Closeable claim() throws IOException {
         claims++;
