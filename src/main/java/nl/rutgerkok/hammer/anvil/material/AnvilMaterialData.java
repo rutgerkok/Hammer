@@ -45,7 +45,8 @@ public final class AnvilMaterialData implements MaterialData {
 
     /**
      * Creates a new material data of the default state of the given material.
-     * However, {@link #matches(short)} will return true for any provided value.
+     * However, {@link #matchesRawData(byte)} will return true for any provided
+     * value.
      *
      * @param material
      *            The material.

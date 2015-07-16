@@ -83,7 +83,7 @@ public final class TagType<T> {
      * be compared to the constants in the {@link TagType} class.
      *
      * @param <T>
-     *
+     *            Type of the tag value.
      * @param value
      *            The given object.
      * @return The marker type.

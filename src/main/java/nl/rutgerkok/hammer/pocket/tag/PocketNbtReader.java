@@ -117,7 +117,7 @@ public final class PocketNbtReader {
      * Reads the payload of the given type.
      *
      * @param <T>
-     *
+     *            Type of the tag value.
      * @param dataInput
      *            Stream to read from.
      * @param type

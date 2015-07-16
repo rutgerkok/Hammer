@@ -113,7 +113,7 @@ public final class AnvilNbtReader {
      * Reads the payload of the given type.
      *
      * @param <T>
-     *
+     *            Type of the tag.
      * @param dataInput
      *            Stream to read from.
      * @param type
