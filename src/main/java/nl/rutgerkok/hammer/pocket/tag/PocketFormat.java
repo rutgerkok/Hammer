@@ -9,6 +9,7 @@ public final class PocketFormat {
      */
     public static class TileEntityTag {
         public static final CompoundKey ID = CompoundKey.of("id");
+        public static final CompoundKey ITEMS = CompoundKey.of("Items");
         public static final CompoundKey X_POS = CompoundKey.of("x");
         public static final CompoundKey Y_POS = CompoundKey.of("y");
         public static final CompoundKey Z_POS = CompoundKey.of("z");

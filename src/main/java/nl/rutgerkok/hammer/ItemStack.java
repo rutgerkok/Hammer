@@ -11,6 +11,13 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 public interface ItemStack {
 
     /**
+     * Gets the amount of items in this stack.
+     *
+     * @return The amount of items.
+     */
+    byte getCount();
+
+    /**
      * Gets the material of this tag.
      *
      * @return The material.
@@ -43,6 +50,15 @@ public interface ItemStack {
      * @return True if the material matches, false otherwise.
      */
     boolean hasMaterialData(MaterialData materialData);
+
+    /**
+     * Sets the amount of items in this stack.
+     *
+     * @param count
+     *            The new count. The number is simply saved to the NBT tag, even
+     *            if the number is invalid.
+     */
+    void setCount(byte count);
 
     /**
      * Sets the material of this stack.

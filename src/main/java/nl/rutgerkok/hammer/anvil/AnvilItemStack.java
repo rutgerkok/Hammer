@@ -27,6 +27,7 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 final class AnvilItemStack implements ItemStack {
     private static final CompoundKey BLOCK_DATA_TAG = CompoundKey.of("Damage");
     private static final CompoundKey BLOCK_ID_TAG = CompoundKey.of("id");
+    private static final CompoundKey COUNT_TAG = CompoundKey.of("Count");
 
     private final MaterialMap materialMap;
     private final CompoundTag tag;
@@ -34,6 +35,11 @@ final class AnvilItemStack implements ItemStack {
     AnvilItemStack(MaterialMap materialMap, CompoundTag tag) {
         this.materialMap = Objects.requireNonNull(materialMap);
         this.tag = Objects.requireNonNull(tag);
+    }
+
+    @Override
+    public byte getCount() {
+        return tag.getByte(COUNT_TAG);
     }
 
     /**
@@ -107,6 +113,11 @@ final class AnvilItemStack implements ItemStack {
         return tag.isType(BLOCK_ID_TAG, TagType.STRING);
     }
 
+    @Override
+    public void setCount(byte count) {
+        tag.setByte(COUNT_TAG, count);
+    }
+
     /**
      * Sets the material of this stack.
      *
@@ -123,5 +134,16 @@ final class AnvilItemStack implements ItemStack {
             tag.setShort(BLOCK_ID_TAG, materialData.getMaterial().getId());
         }
         tag.setShort(BLOCK_DATA_TAG, materialData.getData());
+    }
+
+    @Override
+    public String toString() {
+        String materialString;
+        try {
+            materialString = getMaterialData().toString();
+        } catch (MaterialNotFoundException e) {
+            materialString = tag.getShort(BLOCK_ID_TAG) + ":" + tag.getShort(BLOCK_DATA_TAG);
+        }
+        return getClass().getSimpleName() + "(material=" + materialString + ", count=" + getCount() + ")";
     }
 }
