@@ -7,14 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.ChunkAccess;
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
 import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
@@ -35,6 +36,7 @@ public class AnvilWorld implements World {
     private final GameFactory gameFactory;
     private final Path levelDat;
     private final CompoundTag tag;
+    private final RegionFileCache regionFileCache;
 
     public AnvilWorld(Path levelDat) throws IOException {
         if (!levelDat.getFileName().toString().equals(LEVEL_DAT_NAME)) {
@@ -43,6 +45,7 @@ public class AnvilWorld implements World {
         this.levelDat = levelDat.toAbsolutePath();
         this.tag = AnvilNbtReader.readFromCompressedFile(levelDat);
         this.gameFactory = new AnvilGameFactory(initMaterialMap());
+        this.regionFileCache = new RegionFileCache(getRegionDirectory());
     }
 
     /**
@@ -134,17 +137,26 @@ public class AnvilWorld implements World {
      *             If an IO error occurs.
      */
     public void walkAnvilChunks(Visitor<AnvilChunk> visitor) throws IOException {
-        new ChunkWalk(gameFactory, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
+        new ChunkWalk(gameFactory, regionFileCache).performWalk(visitor);
     }
 
     @Override
     public void walkChunks(Visitor<Chunk> visitor) throws IOException {
-        new ChunkWalk(gameFactory, levelDat.resolveSibling(REGION_FOLDER_NAME)).startWalk(visitor);
+        new ChunkWalk(gameFactory, regionFileCache).performWalk(visitor);
     }
 
     @Override
     public void walkPlayerFiles(Visitor<PlayerFile> visitor) throws IOException {
         new PlayerFilesWalk(this).forEach(visitor);
+    }
+
+    private Path getRegionDirectory() {
+        return levelDat.resolveSibling(REGION_FOLDER_NAME);
+    }
+
+    @Override
+    public ChunkAccess<AnvilChunk> getChunkAccess() {
+        return new AnvilChunkAccess(gameFactory, regionFileCache);
     }
 
 }

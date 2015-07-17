@@ -21,7 +21,6 @@ package nl.rutgerkok.hammer.anvil;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,7 +74,7 @@ import nl.rutgerkok.hammer.util.BooleanList;
  * A version of {@value #VERSION_DEFLATE} represents a deflated (zlib
  * compressed) NBT file. The deflated data is the chunk length - 1.
  */
-public class RegionFile implements Closeable {
+public class RegionFile {
 
     /*
      * lets chunk writing be multithreaded by not locking the whole file as a
@@ -118,7 +117,14 @@ public class RegionFile implements Closeable {
     private final int offsets[];
     private BooleanList sectorFree;
 
-    public RegionFile(Path path) {
+    /**
+     * Creates a new {@link RegionFile} instance. Instances are created by the
+     * {@link RegionFileCache} class.
+     * 
+     * @param path
+     *            The path to the region file.
+     */
+    RegionFile(Path path) {
         offsets = new int[SECTOR_INTS];
         chunkTimestamps = new int[SECTOR_INTS];
 
@@ -187,8 +193,13 @@ public class RegionFile implements Closeable {
         }
     }
 
-    @Override
-    public void close() throws IOException {
+    /**
+     * Closes the region file. This method is called by {@link RegionFileCache}.
+     *
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    void close() throws IOException {
         file.close();
     }
 
@@ -251,7 +262,7 @@ public class RegionFile implements Closeable {
         }
     }
 
-    public OutputStream getChunkDataOutputStream(int x, int z) {
+    public OutputStream getChunkOutputStream(int x, int z) {
         checkBounds(x, z);
 
         return new DeflaterOutputStream(new ChunkBuffer(x, z));

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
+import nl.rutgerkok.hammer.ChunkAccess;
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
@@ -80,5 +81,11 @@ public class PocketWorld implements World {
      */
     public void walkPocketChunks(Visitor<PocketChunk> visitor) throws IOException {
         new ChunkWalk(gameFactory, levelDb).forEach(visitor);
+    }
+
+    @Override
+    public ChunkAccess<PocketChunk> getChunkAccess() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
