@@ -162,4 +162,33 @@ final class ChunkSection {
     private ChunkSection() {
         // Private
     }
+
+    /**
+     * Gets the block data at the given position.
+     *
+     * @param chunkTag
+     *            Chunk data tag.
+     * @param x
+     *            X in the chunk.
+     * @param y
+     *            Y in the chunk.
+     * @param z
+     *            Z in the chunk.
+     * @return The block data.
+     * @throws ArrayIndexOutOfBoundsException
+     *             If the x, y or z are out of bounds.
+     */
+    static byte getMaterialData(CompoundTag chunkTag, int x, int y, int z) {
+        CompoundTag section = getChunkSection(chunkTag, y);
+        if (section == null) {
+            // Empty section
+            return 0;
+        }
+
+        int yInSection = y & (SECTION_Y_SIZE - 1);
+        int position = getPositionInSectionArray(x, yInSection, z);
+
+        byte[] dataArray = section.getByteArray(SectionTag.BLOCK_DATA, TOTAL_SIZE_NIBBLE);
+        return NibbleArray.getInArray(dataArray, position);
+    }
 }

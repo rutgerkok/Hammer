@@ -7,6 +7,8 @@ import java.nio.file.Path;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.ChunkAccess;
+import nl.rutgerkok.hammer.material.MaterialData;
+import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 import nl.rutgerkok.hammer.util.TestFile;
 
 import org.junit.Before;
@@ -26,12 +28,14 @@ public class ChunkRandomAccessTest {
     }
 
     @Test
-    public void testRetrieveChunk() throws IOException {
+    public void testRetrieveChunk() throws IOException, MaterialNotFoundException {
         try (ChunkAccess<?> chunkAccess = world.getChunkAccess()) {
             Chunk chunk = chunkAccess.getChunk(0, 9);
 
             // There must be bedrock at layer 0
-            assertEquals(7, chunk.getMaterialId(0, 0, 0));
+            MaterialData materialData = chunk.getMaterial(0, 0, 0);
+            assertEquals("minecraft:bedrock", materialData.getMaterial().getName());
+            assertEquals(0, materialData.getData());
         }
 
     }

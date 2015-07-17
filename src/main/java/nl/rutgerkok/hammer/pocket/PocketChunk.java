@@ -5,8 +5,12 @@ import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.GameFactory;
+import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
+import nl.rutgerkok.hammer.material.Material;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
+import nl.rutgerkok.hammer.util.MaterialNotFoundException;
+import nl.rutgerkok.hammer.util.NibbleArray;
 
 public final class PocketChunk implements Chunk {
 
@@ -52,6 +56,18 @@ public final class PocketChunk implements Chunk {
         return bytes;
     }
 
+    private void checkOutOfBounds(int x, int y, int z) {
+        if (isOutOfBounds(x, y, z)) {
+            throw new IndexOutOfBoundsException("(" + x + "," + y + "," + z
+                    + ") is outside the chunk, which ranges from (0,0,0) to ("
+                    + CHUNK_X_SIZE + "," + CHUNK_Y_SIZE + "," + CHUNK_Z_SIZE + ")");
+        }
+    }
+
+    private int getArrayPos(int x, int y, int z) {
+        return (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)));
+    }
+
     @Override
     public int getChunkX() {
         return chunkX;
@@ -70,6 +86,20 @@ public final class PocketChunk implements Chunk {
     @Override
     public GameFactory getGameFactory() {
         return gameFactory;
+    }
+
+    @Override
+    public MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException {
+        checkOutOfBounds(x, y, z);
+
+        int arrayPos = getArrayPos(x, y, z);
+        byte blockId = bytes[OFFSET_BLOCK_IDS + arrayPos];
+        // The * 2 comes from that the nibble array has two position per byte
+        byte blockData = NibbleArray.getInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2);
+
+        Material material = gameFactory.getMaterialMap().getById(blockId);
+        // For now, we're just using the class designed for Anvil
+        return AnvilMaterialData.of(material, blockData);
     }
 
     @Override
@@ -104,8 +134,18 @@ public final class PocketChunk implements Chunk {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, MaterialData materialData) {
-        bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))] = (byte) materialData.getMaterial().getId();
+    public boolean isOutOfBounds(int x, int y, int z) {
+        return x < 0 || x >= CHUNK_X_SIZE || y < 0 || y >= CHUNK_Y_SIZE || z < 0 || z >= CHUNK_Z_SIZE;
+    }
+
+    @Override
+    public void setMaterial(int x, int y, int z, MaterialData materialData) {
+        checkOutOfBounds(x, y, z);
+
+        int arrayPos = getArrayPos(x, y, z);
+        bytes[OFFSET_BLOCK_IDS + arrayPos] = (byte) materialData.getMaterial().getId();
+        // The * 2 comes from that the nibble array has two position per byte
+        NibbleArray.setInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2, materialData.getData());
     }
 
 }

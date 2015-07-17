@@ -6,11 +6,14 @@ import java.util.Objects;
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
+import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
+import nl.rutgerkok.hammer.material.Material;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
 import nl.rutgerkok.hammer.tag.TagType;
+import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 
 /**
  * Represents a single chunk, as used by Minecraft.
@@ -43,6 +46,14 @@ public final class AnvilChunk implements Chunk {
         this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
     }
 
+    private void checkOutOfBounds(int x, int y, int z) {
+        if (isOutOfBounds(x, y, z)) {
+            throw new IndexOutOfBoundsException("(" + x + "," + y + "," + z
+                    + ") is outside the chunk, which ranges from (0,0,0) to ("
+                    + CHUNK_X_SIZE + "," + CHUNK_Y_SIZE + "," + CHUNK_Z_SIZE + ")");
+        }
+    }
+
     /**
      * Gets direct access to the biome array of this chunk. Modifying the byte
      * array will modify the data of this chunk.
@@ -51,6 +62,17 @@ public final class AnvilChunk implements Chunk {
      */
     public byte[] getBiomeArray() {
         return chunkTag.getByteArray(ChunkTag.BIOMES, CHUNK_X_SIZE * CHUNK_Z_SIZE);
+    }
+
+    @Override
+    public MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException {
+        checkOutOfBounds(x, y, z);
+
+        short id = ChunkSection.getMaterialId(chunkTag, x, y, z);
+        byte data = ChunkSection.getMaterialData(chunkTag, x, y, z);
+
+        Material material = gameFactory.getMaterialMap().getById(id);
+        return AnvilMaterialData.of(material, data);
     }
 
     /**
@@ -115,15 +137,14 @@ public final class AnvilChunk implements Chunk {
         return chunkTag.getList(ChunkTag.TILE_ENTITIES, TagType.COMPOUND);
     }
 
-    private boolean isOutOfBounds(int x, int y, int z) {
+    @Override
+    public boolean isOutOfBounds(int x, int y, int z) {
         return x < 0 || x >= CHUNK_X_SIZE || y < 0 || y >= CHUNK_Y_SIZE || z < 0 || z >= CHUNK_Z_SIZE;
     }
 
     @Override
-    public void setBlock(int x, int y, int z, MaterialData materialData) {
-        if (isOutOfBounds(x, y, z)) {
-            return;
-        }
+    public void setMaterial(int x, int y, int z, MaterialData materialData) {
+        checkOutOfBounds(x, y, z);
 
         ChunkSection.setMaterialId(chunkTag, x, y, z, materialData.getMaterial().getId());
         ChunkSection.setMaterialData(chunkTag, x, y, z, materialData.getData());
