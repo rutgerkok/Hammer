@@ -24,22 +24,6 @@ import com.google.common.collect.Iterators;
  */
 class RegionFileCache {
 
-    private static final String FILE_EXTENSION = "mca";
-
-    private volatile int claims;
-
-    /**
-     * Cache to prevent the same region file from being opened twice.
-     */
-    private final Map<Path, Reference<RegionFile>> cache = new HashMap<>();
-    private final Path regionFolder;
-
-    public RegionFileCache(Path regionFolder) {
-        this.regionFolder = Objects.requireNonNull(regionFolder, "regionFolder");
-    }
-
-    private Object lock = new Object();
-
     class Claim implements Closeable {
 
         private Claim() {
@@ -52,6 +36,22 @@ class RegionFileCache {
         }
     }
 
+    private static final String FILE_EXTENSION = "mca";
+
+    /**
+     * Cache to prevent the same region file from being opened twice.
+     */
+    private final Map<Path, Reference<RegionFile>> cache = new HashMap<>();
+    private volatile int claims;
+
+    private Object lock = new Object();
+
+    private final Path regionFolder;
+
+    public RegionFileCache(Path regionFolder) {
+        this.regionFolder = Objects.requireNonNull(regionFolder, "regionFolder");
+    }
+
     /**
      * Registers a claim. The region cache will stay open until all claims have
      * {@link Claim#close() been closed}.
@@ -61,6 +61,18 @@ class RegionFileCache {
     Claim claim() {
         claims++;
         return new Claim();
+    }
+
+    /**
+     * Counts the amount of region files. This method takes a while to execute
+     * and the result is not cached.
+     * 
+     * @return The amount of region files.
+     * @throws IOException
+     *             If an IO error occurs counting the files.
+     */
+    int countRegionFiles() throws IOException {
+        return DirectoryUtil.countFiles(regionFolder);
     }
 
     /**
@@ -94,33 +106,34 @@ class RegionFileCache {
         return loadRegionFile(file);
     }
 
+    @SuppressWarnings("resource")
+    // Directory stream is closed by the close method of the returned instance
+    DirectoryStream<RegionFile> getRegionFiles() throws IOException {
+        final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder);
+        return new DirectoryStream<RegionFile>() {
+
+            @Override
+            public void close() throws IOException {
+                files.close();
+            }
+
+            @Override
+            public Iterator<RegionFile> iterator() {
+                return Iterators.transform(files.iterator(), new Function<Path, RegionFile>() {
+
+                    @Override
+                    public RegionFile apply(Path input) {
+                        return loadRegionFile(input);
+                    }
+                });
+            }
+        };
+    }
+
     private RegionFile loadRegionFile(Path file) {
         RegionFile reg = new RegionFile(file);
         cache.put(file, new SoftReference<RegionFile>(reg));
         return reg;
-    }
-
-    DirectoryStream<RegionFile> getRegionFiles() throws IOException {
-        try (final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder)) {
-            return new DirectoryStream<RegionFile>() {
-
-                @Override
-                public void close() throws IOException {
-                    files.close();
-                }
-
-                @Override
-                public Iterator<RegionFile> iterator() {
-                    return Iterators.transform(files.iterator(), new Function<Path, RegionFile>() {
-
-                        @Override
-                        public RegionFile apply(Path input) {
-                            return loadRegionFile(input);
-                        }
-                    });
-                }
-            };
-        }
     }
 
     private void release() {
@@ -140,17 +153,5 @@ class RegionFileCache {
                 cache.clear();
             }
         }
-    }
-
-    /**
-     * Counts the amount of region files. This method takes a while to execute
-     * and the result is not cached.
-     * 
-     * @return The amount of region files.
-     * @throws IOException
-     *             If an IO error occurs counting the files.
-     */
-    int countRegionFiles() throws IOException {
-        return DirectoryUtil.countFiles(regionFolder);
     }
 }
