@@ -15,6 +15,14 @@ import nl.rutgerkok.hammer.util.Visitor;
 public interface ChunkAccess<T extends Chunk> extends Closeable {
 
     /**
+     * Closes the chunk access for this instance, so that, if there are no other
+     * open chunk accessors, the region files/level database can be closed.
+     * @throws IOException If an IO error occurs when closing.
+     */
+    @Override
+    void close() throws IOException;
+
+    /**
      * Gets the chunk at the given chunk coordinates. If the chunk does not
      * exist, a chunk consisting of only air blocks is returned.
      *
@@ -39,11 +47,4 @@ public interface ChunkAccess<T extends Chunk> extends Closeable {
      *             If an IO error occurs during saving.
      */
     void saveChunk(T chunk) throws IOException;
-
-    /**
-     * Closes the chunk access for this instance, so that, if there are no other
-     * open chunk accessors, the region files/level database can be closed.
-     */
-    @Override
-    void close();
 }

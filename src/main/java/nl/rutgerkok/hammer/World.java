@@ -26,6 +26,27 @@ import nl.rutgerkok.hammer.util.Visitor;
 public interface World {
 
     /**
+     * Gets random (as opposed to {@link #walkChunks(Visitor) sequential})
+     * access to the chunks in the world.
+     * 
+     * <p>
+     * The returned instance must be {@link ChunkAccess#close() closed} to free
+     * up any associated resources.
+     * 
+     * <p>
+     * The chunk access must be implemented in such a way that multiple chunk
+     * accessors (either created through this method or through
+     * {@link #walkChunks(Visitor)}) can safely be open at the same time. One
+     * exception is the case where multiple {@link World} instances exist for
+     * the same world. See the note at the top of the {@link World} class for
+     * more information.
+     * 
+     * @return Access to the chunks.
+     * @throws IOException If an IO error occurs opening the level.
+     */
+    ChunkAccess<?> getChunkAccess() throws IOException;
+
+    /**
      * Gets the game factory of this world.
      *
      * @return The game factory.
@@ -59,26 +80,6 @@ public interface World {
      * @see #getChunkAccess() Random access to chunks
      */
     void walkChunks(Visitor<Chunk> visitor) throws IOException;
-
-    /**
-     * Gets random (as opposed to {@link #walkChunks(Visitor) sequential})
-     * access to the chunks in the world.
-     * 
-     * <p>
-     * The returned instance must be {@link ChunkAccess#close() closed} to free
-     * up any associated resources.
-     * 
-     * <p>
-     * The chunk access must be implemented in such a way that multiple chunk
-     * accessors (either created through this method or through
-     * {@link #walkChunks(Visitor)}) can safely be open at the same time. One
-     * exception is the case where multiple {@link World} instances exist for
-     * the same world. See the note at the top of the {@link World} class for
-     * more information.
-     * 
-     * @return Access to the chunks.
-     */
-    ChunkAccess<?> getChunkAccess();
 
     /**
      * Gets a walk along all player files in the world.

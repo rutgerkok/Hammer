@@ -43,6 +43,11 @@ public class PocketWorld implements World {
     }
 
     @Override
+    public ChunkAccess<PocketChunk> getChunkAccess() throws IOException {
+        return new PocketChunkAccess(gameFactory, levelDb);
+    }
+
+    @Override
     public GameFactory getGameFactory() {
         return gameFactory;
     }
@@ -61,7 +66,9 @@ public class PocketWorld implements World {
 
     @Override
     public void walkChunks(Visitor<Chunk> visitor) throws IOException {
-        new ChunkWalk(this.gameFactory, this.levelDb).forEach(visitor);
+        try (ChunkWalk chunkWalk = new ChunkWalk(new PocketChunkAccess(gameFactory, levelDb))) {
+            chunkWalk.forEach(visitor);
+        }
     }
 
     @Override
@@ -80,12 +87,8 @@ public class PocketWorld implements World {
      *             If an IO error occurs.
      */
     public void walkPocketChunks(Visitor<PocketChunk> visitor) throws IOException {
-        new ChunkWalk(gameFactory, levelDb).forEach(visitor);
-    }
-
-    @Override
-    public ChunkAccess<PocketChunk> getChunkAccess() {
-        // TODO Auto-generated method stub
-        return null;
+        try (ChunkWalk chunkWalk = new ChunkWalk(new PocketChunkAccess(gameFactory, levelDb))) {
+            chunkWalk.forEach(visitor);
+        }
     }
 }

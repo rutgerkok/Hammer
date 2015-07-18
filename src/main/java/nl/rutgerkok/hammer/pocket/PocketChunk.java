@@ -1,5 +1,6 @@
 package nl.rutgerkok.hammer.pocket;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,12 +30,30 @@ public final class PocketChunk implements Chunk {
     private static final int OFFSET_COLOR_DATA = 32_768 + 16_384 + 16_384 + 16_384 + 256;
     private static final int OFFSET_MARKER_DATA = 32_768 + 16_384 + 16_384 + 16_384;
     private static final int OFFSET_SKYLIGHT_DATA = 32_768 + 16_384;
+    private static final int TOTAL_BYTE_LENGTH = 32_768 + 16_384 + 16_384 + 16_384 + 256 + 1024;
+
+    /**
+     * Creates a new, empty chunk.
+     *
+     * @param gameFactory
+     *            Game factory belonging to Pocket Edition.
+     * @param chunkX
+     *            Chunk x coordinate.
+     * @param chunkZ
+     *            Chunk z coordinate.
+     * @return The chunk.
+     */
+    static PocketChunk newEmptyChunk(GameFactory gameFactory, int chunkX, int chunkZ) {
+        return new PocketChunk(gameFactory, chunkZ, chunkZ, new byte[TOTAL_BYTE_LENGTH],
+                new ArrayList<CompoundTag>(), new ArrayList<CompoundTag>());
+    }
 
     private final byte[] bytes;
     private final int chunkX;
     private final int chunkZ;
     private final List<CompoundTag> entities;
     private final GameFactory gameFactory;
+
     private final List<CompoundTag> tileEntities;
 
     PocketChunk(GameFactory gameFactory, int chunkX, int chunkZ,
