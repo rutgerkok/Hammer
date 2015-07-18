@@ -35,17 +35,22 @@ public class AnvilWorld implements World {
 
     private final GameFactory gameFactory;
     private final Path levelDat;
-    private final CompoundTag tag;
     private final RegionFileCache regionFileCache;
+    private final CompoundTag tag;
 
     public AnvilWorld(Path levelDat) throws IOException {
         if (!levelDat.getFileName().toString().equals(LEVEL_DAT_NAME)) {
             throw new IOException("Expected a " + LEVEL_DAT_NAME + " file, got \"" + levelDat.getName(levelDat.getNameCount() - 1) + "\"");
         }
         this.levelDat = levelDat.toAbsolutePath();
-        this.tag = AnvilNbtReader.readFromCompressedFile(levelDat);
+        this.tag = Files.exists(levelDat) ? AnvilNbtReader.readFromCompressedFile(levelDat) : new CompoundTag();
         this.gameFactory = new AnvilGameFactory(initMaterialMap());
         this.regionFileCache = new RegionFileCache(getRegionDirectory());
+    }
+
+    @Override
+    public ChunkAccess<AnvilChunk> getChunkAccess() {
+        return new AnvilChunkAccess(gameFactory, regionFileCache);
     }
 
     /**
@@ -100,6 +105,10 @@ public class AnvilWorld implements World {
         return getDirectory(PLAYER_DIRECTORY_OLD);
     }
 
+    private Path getRegionDirectory() {
+        return levelDat.resolveSibling(REGION_FOLDER_NAME);
+    }
+
     /**
      * Scans the level.dat for a Forge name->id map, if found it used that,
      * otherwise it uses the vanilla ids.
@@ -148,15 +157,6 @@ public class AnvilWorld implements World {
     @Override
     public void walkPlayerFiles(Visitor<PlayerFile> visitor) throws IOException {
         new PlayerFilesWalk(this).forEach(visitor);
-    }
-
-    private Path getRegionDirectory() {
-        return levelDat.resolveSibling(REGION_FOLDER_NAME);
-    }
-
-    @Override
-    public ChunkAccess<AnvilChunk> getChunkAccess() {
-        return new AnvilChunkAccess(gameFactory, regionFileCache);
     }
 
 }
