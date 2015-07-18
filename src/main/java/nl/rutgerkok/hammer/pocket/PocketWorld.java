@@ -33,7 +33,11 @@ public class PocketWorld implements World {
      *             If an IO error occurs reading the level.dat file.
      */
     public PocketWorld(Path levelDat) throws IOException {
-        this.levelDat = Objects.requireNonNull(levelDat, LEVEL_DAT_NAME);
+        this.levelDat = Objects.requireNonNull(levelDat, "levelDat");
+
+        if (!levelDat.getFileName().toString().equals(LEVEL_DAT_NAME)) {
+            throw new IOException(levelDat + " is not a valid level.dat file");
+        }
         this.rootLevelTag = PocketNbtReader.readFromUncompressedFile(levelDat);
 
         // Use the same material map as Anvil for now
