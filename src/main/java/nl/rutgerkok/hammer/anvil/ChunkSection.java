@@ -23,6 +23,33 @@ final class ChunkSection {
     private static final int TOTAL_SIZE = SECTION_X_SIZE * SECTION_Y_SIZE * SECTION_Z_SIZE;
     private static final int TOTAL_SIZE_NIBBLE = TOTAL_SIZE / 2;
 
+    /**
+     * Adds the requested chunk section to the chunk, and returns it.
+     *
+     * @param chunkTag
+     *            The chunk to add the new section to.
+     * @param y
+     *            The block y of the chunk section.
+     * @return The chunk section.
+     */
+    private static CompoundTag createChunkSection(CompoundTag chunkTag, int y) {
+        CompoundTag chunkSection = new CompoundTag();
+        int sectionIndex = y >>> SECTION_Y_BITS;
+        chunkSection.setByte(SectionTag.INDEX, (byte) sectionIndex);
+        chunkSection.setByteArray(SectionTag.BLOCK_IDS, new byte[TOTAL_SIZE]);
+        chunkSection.setByteArray(SectionTag.BLOCK_DATA, new byte[TOTAL_SIZE_NIBBLE]);
+        chunkSection.setByteArray(SectionTag.BLOCK_LIGHT, new byte[TOTAL_SIZE_NIBBLE]);
+        chunkSection.setByteArray(SectionTag.SKY_LIGHT, new byte[TOTAL_SIZE_NIBBLE]);
+
+        // Add the new section
+        chunkTag.getList(ChunkTag.SECTIONS, TagType.COMPOUND).add(chunkSection);
+
+        // Mark chunk as needing light update
+        chunkTag.setBoolean(ChunkTag.LIGHT_POPULATED, false);
+
+        return chunkSection;
+    }
+
     private static CompoundTag getChunkSection(CompoundTag chunkTag, int y) {
         if (y < 0 || y >= AnvilChunk.CHUNK_Y_SIZE) {
             return null;
@@ -35,18 +62,47 @@ final class ChunkSection {
             // Do a guess (correct only if no chunk sections are omitted at
             // and below this section index)
             CompoundTag section = sections.get(sectionIndex);
-            if (section != null && section.getByte(SectionTag.Y_POS) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
                 return section;
             }
         }
 
         // Search for section
         for (CompoundTag section : sections) {
-            if (section != null && section.getByte(SectionTag.Y_POS) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
                 return section;
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the block data at the given position.
+     *
+     * @param chunkTag
+     *            Chunk data tag.
+     * @param x
+     *            X in the chunk.
+     * @param y
+     *            Y in the chunk.
+     * @param z
+     *            Z in the chunk.
+     * @return The block data.
+     * @throws ArrayIndexOutOfBoundsException
+     *             If the x, y or z are out of bounds.
+     */
+    static byte getMaterialData(CompoundTag chunkTag, int x, int y, int z) {
+        CompoundTag section = getChunkSection(chunkTag, y);
+        if (section == null) {
+            // Empty section
+            return 0;
+        }
+
+        int yInSection = y & (SECTION_Y_SIZE - 1);
+        int position = getPositionInSectionArray(x, yInSection, z);
+
+        byte[] dataArray = section.getByteArray(SectionTag.BLOCK_DATA, TOTAL_SIZE_NIBBLE);
+        return NibbleArray.getInArray(dataArray, position);
     }
 
     /**
@@ -106,8 +162,8 @@ final class ChunkSection {
     static void setMaterialData(CompoundTag chunkTag, int x, int y, int z, byte data) {
         CompoundTag section = getChunkSection(chunkTag, y);
         if (section == null) {
-            // Silently fail
-            return;
+            // Create the section first
+            section = createChunkSection(chunkTag, y);
         }
 
         int yInSection = y & (SECTION_Y_SIZE - 1);
@@ -135,8 +191,8 @@ final class ChunkSection {
     static void setMaterialId(CompoundTag chunkTag, int x, int y, int z, short id) {
         CompoundTag section = getChunkSection(chunkTag, y);
         if (section == null) {
-            // Silently fail
-            return;
+            // Create the section first
+            section = createChunkSection(chunkTag, y);
         }
 
         int yInSection = y & (SECTION_Y_SIZE - 1);
@@ -161,34 +217,5 @@ final class ChunkSection {
 
     private ChunkSection() {
         // Private
-    }
-
-    /**
-     * Gets the block data at the given position.
-     *
-     * @param chunkTag
-     *            Chunk data tag.
-     * @param x
-     *            X in the chunk.
-     * @param y
-     *            Y in the chunk.
-     * @param z
-     *            Z in the chunk.
-     * @return The block data.
-     * @throws ArrayIndexOutOfBoundsException
-     *             If the x, y or z are out of bounds.
-     */
-    static byte getMaterialData(CompoundTag chunkTag, int x, int y, int z) {
-        CompoundTag section = getChunkSection(chunkTag, y);
-        if (section == null) {
-            // Empty section
-            return 0;
-        }
-
-        int yInSection = y & (SECTION_Y_SIZE - 1);
-        int position = getPositionInSectionArray(x, yInSection, z);
-
-        byte[] dataArray = section.getByteArray(SectionTag.BLOCK_DATA, TOTAL_SIZE_NIBBLE);
-        return NibbleArray.getInArray(dataArray, position);
     }
 }

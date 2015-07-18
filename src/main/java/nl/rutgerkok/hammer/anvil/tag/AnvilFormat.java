@@ -24,6 +24,7 @@ public final class AnvilFormat {
         public static final CompoundKey BIOMES = CompoundKey.of("Biomes");
         public static final CompoundKey ENTITIES = CompoundKey.of("Entities");
         public static final CompoundKey INHABITED_TIME = CompoundKey.of("InhabitedTime");
+        public static final CompoundKey LIGHT_POPULATED = CompoundKey.of("LightPopulated");
         public static final CompoundKey SECTIONS = CompoundKey.of("Sections");
         public static final CompoundKey TILE_ENTITIES = CompoundKey.of("TileEntities");
         public static final CompoundKey X_POS = CompoundKey.of("xPos");
@@ -67,8 +68,10 @@ public final class AnvilFormat {
     public static class SectionTag {
         public static final CompoundKey BLOCK_DATA = CompoundKey.of("Data");
         public static final CompoundKey BLOCK_IDS = CompoundKey.of("Blocks");
+        public static final CompoundKey BLOCK_LIGHT = CompoundKey.of("BlockLight");
         public static final CompoundKey EXT_BLOCK_IDS = CompoundKey.of("Add");
-        public static final CompoundKey Y_POS = CompoundKey.of("Y");
+        public static final CompoundKey INDEX = CompoundKey.of("Y");
+        public static final CompoundKey SKY_LIGHT = CompoundKey.of("SkyLight");
     }
 
     /**
