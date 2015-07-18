@@ -116,7 +116,7 @@ public final class PocketChunk implements Chunk {
         // The * 2 comes from that the nibble array has two position per byte
         byte blockData = NibbleArray.getInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2);
 
-        Material material = gameFactory.getMaterialMap().getById(blockId);
+        Material material = gameFactory.getMaterialMap().getById(blockId & 0xff);
         // For now, we're just using the class designed for Anvil
         return AnvilMaterialData.of(material, blockData);
     }
