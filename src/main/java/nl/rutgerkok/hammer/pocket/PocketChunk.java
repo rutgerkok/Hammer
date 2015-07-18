@@ -44,7 +44,7 @@ public final class PocketChunk implements Chunk {
      * @return The chunk.
      */
     static PocketChunk newEmptyChunk(GameFactory gameFactory, int chunkX, int chunkZ) {
-        return new PocketChunk(gameFactory, chunkZ, chunkZ, new byte[TOTAL_BYTE_LENGTH],
+        return new PocketChunk(gameFactory, chunkX, chunkZ, new byte[TOTAL_BYTE_LENGTH],
                 new ArrayList<CompoundTag>(), new ArrayList<CompoundTag>());
     }
 
@@ -165,6 +165,11 @@ public final class PocketChunk implements Chunk {
         bytes[OFFSET_BLOCK_IDS + arrayPos] = (byte) materialData.getMaterial().getId();
         // The * 2 comes from that the nibble array has two position per byte
         NibbleArray.setInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2, materialData.getData());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + this.chunkX + "," + chunkZ + ")";
     }
 
 }
