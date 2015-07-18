@@ -25,9 +25,10 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
  *
  */
 final class AnvilItemStack implements ItemStack {
-    private static final CompoundKey BLOCK_DATA_TAG = CompoundKey.of("Damage");
-    private static final CompoundKey BLOCK_ID_TAG = CompoundKey.of("id");
-    private static final CompoundKey COUNT_TAG = CompoundKey.of("Count");
+    private static final CompoundKey<Short> BLOCK_DATA_TAG = CompoundKey.of("Damage");
+    private static final CompoundKey<String> BLOCK_ID_TAG = CompoundKey.of("id");
+    private static final CompoundKey<Byte> COUNT_TAG = CompoundKey.of("Count");
+    private static final CompoundKey<Short> OLD_BLOCK_ID_TAG = CompoundKey.of("id");
 
     private final MaterialMap materialMap;
     private final CompoundTag tag;
@@ -59,7 +60,7 @@ final class AnvilItemStack implements ItemStack {
             return materialMap.getByName(tag.getString(BLOCK_ID_TAG));
         } else {
             // Try as number
-            return materialMap.getById(tag.getShort(BLOCK_ID_TAG));
+            return materialMap.getById(tag.getShort(OLD_BLOCK_ID_TAG));
         }
     }
 
@@ -131,7 +132,7 @@ final class AnvilItemStack implements ItemStack {
         if (isBlockIdInStringFormat()) {
             tag.setString(BLOCK_ID_TAG, materialData.getMaterial().getName());
         } else {
-            tag.setShort(BLOCK_ID_TAG, materialData.getMaterial().getId());
+            tag.setShort(OLD_BLOCK_ID_TAG, materialData.getMaterial().getId());
         }
         tag.setShort(BLOCK_DATA_TAG, materialData.getData());
     }
@@ -142,7 +143,7 @@ final class AnvilItemStack implements ItemStack {
         try {
             materialString = getMaterialData().toString();
         } catch (MaterialNotFoundException e) {
-            materialString = tag.getShort(BLOCK_ID_TAG) + ":" + tag.getShort(BLOCK_DATA_TAG);
+            materialString = tag.getString(BLOCK_ID_TAG) + ":" + tag.getShort(BLOCK_DATA_TAG);
         }
         return getClass().getSimpleName() + "(material=" + materialString + ", count=" + getCount() + ")";
     }

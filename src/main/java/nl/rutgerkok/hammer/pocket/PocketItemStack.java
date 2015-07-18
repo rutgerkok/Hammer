@@ -18,10 +18,10 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
  * @see GameFactory#createItemStack(CompoundTag)
  */
 final class PocketItemStack implements ItemStack {
-    private static final CompoundKey BLOCK_DATA_TAG = CompoundKey.of("Damage");
-    private static final CompoundKey BLOCK_ID_TAG = CompoundKey.of("id");
+    private static final CompoundKey<Short> BLOCK_DATA_TAG = CompoundKey.of("Damage");
+    private static final CompoundKey<Short> BLOCK_ID_TAG = CompoundKey.of("id");
+    private static final CompoundKey<Byte> COUNT_TAG = CompoundKey.of("Count");
 
-    private static final CompoundKey COUNT_TAG = CompoundKey.of("Count");
     private final MaterialMap materialMap;
 
     private final CompoundTag tag;
@@ -44,7 +44,7 @@ final class PocketItemStack implements ItemStack {
 
     @Override
     public MaterialData getMaterialData() throws MaterialNotFoundException {
-        byte data = tag.getByte(BLOCK_DATA_TAG);
+        byte data = (byte) tag.getShort(BLOCK_DATA_TAG);
         // We're assuming that Pocket and Anvil material data are compatible
         // here. This assumption is mostly correct, except for some edge cases,
         // like double slabs.
@@ -59,7 +59,7 @@ final class PocketItemStack implements ItemStack {
         if (materialData.isBlockDataUnspecified()) {
             return true;
         }
-        return materialData.getData() == tag.getByte(BLOCK_DATA_TAG);
+        return materialData.getData() == tag.getShort(BLOCK_DATA_TAG);
     }
 
     @Override

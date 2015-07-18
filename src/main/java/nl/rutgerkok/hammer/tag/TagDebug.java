@@ -41,7 +41,7 @@ final class TagDebug {
 
     private static Map<String, Object> toTypedMap(CompoundTag tag) {
         Map<String, Object> typedMap = new LinkedHashMap<>();
-        for (Entry<CompoundKey, Object> entry : tag.entrySet()) {
+        for (Entry<CompoundKey<?>, Object> entry : tag.entrySet()) {
             String keyName = entry.getKey().getKeyName();
             Object value = entry.getValue();
 

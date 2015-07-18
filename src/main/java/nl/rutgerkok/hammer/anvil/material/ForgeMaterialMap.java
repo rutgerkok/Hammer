@@ -17,8 +17,8 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 public class ForgeMaterialMap implements MaterialMap {
 
     private static final String AIR_NAME = "air";
-    private static final CompoundKey MAPPING_KEY = CompoundKey.of("K");
-    private static final CompoundKey MAPPING_VALUE = CompoundKey.of("V");
+    private static final CompoundKey<String> MAPPING_KEY = CompoundKey.of("K");
+    private static final CompoundKey<Integer> MAPPING_VALUE = CompoundKey.of("V");
 
     private Material air = null;
     private Map<Integer, AnvilMaterial> byId = new HashMap<>();

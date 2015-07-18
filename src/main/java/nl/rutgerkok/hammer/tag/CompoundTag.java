@@ -63,14 +63,14 @@ public final class CompoundTag implements JSONAware {
         return value;
     }
 
-    private Map<CompoundKey, Object> map = new HashMap<>();
+    private Map<CompoundKey<?>, Object> map = new HashMap<>();
 
     public CompoundTag() {
 
     }
 
     public CompoundTag(CompoundTag copy) {
-        for (Entry<CompoundKey, Object> entry : copy.entrySet()) {
+        for (Entry<CompoundKey<?>, Object> entry : copy.entrySet()) {
             Object value = deepCopy(entry.getValue());
             map.put(entry.getKey(), value);
         }
@@ -90,7 +90,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return True if such a tag exists, false otherwise.
      */
-    public boolean containsKey(CompoundKey key) {
+    public boolean containsKey(CompoundKey<?> key) {
         return map.containsKey(key);
     }
 
@@ -110,7 +110,7 @@ public final class CompoundTag implements JSONAware {
      *
      * @return All entries.
      */
-    public Set<Entry<CompoundKey, Object>> entrySet() {
+    public Set<Entry<CompoundKey<?>, Object>> entrySet() {
         return Collections.unmodifiableSet(map.entrySet());
     }
 
@@ -129,7 +129,7 @@ public final class CompoundTag implements JSONAware {
         if (tag.size() != map.size()) {
             return false;
         }
-        for (Entry<CompoundKey, Object> entry : tag.entrySet()) {
+        for (Entry<CompoundKey<?>, Object> entry : tag.entrySet()) {
             if (!valueEquals(entry.getValue(), map.get(entry.getKey()))) {
                 return false;
             }
@@ -146,8 +146,12 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The boolean, or false if not found.
      */
-    public boolean getBoolean(CompoundKey key) {
-        return getByte(key) != 0;
+    public boolean getBoolean(CompoundKey<Boolean> key) {
+        // Sneaky conversion to byte key
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        CompoundKey<Byte> byteKey = (CompoundKey) key;
+
+        return getByte(byteKey) != 0;
     }
 
     /**
@@ -159,7 +163,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The byte, or 0 if not found.
      */
-    public byte getByte(CompoundKey key) {
+    public byte getByte(CompoundKey<Byte> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).byteValue();
@@ -179,7 +183,7 @@ public final class CompoundTag implements JSONAware {
      *            Length of the byte array.
      * @return The byte array.
      */
-    public byte[] getByteArray(CompoundKey key, int length) {
+    public byte[] getByteArray(CompoundKey<byte[]> key, int length) {
         Object value = map.get(key);
         if (value instanceof byte[]) {
             byte[] array = (byte[]) value;
@@ -202,7 +206,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The compound tag.
      */
-    public CompoundTag getCompound(CompoundKey key) {
+    public CompoundTag getCompound(CompoundKey<CompoundTag> key) {
         Object value = map.get(key);
         if (value instanceof CompoundTag) {
             return (CompoundTag) value;
@@ -223,7 +227,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The double, or 0.0 if not found.
      */
-    public double getDouble(CompoundKey key) {
+    public double getDouble(CompoundKey<Double> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
@@ -240,7 +244,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The float, or 0.0 if not found.
      */
-    public float getFloat(CompoundKey key) {
+    public float getFloat(CompoundKey<Float> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).floatValue();
@@ -257,7 +261,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The integer, or 0 if not found.
      */
-    public int getInt(CompoundKey key) {
+    public int getInt(CompoundKey<Integer> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).intValue();
@@ -277,7 +281,7 @@ public final class CompoundTag implements JSONAware {
      *            Length of the integer array.
      * @return The integer array.
      */
-    public int[] getIntArray(CompoundKey key, int length) {
+    public int[] getIntArray(CompoundKey<int[]> key, int length) {
         Object value = map.get(key);
         if (value instanceof int[]) {
             int[] array = (int[]) value;
@@ -303,7 +307,7 @@ public final class CompoundTag implements JSONAware {
      * @return The list.
      */
     @SuppressWarnings("unchecked")
-    public <T> ListTag<T> getList(CompoundKey key, TagType<T> type) {
+    public <T> ListTag<T> getList(CompoundKey<ListTag<T>> key, TagType<T> type) {
         Object value = map.get(key);
         if (value instanceof ListTag) {
             ListTag<?> listTag = (ListTag<?>) value;
@@ -327,7 +331,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The long, or 0 if not found.
      */
-    public long getLong(CompoundKey key) {
+    public long getLong(CompoundKey<Long> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).longValue();
@@ -344,7 +348,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The integer, or 0 if not found.
      */
-    public short getShort(CompoundKey key) {
+    public short getShort(CompoundKey<Short> key) {
         Object value = map.get(key);
         if (value instanceof Number) {
             return ((Number) value).shortValue();
@@ -360,7 +364,7 @@ public final class CompoundTag implements JSONAware {
      *            Name of the tag, case insensitive.
      * @return The string.
      */
-    public String getString(CompoundKey key) {
+    public String getString(CompoundKey<String> key) {
         Object value = map.get(key);
         if (value instanceof String) {
             return (String) value;
@@ -387,6 +391,8 @@ public final class CompoundTag implements JSONAware {
     /**
      * Gets whether the value with the given key is of the given type.
      *
+     * @param <T>
+     *            Expected type.
      * @param key
      *            Key of the tag.
      * @param tagType
@@ -394,7 +400,7 @@ public final class CompoundTag implements JSONAware {
      *
      * @return True if the tag is of the given type, false otherwise.
      */
-    public boolean isType(CompoundKey key, TagType<?> tagType) {
+    public <T> boolean isType(CompoundKey<T> key, TagType<T> tagType) {
         Object value = this.map.get(key);
         if (value == null) {
             return false;
@@ -412,7 +418,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag. Must be of the given type, may not be null.
      */
-    public <T> void set(CompoundKey key, TagType<T> type, T value) {
+    public <T> void set(CompoundKey<T> key, TagType<T> type, T value) {
         value = type.cast(Objects.requireNonNull(value));
         map.put(key, value);
     }
@@ -430,8 +436,12 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setBoolean(CompoundKey key, boolean value) {
-        setByte(key, (byte) (value ? 1 : 0));
+    public void setBoolean(CompoundKey<Boolean> key, boolean value) {
+        // Sneaky conversion
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        CompoundKey<Byte> byteKey = (CompoundKey) key;
+
+        setByte(byteKey, (byte) (value ? 1 : 0));
     }
 
     /**
@@ -443,7 +453,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setByte(CompoundKey key, byte value) {
+    public void setByte(CompoundKey<Byte> key, byte value) {
         map.put(key, value);
     }
 
@@ -456,7 +466,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setByteArray(CompoundKey key, byte[] value) {
+    public void setByteArray(CompoundKey<byte[]> key, byte[] value) {
         map.put(key, Objects.requireNonNull(value));
     }
 
@@ -469,7 +479,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setCompound(CompoundKey key, CompoundTag value) {
+    public void setCompound(CompoundKey<CompoundTag> key, CompoundTag value) {
         map.put(key, Objects.requireNonNull(value));
     }
 
@@ -482,7 +492,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setDouble(CompoundKey key, double value) {
+    public void setDouble(CompoundKey<Double> key, double value) {
         map.put(key, value);
     }
 
@@ -495,7 +505,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setFloat(CompoundKey key, float value) {
+    public void setFloat(CompoundKey<Float> key, float value) {
         map.put(key, value);
     }
 
@@ -508,7 +518,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setInt(CompoundKey key, int value) {
+    public void setInt(CompoundKey<Integer> key, int value) {
         map.put(key, value);
     }
 
@@ -521,7 +531,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setIntArray(CompoundKey key, int[] value) {
+    public void setIntArray(CompoundKey<int[]> key, int[] value) {
         map.put(key, Objects.requireNonNull(value));
     }
 
@@ -534,7 +544,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setList(CompoundKey name, ListTag<?> value) {
+    public void setList(CompoundKey<ListTag<?>> name, ListTag<?> value) {
         map.put(name, value);
     }
 
@@ -547,7 +557,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setLong(CompoundKey key, long value) {
+    public void setLong(CompoundKey<Long> key, long value) {
         map.put(key, value);
     }
 
@@ -560,7 +570,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setShort(CompoundKey key, short value) {
+    public void setShort(CompoundKey<Short> key, short value) {
         map.put(key, value);
     }
 
@@ -573,7 +583,7 @@ public final class CompoundTag implements JSONAware {
      * @param value
      *            Value of the tag.
      */
-    public void setString(CompoundKey key, String value) {
+    public void setString(CompoundKey<String> key, String value) {
         map.put(key, Objects.requireNonNull(value));
     }
 

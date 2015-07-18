@@ -23,7 +23,7 @@ import nl.rutgerkok.hammer.tag.TagType;
 public class AnvilNbtWriter {
 
     private static void writeCompound(DataOutput dos, CompoundTag tag) throws IOException {
-        for (Entry<CompoundKey, Object> entry : tag.entrySet()) {
+        for (Entry<CompoundKey<?>, Object> entry : tag.entrySet()) {
             TagType<?> tagType = TagType.ofObject(entry.getValue());
             tagType.write(dos);
             dos.writeUTF(entry.getKey().getKeyName());

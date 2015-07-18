@@ -6,8 +6,10 @@ import java.util.Objects;
  * Represents a key in a compound tag. {@link #equals(Object)} and
  * {@link #hashCode()} are case insensitive.
  *
+ * @param <T>
+ *            Type of the value belonging to this key.
  */
-public final class CompoundKey {
+public final class CompoundKey<T> {
 
     /**
      * Creates a new key with the given string representation.
@@ -16,8 +18,8 @@ public final class CompoundKey {
      *            The string representation.
      * @return The key.
      */
-    public static final CompoundKey of(String key) {
-        return new CompoundKey(key);
+    public static final <T> CompoundKey<T> of(String key) {
+        return new CompoundKey<T>(key);
     }
 
     private int hash = 0;
@@ -39,7 +41,7 @@ public final class CompoundKey {
         if (!(obj instanceof CompoundKey)) {
             return false;
         }
-        return ((CompoundKey) obj).key.equalsIgnoreCase(key);
+        return ((CompoundKey<?>) obj).key.equalsIgnoreCase(key);
     }
 
     /**

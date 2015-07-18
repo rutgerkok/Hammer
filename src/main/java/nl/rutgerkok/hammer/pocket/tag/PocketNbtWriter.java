@@ -21,7 +21,7 @@ import nl.rutgerkok.hammer.tag.TagType;
 public class PocketNbtWriter {
 
     private static void writeCompound(OutputStream outputStream, CompoundTag tag) throws IOException {
-        for (Entry<CompoundKey, Object> entry : tag.entrySet()) {
+        for (Entry<CompoundKey<?>, Object> entry : tag.entrySet()) {
             TagType<?> tagType = TagType.ofObject(entry.getValue());
             tagType.write(outputStream);
             LittleEndian.writeUTF(outputStream, entry.getKey().getKeyName());
