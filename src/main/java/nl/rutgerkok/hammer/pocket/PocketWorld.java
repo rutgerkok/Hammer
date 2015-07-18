@@ -17,6 +17,7 @@ import nl.rutgerkok.hammer.util.Visitor;
 
 public class PocketWorld implements World {
 
+    public static final String LEVEL_DAT_NAME = "level.dat";
     private static final String LEVEL_DB_FOLDER = "db";
     private final GameFactory gameFactory;
     private final Path levelDat;
@@ -32,7 +33,7 @@ public class PocketWorld implements World {
      *             If an IO error occurs reading the level.dat file.
      */
     public PocketWorld(Path levelDat) throws IOException {
-        this.levelDat = Objects.requireNonNull(levelDat, "level.dat");
+        this.levelDat = Objects.requireNonNull(levelDat, LEVEL_DAT_NAME);
         this.rootLevelTag = PocketNbtReader.readFromUncompressedFile(levelDat);
 
         // Use the same material map as Anvil for now
