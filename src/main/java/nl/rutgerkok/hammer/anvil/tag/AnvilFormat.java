@@ -26,6 +26,7 @@ public final class AnvilFormat {
         public static final CompoundKey INHABITED_TIME = CompoundKey.of("InhabitedTime");
         public static final CompoundKey LIGHT_POPULATED = CompoundKey.of("LightPopulated");
         public static final CompoundKey SECTIONS = CompoundKey.of("Sections");
+        public static final CompoundKey TERRAIN_POPULATED = CompoundKey.of("TerrainPopulated");
         public static final CompoundKey TILE_ENTITIES = CompoundKey.of("TileEntities");
         public static final CompoundKey X_POS = CompoundKey.of("xPos");
         public static final CompoundKey Z_POS = CompoundKey.of("zPos");
@@ -51,6 +52,7 @@ public final class AnvilFormat {
      * Level.dat data tag format.
      */
     public static class LevelTag {
+        public static final CompoundKey LEVEL_NAME = CompoundKey.of("LevelName");
         public static final CompoundKey PLAYER = CompoundKey.of("Player");
     }
 

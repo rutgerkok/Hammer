@@ -5,6 +5,15 @@ import nl.rutgerkok.hammer.tag.CompoundKey;
 public final class PocketFormat {
 
     /**
+     * Keys from the level.dat file.
+     *
+     */
+    public static class LevelTag {
+        public static final CompoundKey LAST_PLAYED = CompoundKey.of("LastPlayed");
+        public static final CompoundKey LEVEL_NAME = CompoundKey.of("LevelName");
+    }
+
+    /**
      * Tag keys appearing in tile entity tags.
      */
     public static class TileEntityTag {
@@ -14,10 +23,6 @@ public final class PocketFormat {
         public static final CompoundKey Y_POS = CompoundKey.of("y");
         public static final CompoundKey Z_POS = CompoundKey.of("z");
     }
-
-    // Level.dat root tag
-    public static final CompoundKey LEVEL_LAST_PLAYED = CompoundKey.of("LastPlayed");
-    public static final CompoundKey LEVEL_NAME = CompoundKey.of("LevelName");
 
     public static final int VERSION = 4;
 }
