@@ -30,6 +30,24 @@ public final class AnvilChunk implements Chunk {
      */
     public static final int MAX_BIOME_ID = 254;
 
+    /**
+     * Creates a new, empty chunk.
+     *
+     * @param gameFactory
+     *            Game factory belonging to Pocket Edition.
+     * @param chunkX
+     *            Chunk x coordinate.
+     * @param chunkZ
+     *            Chunk z coordinate.
+     * @return The chunk.
+     */
+    static AnvilChunk newEmptyChunk(GameFactory gameFactory, int chunkX, int chunkZ) {
+        CompoundTag chunkTag = new CompoundTag();
+        chunkTag.setInt(ChunkTag.X_POS, chunkX);
+        chunkTag.setInt(ChunkTag.Z_POS, chunkZ);
+        return new AnvilChunk(gameFactory, chunkTag);
+    }
+
     private final CompoundTag chunkTag;
     private final GameFactory gameFactory;
 
@@ -41,7 +59,7 @@ public final class AnvilChunk implements Chunk {
      * @param chunkTag
      *            The data tag, with child tags like Biomes, Sections, etc.
      */
-    public AnvilChunk(GameFactory gameFactory, CompoundTag chunkTag) {
+    AnvilChunk(GameFactory gameFactory, CompoundTag chunkTag) {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
     }
@@ -62,17 +80,6 @@ public final class AnvilChunk implements Chunk {
      */
     public byte[] getBiomeArray() {
         return chunkTag.getByteArray(ChunkTag.BIOMES, CHUNK_X_SIZE * CHUNK_Z_SIZE);
-    }
-
-    @Override
-    public MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException {
-        checkOutOfBounds(x, y, z);
-
-        short id = ChunkSection.getMaterialId(chunkTag, x, y, z);
-        byte data = ChunkSection.getMaterialData(chunkTag, x, y, z);
-
-        Material material = gameFactory.getMaterialMap().getById(id);
-        return AnvilMaterialData.of(material, data);
     }
 
     /**
@@ -102,6 +109,17 @@ public final class AnvilChunk implements Chunk {
     @Override
     public GameFactory getGameFactory() {
         return gameFactory;
+    }
+
+    @Override
+    public MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException {
+        checkOutOfBounds(x, y, z);
+
+        short id = ChunkSection.getMaterialId(chunkTag, x, y, z);
+        byte data = ChunkSection.getMaterialData(chunkTag, x, y, z);
+
+        Material material = gameFactory.getMaterialMap().getById(id);
+        return AnvilMaterialData.of(material, data);
     }
 
     @Override
@@ -148,5 +166,10 @@ public final class AnvilChunk implements Chunk {
 
         ChunkSection.setMaterialId(chunkTag, x, y, z, materialData.getMaterial().getId());
         ChunkSection.setMaterialData(chunkTag, x, y, z, materialData.getData());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + getChunkX() + "," + getChunkZ() + ")";
     }
 }

@@ -18,9 +18,9 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
  */
 final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
 
-    private final GameFactory gameFactory;
     private final RegionFileCache cache;
     private final Claim claim;
+    private final GameFactory gameFactory;
 
     public AnvilChunkAccess(GameFactory gameFactory, RegionFileCache cache) {
         this.gameFactory = gameFactory;
@@ -34,6 +34,20 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
         claim.close();
     }
 
+    @Override
+    public AnvilChunk getChunk(int chunkX, int chunkZ) throws IOException {
+        try (InputStream stream = getChunkInputStream(chunkX, chunkZ)) {
+            if (stream == null) {
+                // Chunk doesn't exist yet
+                return AnvilChunk.newEmptyChunk(gameFactory, chunkX, chunkZ);
+            }
+
+            // Read the chunk
+            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(ChunkRootTag.MINECRAFT);
+            return new AnvilChunk(gameFactory, chunkTag);
+        }
+    }
+
     private InputStream getChunkInputStream(int chunkX, int chunkZ) throws IOException {
         RegionFile regionFile = cache.getRegionFile(chunkX, chunkZ);
         return regionFile.getChunkInputStream(chunkX & 31, chunkZ & 31);
@@ -42,20 +56,6 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
     private OutputStream getChunkOutputStream(int chunkX, int chunkZ) throws IOException {
         RegionFile regionFile = cache.getRegionFile(chunkX, chunkZ);
         return regionFile.getChunkOutputStream(chunkX & 31, chunkZ & 31);
-    }
-
-    @Override
-    public AnvilChunk getChunk(int chunkX, int chunkZ) throws IOException {
-        try (InputStream stream = getChunkInputStream(chunkX, chunkZ)) {
-            if (stream == null) {
-                // Chunk doesn't exist yet
-                return new AnvilChunk(gameFactory, new CompoundTag());
-            }
-
-            // Read the chunk
-            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(ChunkRootTag.MINECRAFT);
-            return new AnvilChunk(gameFactory, chunkTag);
-        }
     }
 
     @Override
