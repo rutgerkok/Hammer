@@ -12,6 +12,11 @@ import java.util.Iterator;
 public final class MaterialSet extends HashSet<Material> {
 
     /**
+     * Default serial version id.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * Iterator that keeps the BitSet in sync.
      *
      */

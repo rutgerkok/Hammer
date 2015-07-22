@@ -6,6 +6,8 @@ package nl.rutgerkok.hammer.util;
  */
 public class MaterialNotFoundException extends Exception {
 
+    private static final long serialVersionUID = -6301652887983469894L;
+
     /**
      * Constructs a new exception with the given material id.
      *

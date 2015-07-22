@@ -106,7 +106,6 @@ class RegionFileCache {
         return loadRegionFile(file);
     }
 
-    @SuppressWarnings("resource")
     // Directory stream is closed by the close method of the returned instance
     DirectoryStream<RegionFile> getRegionFiles() throws IOException {
         final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder);

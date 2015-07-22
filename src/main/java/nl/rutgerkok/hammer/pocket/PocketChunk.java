@@ -26,11 +26,23 @@ public final class PocketChunk implements Chunk {
 
     private static final int OFFSET_BLOCK_DATA = 32_768;
     private static final int OFFSET_BLOCK_IDS = 0;
+    /**
+     * Unused currently, but can be used in the future when light values can be
+     * inspected/modified. Until then, this constant simply serves as a form of
+     * documentation. Same story for the other unused constants in this class.
+     */
+    @SuppressWarnings("unused")
     private static final int OFFSET_BLOCKLIGHT_DATA = 32_768 + 16_384 + 16_384;
-    private static final int OFFSET_COLOR_DATA = 32_768 + 16_384 + 16_384 + 16_384 + 256;
-    private static final int OFFSET_MARKER_DATA = 32_768 + 16_384 + 16_384 + 16_384;
+    @SuppressWarnings("unused")
+    private static final int OFFSET_COLOR_DATA = 32_768 + 16_384 + 16_384
+            + 16_384 + 256;
+    @SuppressWarnings("unused")
+    private static final int OFFSET_MARKER_DATA = 32_768 + 16_384 + 16_384
+            + 16_384;
+    @SuppressWarnings("unused")
     private static final int OFFSET_SKYLIGHT_DATA = 32_768 + 16_384;
-    private static final int TOTAL_BYTE_LENGTH = 32_768 + 16_384 + 16_384 + 16_384 + 256 + 1024;
+    private static final int TOTAL_BYTE_LENGTH = 32_768 + 16_384 + 16_384
+            + 16_384 + 256 + 1024;
 
     /**
      * Creates a new, empty chunk.
@@ -43,9 +55,11 @@ public final class PocketChunk implements Chunk {
      *            Chunk z coordinate.
      * @return The chunk.
      */
-    static PocketChunk newEmptyChunk(GameFactory gameFactory, int chunkX, int chunkZ) {
-        return new PocketChunk(gameFactory, chunkX, chunkZ, new byte[TOTAL_BYTE_LENGTH],
-                new ArrayList<CompoundTag>(), new ArrayList<CompoundTag>());
+    static PocketChunk newEmptyChunk(GameFactory gameFactory, int chunkX,
+            int chunkZ) {
+        return new PocketChunk(gameFactory, chunkX, chunkZ,
+                new byte[TOTAL_BYTE_LENGTH], new ArrayList<CompoundTag>(),
+                new ArrayList<CompoundTag>());
     }
 
     private final byte[] bytes;
@@ -56,14 +70,15 @@ public final class PocketChunk implements Chunk {
 
     private final List<CompoundTag> tileEntities;
 
-    PocketChunk(GameFactory gameFactory, int chunkX, int chunkZ,
-            byte[] bytes, List<CompoundTag> entities, List<CompoundTag> tileEntities) {
+    PocketChunk(GameFactory gameFactory, int chunkX, int chunkZ, byte[] bytes,
+            List<CompoundTag> entities, List<CompoundTag> tileEntities) {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
         this.bytes = Objects.requireNonNull(bytes, "bytes");
         this.entities = Objects.requireNonNull(entities, "entities");
-        this.tileEntities = Objects.requireNonNull(tileEntities, "tileEntities");
+        this.tileEntities = Objects.requireNonNull(tileEntities,
+                "tileEntities");
     }
 
     /**
@@ -79,7 +94,8 @@ public final class PocketChunk implements Chunk {
         if (isOutOfBounds(x, y, z)) {
             throw new IndexOutOfBoundsException("(" + x + "," + y + "," + z
                     + ") is outside the chunk, which ranges from (0,0,0) to ("
-                    + CHUNK_X_SIZE + "," + CHUNK_Y_SIZE + "," + CHUNK_Z_SIZE + ")");
+                    + CHUNK_X_SIZE + "," + CHUNK_Y_SIZE + "," + CHUNK_Z_SIZE
+                    + ")");
         }
     }
 
@@ -108,22 +124,26 @@ public final class PocketChunk implements Chunk {
     }
 
     @Override
-    public MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException {
+    public MaterialData getMaterial(int x, int y, int z)
+            throws MaterialNotFoundException {
         checkOutOfBounds(x, y, z);
 
         int arrayPos = getArrayPos(x, y, z);
         byte blockId = bytes[OFFSET_BLOCK_IDS + arrayPos];
         // The * 2 comes from that the nibble array has two position per byte
-        byte blockData = NibbleArray.getInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2);
+        byte blockData = NibbleArray.getInArray(bytes,
+                arrayPos + OFFSET_BLOCK_DATA * 2);
 
-        Material material = gameFactory.getMaterialMap().getById(blockId & 0xff);
+        Material material = gameFactory.getMaterialMap()
+                .getById(blockId & 0xff);
         // For now, we're just using the class designed for Anvil
         return AnvilMaterialData.of(material, blockData);
     }
 
     @Override
     public short getMaterialId(int x, int y, int z) {
-        return bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))];
+        return bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS)
+                | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))];
     }
 
     @Override
@@ -154,7 +174,8 @@ public final class PocketChunk implements Chunk {
 
     @Override
     public boolean isOutOfBounds(int x, int y, int z) {
-        return x < 0 || x >= CHUNK_X_SIZE || y < 0 || y >= CHUNK_Y_SIZE || z < 0 || z >= CHUNK_Z_SIZE;
+        return x < 0 || x >= CHUNK_X_SIZE || y < 0 || y >= CHUNK_Y_SIZE || z < 0
+                || z >= CHUNK_Z_SIZE;
     }
 
     @Override
@@ -162,14 +183,17 @@ public final class PocketChunk implements Chunk {
         checkOutOfBounds(x, y, z);
 
         int arrayPos = getArrayPos(x, y, z);
-        bytes[OFFSET_BLOCK_IDS + arrayPos] = (byte) materialData.getMaterial().getId();
+        bytes[OFFSET_BLOCK_IDS + arrayPos] = (byte) materialData.getMaterial()
+                .getId();
         // The * 2 comes from that the nibble array has two position per byte
-        NibbleArray.setInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2, materialData.getData());
+        NibbleArray.setInArray(bytes, arrayPos + OFFSET_BLOCK_DATA * 2,
+                materialData.getData());
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" + this.chunkX + "," + chunkZ + ")";
+        return getClass().getSimpleName() + "(" + this.chunkX + "," + chunkZ
+                + ")";
     }
 
 }

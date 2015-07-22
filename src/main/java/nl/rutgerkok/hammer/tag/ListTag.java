@@ -18,6 +18,8 @@ import org.json.simple.JSONAware;
  */
 public final class ListTag<T> extends ArrayList<T> implements JSONAware {
 
+    private static final long serialVersionUID = -100623061960128101L;
+
     /**
      * Creates a list tag with the specified elements.
      *

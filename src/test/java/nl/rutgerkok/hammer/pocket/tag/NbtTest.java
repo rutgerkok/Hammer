@@ -15,9 +15,9 @@ public class NbtTest {
 
     @Test
     public void testWrite() throws IOException {
-        CompoundKey intKey = CompoundKey.of("Int");
-        CompoundKey floatKey = CompoundKey.of("Float");
-        CompoundKey stringKey = CompoundKey.of("String");
+        CompoundKey<Integer> intKey = CompoundKey.of("Int");
+        CompoundKey<Float> floatKey = CompoundKey.of("Float");
+        CompoundKey<String> stringKey = CompoundKey.of("String");
 
         CompoundTag original = new CompoundTag();
         original.setInt(intKey, 3);
