@@ -62,7 +62,7 @@ public final class GlobalMaterialMap {
                 }
                 MaterialData found = nameToInfo.get(name.toLowerCase());
                 if (found != null) {
-                    // Return existing material instread, but add possible new
+                    // Return existing material instead, but add possible new
                     // aliases first
                     addNameEntries(found, names);
                     return found;
