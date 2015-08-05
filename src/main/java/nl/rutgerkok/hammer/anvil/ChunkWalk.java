@@ -7,7 +7,6 @@ import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.util.Objects;
 
-import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.anvil.RegionFileCache.Claim;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
@@ -24,10 +23,10 @@ import nl.rutgerkok.hammer.util.Visitor;
  */
 final class ChunkWalk {
 
-    private final GameFactory gameFactory;
+    private final AnvilGameFactory gameFactory;
     private final RegionFileCache regionFileCache;
 
-    ChunkWalk(GameFactory gameFactory, RegionFileCache regionFileCache) {
+    ChunkWalk(AnvilGameFactory gameFactory, RegionFileCache regionFileCache) {
         this.gameFactory = Objects.requireNonNull(gameFactory, "materialMap");
         this.regionFileCache = Objects.requireNonNull(regionFileCache, "regionFileCache");
     }

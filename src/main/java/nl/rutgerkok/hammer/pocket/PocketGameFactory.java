@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.ItemStack;
-import nl.rutgerkok.hammer.material.MaterialMap;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
@@ -13,9 +13,9 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
  */
 final class PocketGameFactory implements GameFactory {
 
-    private final MaterialMap materialMap;
+    private final BlockDataMaterialMap materialMap;
 
-    PocketGameFactory(MaterialMap materialMap) {
+    PocketGameFactory(BlockDataMaterialMap materialMap) {
         this.materialMap = Objects.requireNonNull(materialMap, "materialMap");
     }
 
@@ -25,7 +25,7 @@ final class PocketGameFactory implements GameFactory {
     }
 
     @Override
-    public MaterialMap getMaterialMap() {
+    public BlockDataMaterialMap getMaterialMap() {
         return materialMap;
     }
 

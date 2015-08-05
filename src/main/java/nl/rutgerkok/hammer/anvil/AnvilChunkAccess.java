@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import nl.rutgerkok.hammer.ChunkAccess;
-import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.anvil.RegionFileCache.Claim;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
@@ -20,9 +19,9 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
 
     private final RegionFileCache cache;
     private final Claim claim;
-    private final GameFactory gameFactory;
+    private final AnvilGameFactory gameFactory;
 
-    public AnvilChunkAccess(GameFactory gameFactory, RegionFileCache cache) {
+    public AnvilChunkAccess(AnvilGameFactory gameFactory, RegionFileCache cache) {
         this.gameFactory = gameFactory;
         this.cache = cache;
 

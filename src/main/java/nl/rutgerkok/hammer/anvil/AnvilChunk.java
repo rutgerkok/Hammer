@@ -4,11 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.Chunk;
-import nl.rutgerkok.hammer.GameFactory;
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
-import nl.rutgerkok.hammer.material.Material;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
@@ -41,7 +37,7 @@ public final class AnvilChunk implements Chunk {
      *            Chunk z coordinate.
      * @return The chunk.
      */
-    static AnvilChunk newEmptyChunk(GameFactory gameFactory, int chunkX, int chunkZ) {
+    static AnvilChunk newEmptyChunk(AnvilGameFactory gameFactory, int chunkX, int chunkZ) {
         CompoundTag chunkTag = new CompoundTag();
         chunkTag.setInt(ChunkTag.X_POS, chunkX);
         chunkTag.setInt(ChunkTag.Z_POS, chunkZ);
@@ -49,7 +45,7 @@ public final class AnvilChunk implements Chunk {
     }
 
     private final CompoundTag chunkTag;
-    private final GameFactory gameFactory;
+    private final AnvilGameFactory gameFactory;
 
     /**
      * Creates a new chunk from the given data tag.
@@ -59,7 +55,7 @@ public final class AnvilChunk implements Chunk {
      * @param chunkTag
      *            The data tag, with child tags like Biomes, Sections, etc.
      */
-    AnvilChunk(GameFactory gameFactory, CompoundTag chunkTag) {
+    AnvilChunk(AnvilGameFactory gameFactory, CompoundTag chunkTag) {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
     }
@@ -107,7 +103,7 @@ public final class AnvilChunk implements Chunk {
     }
 
     @Override
-    public GameFactory getGameFactory() {
+    public AnvilGameFactory getGameFactory() {
         return gameFactory;
     }
 
@@ -118,15 +114,12 @@ public final class AnvilChunk implements Chunk {
         short id = ChunkSection.getMaterialId(chunkTag, x, y, z);
         byte data = ChunkSection.getMaterialData(chunkTag, x, y, z);
 
-        Material material = gameFactory.getMaterialMap().getById(id);
-        return AnvilMaterialData.of(material, data);
+        return gameFactory.getMaterialMap().getMaterialData(id, data);
     }
 
     @Override
     public short getMaterialId(int x, int y, int z) {
-        if (isOutOfBounds(x, y, z)) {
-            return AnvilMaterial.AIR_ID;
-        }
+        checkOutOfBounds(x, y, z);
         return ChunkSection.getMaterialId(chunkTag, x, y, z);
     }
 
@@ -161,11 +154,14 @@ public final class AnvilChunk implements Chunk {
     }
 
     @Override
-    public void setMaterial(int x, int y, int z, MaterialData materialData) {
+    public void setMaterial(int x, int y, int z, MaterialData materialData) throws MaterialNotFoundException {
         checkOutOfBounds(x, y, z);
 
-        ChunkSection.setMaterialId(chunkTag, x, y, z, materialData.getMaterial().getId());
-        ChunkSection.setMaterialData(chunkTag, x, y, z, materialData.getData());
+        char ida = gameFactory.getMaterialMap().getMinecraftId(materialData);
+        short blockId = (short) (ida >> 4);
+        byte blockData = (byte) (ida & 0xf);
+
+        ChunkSection.setMaterialIdAndData(chunkTag, x, y, z, blockId, blockData);
     }
 
     @Override

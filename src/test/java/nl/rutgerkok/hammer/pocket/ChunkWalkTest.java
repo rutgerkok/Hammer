@@ -5,11 +5,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import nl.rutgerkok.hammer.CountingChunkVisitor;
-import nl.rutgerkok.hammer.util.TestFile;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import nl.rutgerkok.hammer.CountingChunkVisitor;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
+import nl.rutgerkok.hammer.util.TestFile;
 
 public class ChunkWalkTest {
 
@@ -18,7 +19,7 @@ public class ChunkWalkTest {
     @Before
     public void loadWorld() throws IOException {
         Path levelDat = TestFile.get("pocket_0_10_4/level.dat");
-        world = new PocketWorld(levelDat);
+        world = new PocketWorld(new GlobalMaterialMap(), levelDat);
     }
 
     @Test

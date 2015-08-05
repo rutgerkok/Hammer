@@ -1,6 +1,6 @@
 package nl.rutgerkok.hammer;
 
-import nl.rutgerkok.hammer.material.MaterialMap;
+import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
@@ -23,5 +23,5 @@ public interface GameFactory {
      * 
      * @return The material map.
      */
-    MaterialMap getMaterialMap();
+    WorldMaterialMap getMaterialMap();
 }

@@ -2,7 +2,6 @@ package nl.rutgerkok.hammer;
 
 import java.util.List;
 
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterial;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
@@ -45,14 +44,14 @@ public interface Chunk {
      * Gets the block at the given location.
      *
      * @param x
-     *            X position of the block, <code>0 <= x < 
-     *            {@link #getSizeX()}</code>.
+     *            X position of the block, <code>0 <= x < {@link #getSizeX()}
+     *            </code>.
      * @param y
-     *            Y position of the block, <code>0 <= y < 
-     *            {@link #getSizeY()}</code>.
+     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            </code>.
      * @param z
-     *            Z position of the block, <code>0 <= z < 
-     *            {@link #getSizeZ()}</code>.
+     *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
+     *            </code>.
      * @return The block.
      * @throws MaterialNotFoundException
      *             If the material with the saved id is unknown.
@@ -65,16 +64,17 @@ public interface Chunk {
      * Gets the material id at the given position.
      *
      * @param x
-     *            X position of the block, <code>0 <= x < 
-     *            {@link #getSizeX()}</code>.
+     *            X position of the block, <code>0 <= x < {@link #getSizeX()}
+     *            </code>.
      * @param y
-     *            Y position of the block, <code>0 <= y < 
-     *            {@link #getSizeZ()}</code>.
+     *            Y position of the block, <code>0 <= y < {@link #getSizeZ()}
+     *            </code>.
      * @param z
-     *            Z position of the block, <code>0 <= z < 
-     *            {@link #getSizeZ()}</code>.
-     * @return The id, or {@value AnvilMaterial#AIR_ID} if the coordinates are
-     *         out of bounds.
+     *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
+     *            </code>.
+     * @return The id.
+     * @throws IndexOutOfBoundsException
+     *             If the x, y or z is outside this chunk.
      */
     short getMaterialId(int x, int y, int z);
 
@@ -118,14 +118,14 @@ public interface Chunk {
      * Checks if the given block is out of bounds for this chunk.
      * 
      * @param x
-     *            X position of the block, <code>0 <= x < 
-     *            {@link #getSizeX()}</code> for the block to be in bounds.
+     *            X position of the block, <code>0 <= x < {@link #getSizeX()}
+     *            </code> for the block to be in bounds.
      * @param y
-     *            Y position of the block, <code>0 <= y < 
-     *            {@link #getSizeY()}</code> for the block to be in bounds.
+     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            </code> for the block to be in bounds.
      * @param z
-     *            Z position of the block, <code>0 <= z < 
-     *            {@link #getSizeZ()}</code> for the block to be in bounds.
+     *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
+     *            </code> for the block to be in bounds.
      * @return True if the position is out of bounds, false otherwise.
      */
     boolean isOutOfBounds(int x, int y, int z);
@@ -134,19 +134,21 @@ public interface Chunk {
      * Sets the block at the given position.
      *
      * @param x
-     *            X position of the block, <code>0 <= x < 
-     *            {@link #getSizeX()}</code>.
+     *            X position of the block, <code>0 <= x < {@link #getSizeX()}
+     *            </code>.
      * @param y
-     *            Y position of the block, <code>0 <= y < 
-     *            {@link #getSizeY()}</code>.
+     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            </code>.
      * @param z
-     *            Z position of the block, <code>0 <= z < 
-     *            {@link #getSizeZ()}</code>.
+     *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
+     *            </code>.
      * @param materialData
      *            Material to set.
+     * @throws MaterialNotFoundException
+     *             If the material data is not supported in this world.
      * @throws IndexOutOfBoundsException
      *             If the x, y or z is outside the chunk.
      */
-    void setMaterial(int x, int y, int z, MaterialData materialData);
+    void setMaterial(int x, int y, int z, MaterialData materialData) throws MaterialNotFoundException;
 
 }

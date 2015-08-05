@@ -5,14 +5,15 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.ChunkAccess;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 import nl.rutgerkok.hammer.util.TestFile;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests random (as opposed to sequential) access to chunks.
@@ -24,7 +25,7 @@ public class ChunkRandomAccessTest {
     @Before
     public void loadWorld() throws IOException {
         Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
-        world = new AnvilWorld(levelDat);
+        world = new AnvilWorld(new GlobalMaterialMap(), levelDat);
     }
 
     @Test
@@ -34,8 +35,7 @@ public class ChunkRandomAccessTest {
 
             // There must be bedrock at layer 0
             MaterialData materialData = chunk.getMaterial(0, 0, 0);
-            assertEquals("minecraft:bedrock", materialData.getMaterial().getName());
-            assertEquals(0, materialData.getData());
+            assertEquals("minecraft:bedrock", materialData.getName());
         }
 
     }

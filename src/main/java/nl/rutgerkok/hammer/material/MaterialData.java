@@ -1,56 +1,51 @@
 package nl.rutgerkok.hammer.material;
 
+import java.util.Collection;
+import java.util.Objects;
+
 /**
- * A combination between a base {@link Material} and some further block data.
+ * Represents the material of a block.
  *
+ * @see GlobalMaterialMap#addMaterial(Collection) Creating instances
  */
-public interface MaterialData {
+public final class MaterialData {
+    MaterialData(char idh, String name) {
+        this.idh = idh;
+        this.name = Objects.requireNonNull(name);
+    }
+
+    private final char idh;
+    private final String name;
 
     /**
-     * Gets the material data number. The data numbers are deprecated, and will
-     * probably be removed in a future update. However, there's no alternative
-     * yet.
+     * {@inheritDoc}
      *
-     * @return The material data.
+     * <p>For this class, the return value is currently equal to
+     * {@link #getName()}, but this may change in the future.
+     *
+     * @return {@inheritDoc}
+     * @see #getName()
      */
-    byte getData();
+    @Override
+    public String toString() {
+        return name;
+    }
 
     /**
-     * Gets the material part of this MaterialData.
-     *
-     * @return The material.
+     * Gets the (Mojang/mod provided) name of this material.
+     * 
+     * @return The name.
      */
-    Material getMaterial();
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Gets whether the block data of this object is a wildcard. If it is, it
-     * will {@link #matches(MaterialData) match} any other block data value.
-     *
-     * @return True if this block data is a wildcard, false otherwise.
+     * Gets the Hammer id of this material.
+     * 
+     * @return The Hammer id.
      */
-    boolean isBlockDataUnspecified();
-
-    /**
-     * Gets if the other block data matches the block data of this material
-     * data. It matches if the block data of this material data
-     * {@link #isBlockDataUnspecified() is unspecified}, or if the block data
-     * has the same number.
-     *
-     * @param blockData
-     *            The other block data.
-     * @return True if they match, false otherwise.
-     */
-    boolean matches(MaterialData blockData);
-
-    /**
-     * Gets whether the given block name matches the name of
-     * {@link #getMaterial() the material part} of this material data. Case
-     * sensitive.
-     *
-     * @param blockName
-     *            Name of the block to check.
-     * @return True if the name matches, false otherwise.
-     */
-    boolean materialNameEquals(String blockName);
-
+    public char getId() {
+        return idh;
+    }
 }

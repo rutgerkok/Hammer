@@ -1,5 +1,7 @@
 package nl.rutgerkok.hammer.util;
 
+import java.util.NoSuchElementException;
+
 /**
  * Simple class that maps numbers (represented by chars, as those are
  * essentially unsigned shorts) to each other.
@@ -9,7 +11,7 @@ public final class NumberMap {
 
     private char[] idMapping = new char[0];
 
-    public void addId(char originalId, char translatedId) {
+    public void put(char originalId, char translatedId) {
         // Mapping to 0 (null) is special cased
         if (translatedId == 0) {
             if (originalId != 0) {
@@ -25,20 +27,20 @@ public final class NumberMap {
         idMapping[originalId] = translatedId;
     }
 
-    public char getTranslatedId(char originalId) throws MaterialNotFoundException {
+    public char getTranslatedId(char originalId) throws NoSuchElementException {
 
         if (originalId == 0) {
             return 0;
         }
 
         if (originalId > idMapping.length) {
-            throw new MaterialNotFoundException(originalId);
+            throw new NoSuchElementException();
         }
 
         char translatedId = idMapping[originalId];
         if (translatedId == 0) {
             // No mapping found
-            throw new MaterialNotFoundException(originalId);
+            throw new NoSuchElementException();
         }
 
         return translatedId;

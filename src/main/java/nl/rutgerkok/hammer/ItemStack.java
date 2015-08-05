@@ -1,6 +1,5 @@
 package nl.rutgerkok.hammer;
 
-import nl.rutgerkok.hammer.material.Material;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 
@@ -16,18 +15,6 @@ public interface ItemStack {
      * @return The amount of items.
      */
     byte getCount();
-
-    /**
-     * Gets the material of this tag.
-     *
-     * @return The material.
-     * @throws MaterialNotFoundException
-     *             If no block material is present. Usually happens in the case
-     *             of item materials.
-     * @throws NullPointerException
-     *             If the material map is null.
-     */
-    Material getMaterial() throws MaterialNotFoundException;
 
     /**
      * Gets the material and data represented as one object.
@@ -65,9 +52,9 @@ public interface ItemStack {
      *
      * @param materialData
      *            The material.
-     * @throws NullPointerException
-     *             If the material is null.
+     * @throws MaterialNotFoundException
+     *             If the material is not supported in this world.
      */
-    void setMaterialData(MaterialData materialData);
+    void setMaterialData(MaterialData materialData) throws MaterialNotFoundException;
 
 }

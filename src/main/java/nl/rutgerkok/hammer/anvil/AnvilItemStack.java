@@ -4,10 +4,8 @@ import java.util.Objects;
 
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.ItemStack;
-import nl.rutgerkok.hammer.anvil.material.AnvilMaterialData;
-import nl.rutgerkok.hammer.material.Material;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.MaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
@@ -16,10 +14,8 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 /**
  * Implementation of {@link ItemStack} for Anvil worlds.
  *
- * <p>
- * Both the Minecraft 1.8+ format with named ids and the Minecraft 1.2 - 1.7
- * format with numeric ids are supported.
- * </p>
+ * <p> Both the Minecraft 1.8+ format with named ids and the Minecraft 1.2 - 1.7
+ * format with numeric ids are supported. </p>
  * 
  * @see GameFactory#createItemStack(CompoundTag)
  *
@@ -30,10 +26,10 @@ final class AnvilItemStack implements ItemStack {
     private static final CompoundKey<Byte> COUNT_TAG = CompoundKey.of("Count");
     private static final CompoundKey<Short> OLD_BLOCK_ID_TAG = CompoundKey.of("id");
 
-    private final MaterialMap materialMap;
+    private final BlockDataMaterialMap materialMap;
     private final CompoundTag tag;
 
-    AnvilItemStack(MaterialMap materialMap, CompoundTag tag) {
+    AnvilItemStack(BlockDataMaterialMap materialMap, CompoundTag tag) {
         this.materialMap = Objects.requireNonNull(materialMap);
         this.tag = Objects.requireNonNull(tag);
     }
@@ -43,26 +39,6 @@ final class AnvilItemStack implements ItemStack {
         return tag.getByte(COUNT_TAG);
     }
 
-    /**
-     * Gets the material of this tag.
-     *
-     * @return The material.
-     * @throws MaterialNotFoundException
-     *             If no block material is present. Usually happens in the case
-     *             of item materials.
-     * @throws NullPointerException
-     *             If the material map is null.
-     */
-    @Override
-    public Material getMaterial() throws MaterialNotFoundException {
-        if (isBlockIdInStringFormat()) {
-            // Try as string
-            return materialMap.getByName(tag.getString(BLOCK_ID_TAG));
-        } else {
-            // Try as number
-            return materialMap.getById(tag.getShort(OLD_BLOCK_ID_TAG));
-        }
-    }
 
     /**
      * Gets the material and data represented as one object.
@@ -76,12 +52,31 @@ final class AnvilItemStack implements ItemStack {
      */
     @Override
     public MaterialData getMaterialData() throws MaterialNotFoundException {
-        Material material = getMaterial();
         short blockData = getRawBlockDataValue();
-        if (blockData < AnvilMaterialData.MIN_BLOCK_DATA || blockData > AnvilMaterialData.MAX_BLOCK_DATA) {
-            throw new MaterialNotFoundException("Block data: " + blockData);
+        if (blockData < 0 || blockData > BlockDataMaterialMap.MAX_BLOCK_DATA) {
+            // Maybe used as armor/tool damage value?
+            blockData = 0;
         }
-        return AnvilMaterialData.of(material, (byte) blockData);
+        if (this.isBlockIdInStringFormat()) {
+            String blockId = tag.getString(BLOCK_ID_TAG);
+            try {
+                return materialMap.getMaterialData(blockId, (byte) blockData);
+            } catch (MaterialNotFoundException e) {
+                // Try without block data, maybe block data is used as damage
+                // value
+                return materialMap.getMaterialData(blockId, (byte) 0);
+            }
+        } else {
+            short blockId = tag.getShort(OLD_BLOCK_ID_TAG);
+            try {
+                return materialMap.getMaterialData(blockId, (byte) blockData);
+            } catch (MaterialNotFoundException e) {
+                // Try without block data, maybe block data is used as damage
+                // value
+                return materialMap.getMaterialData(blockId, (byte) 0);
+            }
+        }
+
     }
 
     /**
@@ -104,7 +99,7 @@ final class AnvilItemStack implements ItemStack {
     @Override
     public boolean hasMaterialData(MaterialData materialData) {
         try {
-            return materialData.matches(this.getMaterialData());
+            return materialData.equals(this.getMaterialData());
         } catch (MaterialNotFoundException e) {
             return false;
         }
@@ -119,22 +114,16 @@ final class AnvilItemStack implements ItemStack {
         tag.setByte(COUNT_TAG, count);
     }
 
-    /**
-     * Sets the material of this stack.
-     *
-     * @param materialData
-     *            The material.
-     * @throws NullPointerException
-     *             If the material is null.
-     */
     @Override
-    public void setMaterialData(MaterialData materialData) {
+    public void setMaterialData(MaterialData materialData) throws MaterialNotFoundException {
+        char anvilId = materialMap.getMinecraftId(materialData);
         if (isBlockIdInStringFormat()) {
-            tag.setString(BLOCK_ID_TAG, materialData.getMaterial().getName());
+            String baseBlockName = materialMap.getBaseName(materialData);
+            tag.setString(BLOCK_ID_TAG, baseBlockName);
         } else {
-            tag.setShort(OLD_BLOCK_ID_TAG, materialData.getMaterial().getId());
+            tag.setShort(OLD_BLOCK_ID_TAG, (short) (anvilId >> 4));
         }
-        tag.setShort(BLOCK_DATA_TAG, materialData.getData());
+        tag.setShort(BLOCK_DATA_TAG, (short) (anvilId & 0xf));
     }
 
     @Override

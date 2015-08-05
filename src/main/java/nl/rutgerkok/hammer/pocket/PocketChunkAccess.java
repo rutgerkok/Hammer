@@ -10,18 +10,17 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import nl.rutgerkok.hammer.ChunkAccess;
-import nl.rutgerkok.hammer.GameFactory;
-import nl.rutgerkok.hammer.pocket.PocketLevelDb.ChunkKeyType;
-import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
-import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
-import nl.rutgerkok.hammer.tag.CompoundTag;
-
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
+
+import nl.rutgerkok.hammer.ChunkAccess;
+import nl.rutgerkok.hammer.pocket.PocketLevelDb.ChunkKeyType;
+import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
+import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
+import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
  * Provides access to the chunks stored in LevelDb.
@@ -30,11 +29,11 @@ import com.google.common.collect.Iterators;
 final class PocketChunkAccess implements ChunkAccess<PocketChunk>, Iterable<PocketChunk> {
 
     private final Closeable claim;
-    private final GameFactory gameFactory;
+    private final PocketGameFactory gameFactory;
     private boolean open = true;
     private final PocketLevelDb pocketLevelDb;
 
-    public PocketChunkAccess(GameFactory gameFactory, PocketLevelDb pocketLevelDb) throws IOException {
+    public PocketChunkAccess(PocketGameFactory gameFactory, PocketLevelDb pocketLevelDb) throws IOException {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.pocketLevelDb = Objects.requireNonNull(pocketLevelDb, "pocketLevelDb");
 

@@ -1,10 +1,10 @@
 package nl.rutgerkok.hammer.anvil.material;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URL;
+import java.util.Collections;
 
-import nl.rutgerkok.hammer.material.Material;
-import nl.rutgerkok.hammer.material.MaterialMap;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
@@ -14,72 +14,34 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
  * Uses the mappings as written by Forge.
  *
  */
-public class ForgeMaterialMap implements MaterialMap {
+public class ForgeMaterialMap extends BlockDataMaterialMap {
 
-    private static final String AIR_NAME = "air";
     private static final CompoundKey<String> MAPPING_KEY = CompoundKey.of("K");
     private static final CompoundKey<Integer> MAPPING_VALUE = CompoundKey.of("V");
 
-    private Material air = null;
-    private Map<Integer, AnvilMaterial> byId = new HashMap<>();
-    private Map<String, AnvilMaterial> byName = new HashMap<>();
-
-    public ForgeMaterialMap(ListTag<CompoundTag> itemDataTag) {
+    public ForgeMaterialMap(GlobalMaterialMap dictionary, URL vanillaBlocks, ListTag<CompoundTag> itemDataTag) {
+        super(dictionary, vanillaBlocks);
         for (CompoundTag mapping : itemDataTag) {
             // Forge seems to add a strange character before the key
-            register(mapping.getString(MAPPING_KEY).replaceAll("[^\\w\\-:]", ""),
+            registerForgeBlock(mapping.getString(MAPPING_KEY).replaceAll("[^\\w\\-:]", ""),
                     mapping.getInt(MAPPING_VALUE));
         }
     }
 
-    @Override
-    public Material getAir() {
-        if (this.air == null) {
-            try {
-                this.air = getByName(AIR_NAME);
-            } catch (MaterialNotFoundException e) {
-                throw new RuntimeException("No material for " + AIR_NAME);
+    private void registerForgeBlock(String name, int id) {
+        try {
+            // Check if block already exists (loaded from our vanilla states
+            // file)
+            this.globalMap.getMaterialByName(name);
+        } catch (MaterialNotFoundException e) {
+            // Nope, so register it
+            for (int i = 0; i <= MAX_BLOCK_DATA; i++) {
+                // Block states unfortunately aren't saved to the level.dat,
+                // so we just assume all data values are valid block states
+                super.register((short) id, (byte) i, name + "[dataValue=" + i + "]", Collections.<String> emptyList());
             }
         }
-        return this.air;
-    }
 
-    @Override
-    public AnvilMaterial getById(int id) throws MaterialNotFoundException {
-        AnvilMaterial material = byId.get(id);
-        if (material == null) {
-            throw new MaterialNotFoundException(id);
-        }
-        return material;
-    }
-
-    @Override
-    public AnvilMaterial getByName(String name) throws MaterialNotFoundException {
-        if (!name.contains(":")) {
-            // Missing separator, assume default namespace
-            name = MINECRAFT_PREFIX + name;
-        }
-
-        AnvilMaterial material = byName.get(name);
-        if (material == null) {
-            throw new MaterialNotFoundException(name);
-        }
-        return material;
-    }
-
-    @Override
-    public AnvilMaterial getByNameOrId(String nameOrId) throws MaterialNotFoundException {
-        try {
-            return getById(Integer.parseInt(nameOrId));
-        } catch (NumberFormatException e) {
-            return getByName(nameOrId);
-        }
-    }
-
-    private void register(String name, int id) {
-        AnvilMaterial material = new AnvilMaterial(name, id);
-        byName.put(name, material);
-        byId.put(id, material);
     }
 
 }

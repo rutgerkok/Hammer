@@ -2,15 +2,20 @@ package nl.rutgerkok.hammer.anvil.material;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import nl.rutgerkok.hammer.material.MaterialSet;
 
 import org.junit.Test;
+
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
+import nl.rutgerkok.hammer.material.MaterialData;
+import nl.rutgerkok.hammer.material.MaterialSet;
 
 public class MaterialSetTest {
 
     @Test
     public void testAdd() {
-        AnvilMaterial material = new AnvilMaterial("foo", 1);
+        GlobalMaterialMap dictionary = new GlobalMaterialMap();
+        MaterialData material = dictionary.addMaterial("foo");
+
         MaterialSet set = new MaterialSet();
         assertFalse(set.contains(material));
 
@@ -27,7 +32,9 @@ public class MaterialSetTest {
 
     @Test
     public void testRemove() {
-        AnvilMaterial material = new AnvilMaterial("foo", 1);
+        GlobalMaterialMap dictionary = new GlobalMaterialMap();
+        MaterialData material = dictionary.addMaterial("foo");
+
         MaterialSet set = new MaterialSet();
         set.add(material);
 

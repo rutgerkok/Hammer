@@ -3,6 +3,7 @@ package nl.rutgerkok.hammer.anvil;
 import static nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LFML_ITEM_DATA_TAG;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -12,12 +13,13 @@ import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
-import nl.rutgerkok.hammer.anvil.material.VanillaMaterialMap;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.material.MaterialMap;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
+import nl.rutgerkok.hammer.tag.ListTag;
 import nl.rutgerkok.hammer.tag.TagType;
 import nl.rutgerkok.hammer.util.Visitor;
 
@@ -33,18 +35,19 @@ public class AnvilWorld implements World {
     private static final String PLAYER_DIRECTORY_OLD = "players";
     private static final String REGION_FOLDER_NAME = "region";
 
-    private final GameFactory gameFactory;
+    private final AnvilGameFactory gameFactory;
     private final Path levelDat;
     private final RegionFileCache regionFileCache;
     private final CompoundTag tag;
 
-    public AnvilWorld(Path levelDat) throws IOException {
+    public AnvilWorld(GlobalMaterialMap dictionary, Path levelDat) throws IOException {
         if (!levelDat.getFileName().toString().equals(LEVEL_DAT_NAME)) {
-            throw new IOException("Expected a " + LEVEL_DAT_NAME + " file, got \"" + levelDat.getName(levelDat.getNameCount() - 1) + "\"");
+            throw new IOException("Expected a " + LEVEL_DAT_NAME + " file, got \""
+                    + levelDat.getName(levelDat.getNameCount() - 1) + "\"");
         }
         this.levelDat = levelDat.toAbsolutePath();
         this.tag = Files.exists(levelDat) ? AnvilNbtReader.readFromCompressedFile(levelDat) : new CompoundTag();
-        this.gameFactory = new AnvilGameFactory(initMaterialMap());
+        this.gameFactory = new AnvilGameFactory(initMaterialMap(dictionary));
         this.regionFileCache = new RegionFileCache(getRegionDirectory());
     }
 
@@ -113,16 +116,20 @@ public class AnvilWorld implements World {
      * Scans the level.dat for a Forge name->id map, if found it used that,
      * otherwise it uses the vanilla ids.
      *
+     * @param dictionary
+     *            Global material dictionary.
      * @return The id map.
      */
-    private MaterialMap initMaterialMap() {
+    private BlockDataMaterialMap initMaterialMap(GlobalMaterialMap dictionary) {
+        URL vanillaBlocks = getClass().getResource("/blocks_pc.json");
         if (tag.containsKey(LevelRootTag.FML)) {
             CompoundTag fmlTag = tag.getCompound(LevelRootTag.FML);
             if (fmlTag.containsKey(LFML_ITEM_DATA_TAG)) {
-                return new ForgeMaterialMap(fmlTag.getList(LFML_ITEM_DATA_TAG, TagType.COMPOUND));
+                ListTag<CompoundTag> forgeBlocks = fmlTag.getList(LFML_ITEM_DATA_TAG, TagType.COMPOUND);
+                return new ForgeMaterialMap(dictionary, vanillaBlocks, forgeBlocks);
             }
         }
-        return new VanillaMaterialMap();
+        return new BlockDataMaterialMap(dictionary, vanillaBlocks);
     }
 
     /**

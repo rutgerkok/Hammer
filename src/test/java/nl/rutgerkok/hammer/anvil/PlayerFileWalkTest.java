@@ -6,16 +6,17 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.junit.Test;
+
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Result;
 import nl.rutgerkok.hammer.util.TestFile;
 import nl.rutgerkok.hammer.util.Visitor;
-
-import org.junit.Test;
 
 public class PlayerFileWalkTest {
 
@@ -34,7 +35,7 @@ public class PlayerFileWalkTest {
     @Test
     public void testBasicUsage() throws IOException {
         Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
-        World world = new AnvilWorld(levelDat);
+        World world = new AnvilWorld(new GlobalMaterialMap(), levelDat);
 
         TestVisitor visitor = new TestVisitor();
         world.walkPlayerFiles(visitor);
