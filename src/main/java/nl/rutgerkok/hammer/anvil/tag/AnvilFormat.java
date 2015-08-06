@@ -1,10 +1,10 @@
 package nl.rutgerkok.hammer.anvil.tag;
 
+import com.google.common.collect.ImmutableList;
+
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Names of the various NBT tags of Minecraft's chunk format.
@@ -56,6 +56,8 @@ public final class AnvilFormat {
     public static class LevelTag {
         public static final CompoundKey<String> LEVEL_NAME = CompoundKey.of("LevelName");
         public static final CompoundKey<CompoundTag> PLAYER = CompoundKey.of("Player");
+        public static final CompoundKey<Integer> VERSION = CompoundKey.of("version");
+        public static final CompoundKey<Long> LAST_PLAYED = CompoundKey.of("LastPlayed");
     }
 
     /**
