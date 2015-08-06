@@ -15,24 +15,20 @@ import org.json.simple.JSONObject;
  * A map that holds tags any supported {@link TagType tag type}. Maps can, and
  * almost always do, hold tags of different types together in one map.
  *
- * <p>
- * Tags are indexed by a name. Names are always case insensitive. If an
+ * <p> Tags are indexed by a name. Names are always case insensitive. If an
  * non-existing tag is requested a new tag is created automatically.
  *
- * <p>
- * If a requested tag is of the wrong type, it is overwritten with a new tag of
- * the correct type. All numeric types (long, int, short, byte, double, float)
- * are considered equivalent and numbers are automatically casted to the
+ * <p> If a requested tag is of the wrong type, it is overwritten with a new tag
+ * of the correct type. All numeric types (long, int, short, byte, double,
+ * float) are considered equivalent and numbers are automatically casted to the
  * requested type. On the other hand, lists and arrays of numbers do verify
  * their types.
  *
- * <p>
- * Mutable objects returned by a compound tag (subtags, lists, arrays) will have
- * their changes written through to this tag.
+ * <p> Mutable objects returned by a compound tag (subtags, lists, arrays) will
+ * have their changes written through to this tag.
  *
- * <p>
- * Tags are not thread safe, and must only be read/modified by one thread at the
- * same time.
+ * <p> Tags are not thread safe, and must only be read/modified by one thread at
+ * the same time.
  */
 public final class CompoundTag implements JSONAware {
 
@@ -74,6 +70,17 @@ public final class CompoundTag implements JSONAware {
             Object value = deepCopy(entry.getValue());
             map.put(entry.getKey(), value);
         }
+    }
+
+    /**
+     * Adds all keys and values from the other tag to this tag. If an entry
+     * already exists with the same name, it is overwritten.
+     *
+     * @param otherTag
+     *            The other tag.
+     */
+    public void addAll(CompoundTag otherTag) {
+        this.map.putAll(otherTag.map);
     }
 
     /**
@@ -427,8 +434,7 @@ public final class CompoundTag implements JSONAware {
      * Sets the a tag with the given value. This will override the tag (if any)
      * with the same name (case insensitive).
      *
-     * <p>
-     * Booleans are saved as byte tags. Calling this method is equivalent to
+     * <p> Booleans are saved as byte tags. Calling this method is equivalent to
      * calling {@code setByte(name, value? 1 : 0)}.
      *
      * @param key
