@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
-
 import nl.rutgerkok.hammer.ChunkAccess;
 import nl.rutgerkok.hammer.pocket.PocketLevelDb.ChunkKeyType;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
+
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Iterators;
 
 /**
  * Provides access to the chunks stored in LevelDb.
@@ -70,6 +70,23 @@ final class PocketChunkAccess implements ChunkAccess<PocketChunk>, Iterable<Pock
             return PocketChunk.newEmptyChunk(gameFactory, chunkX, chunkZ);
         }
         return getRemainingDataForChunk(chunkX, chunkZ, terrainData);
+    }
+
+    /**
+     * Counts the amount of chunks. May take a while to execute.
+     * @return The amount of chunks.
+     */
+    int getChunkCount() {
+        int count = 0;
+
+        for (Entry<byte[], byte[]> entry : pocketLevelDb) {
+            ChunkKeyType type = pocketLevelDb.getChunkKeyTypeOrNull(entry.getKey());
+            if (type == ChunkKeyType.TERRAIN) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     PocketChunk getRemainingDataForChunk(int chunkX, int chunkZ, byte[] terrainData) throws IOException {

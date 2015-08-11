@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.util.Progress;
+import nl.rutgerkok.hammer.util.Progress.UnitsProgress;
 import nl.rutgerkok.hammer.util.Result;
 import nl.rutgerkok.hammer.util.Visitor;
 
@@ -26,7 +27,7 @@ final class ChunkWalk implements Closeable {
     }
 
     void forEach(Visitor<? super PocketChunk> visitor) throws IOException {
-        Progress progress = Progress.complete();
+        UnitsProgress progress = Progress.ofUnits(chunkAccess.getChunkCount());
         for (PocketChunk chunk : chunkAccess) {
             Result result = visitor.accept(chunk, progress);
             switch (result) {
@@ -41,6 +42,7 @@ final class ChunkWalk implements Closeable {
                 default:
                     throw new AssertionError("Unknown result " + result);
             }
+            progress.increment();
         }
 
     }
