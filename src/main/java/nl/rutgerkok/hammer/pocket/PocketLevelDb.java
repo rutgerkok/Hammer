@@ -82,16 +82,16 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
 
     /**
      * This method needs to be called to make sure the database is open.
-     * 
+     *
      * @return A lock, when closed it will call {@link #release()}.
      * @throws IOException
      *             When the database cannot be opened.
      */
     Closeable claim() throws IOException {
-        claims++;
         if (db == null) {
             db = Iq80DBFactory.factory.open(databaseDirectory.toFile(), new Options());
         }
+        claims++;
         return new Lock();
     }
 
@@ -99,13 +99,13 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
         byte[] bytes = new byte[9];
         writeInt(bytes, 0, chunkX);
         writeInt(bytes, 4, chunkZ);
-        bytes[8] = (byte) keyType.byteType;
+        bytes[8] = keyType.byteType;
         return bytes;
     }
 
     /**
      * Deletes the bytes for the given chunk and key type.
-     * 
+     *
      * @param keyType
      *            The key type.
      * @param chunkX
@@ -120,13 +120,14 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
     @Override
     public void finalize() {
         if (claims != 0) {
-            System.err.println(getClass().getSimpleName() + " was not closed - there's a resource leak somewhere!");
+            System.err.println(getClass().getSimpleName() + " was not closed, " + claims
+                    + " handles remain open. There's a resource leak somewhere!");
         }
     }
 
     /**
      * Gets the raw bytes for the given chunk and key type.
-     * 
+     *
      * @param keyType
      *            The key type.
      * @param chunkX
@@ -141,7 +142,7 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
 
     /**
      * Gets the {@link ChunkKeyType} from the given key.
-     * 
+     *
      * @param key
      *            The key.
      * @return The key type, or null if the key is not the key of a chunk.
@@ -155,7 +156,7 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
 
     /**
      * Gets the chunk x from the chunk key.
-     * 
+     *
      * @param key
      *            The chunk key.
      * @return The chunk x.
@@ -189,7 +190,7 @@ class PocketLevelDb implements Iterable<Entry<byte[], byte[]>> {
 
     /**
      * Puts the given bytes for the given chunk and key type.
-     * 
+     *
      * @param keyType
      *            The key type.
      * @param chunkX
