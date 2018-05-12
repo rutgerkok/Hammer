@@ -17,6 +17,7 @@ public final class AnvilFormat {
      */
     public static class ChunkRootTag {
         public static final CompoundKey<CompoundTag> MINECRAFT = CompoundKey.of("Level");
+        public static final CompoundKey<Integer> DATA_VERSION = CompoundKey.of("DataVersion");
     }
 
     /**
@@ -61,6 +62,25 @@ public final class AnvilFormat {
     }
 
     /**
+     * The material tag in the palette of chunk sections.
+     *
+     */
+    public static class MaterialTag {
+        public static final CompoundKey<String> NAME = CompoundKey.of("Name");
+        public static final CompoundKey<CompoundTag> PROPERTIES = CompoundKey.of("Properties");
+    }
+
+    /**
+     * Old chunk section format (Minecraft 1.2 - 1.12)
+     */
+    public static class OldSectionTag {
+        public static final CompoundKey<byte[]> BLOCK_DATA = CompoundKey.of("Data");
+        public static final CompoundKey<byte[]> BLOCK_IDS = CompoundKey.of("Blocks");
+        public static final CompoundKey<byte[]> EXT_BLOCK_IDS = CompoundKey.of("Add");
+        public static final CompoundKey<Byte> INDEX = CompoundKey.of("Y");
+    }
+
+    /**
      * Player data format
      */
     public static class PlayerTag {
@@ -69,15 +89,15 @@ public final class AnvilFormat {
     }
 
     /**
-     * Chunk section format
+     * Chunk section format. Tags that are no longer in use as of Minecraft 1.13
+     * have been moved to {@link OldSectionTag}.
      */
     public static class SectionTag {
-        public static final CompoundKey<byte[]> BLOCK_DATA = CompoundKey.of("Data");
-        public static final CompoundKey<byte[]> BLOCK_IDS = CompoundKey.of("Blocks");
+        public static final CompoundKey<long[]> BLOCK_STATES = CompoundKey.of("BlockStates");
         public static final CompoundKey<byte[]> BLOCK_LIGHT = CompoundKey.of("BlockLight");
-        public static final CompoundKey<byte[]> EXT_BLOCK_IDS = CompoundKey.of("Add");
         public static final CompoundKey<Byte> INDEX = CompoundKey.of("Y");
         public static final CompoundKey<byte[]> SKY_LIGHT = CompoundKey.of("SkyLight");
+        public static final CompoundKey<ListTag<CompoundTag>> PALETTE = CompoundKey.of("Palette");
     }
 
     /**

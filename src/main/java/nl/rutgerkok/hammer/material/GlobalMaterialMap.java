@@ -2,7 +2,6 @@ package nl.rutgerkok.hammer.material;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
  * material. This means that you can get a {@link MaterialData} object in one
  * world and use it in another world, even though Minecraft may have assigned
  * completely different block ids (see Podzol for example).
- * 
+ *
  * <p>This system only holds up as long as two worlds share the same
  * {@link GlobalMaterialMap} instance. Otherwise, the internal Hammer ids (idh)
  * of the materials can be different, and a completely different material may be
@@ -34,13 +33,19 @@ public final class GlobalMaterialMap {
     private final Lock lock = new ReentrantLock();
     private final Map<String, MaterialData> nameToInfo = new HashMap<>();
 
+    private final MaterialData air;
+
+    public GlobalMaterialMap() {
+        this.air = addMaterial("minecraft:air");
+    }
+
     /**
      * Adds a material entry to this material map.
      *
      * <p>A material may have multiple names, like "reeds" and "sugar cane". You
      * will be able to look up the material by any of these names using
      * {@link #getMaterialByName(String)}.
-     * 
+     *
      * <p>If any of these names is already in use for a material, that material
      * is returned instead. However, any new names for the material supplied to
      * this method are still registered for use with
@@ -79,12 +84,6 @@ public final class GlobalMaterialMap {
         }
     }
 
-    private void addNameEntries(MaterialData materialData, Collection<String> names) {
-        for (String name : names) {
-            nameToInfo.put(name.toLowerCase(), materialData);
-        }
-    }
-
     /**
      * Adds a material entry to this material map.
      *
@@ -96,7 +95,38 @@ public final class GlobalMaterialMap {
      * @return The idh of the material.
      */
     public MaterialData addMaterial(String name) {
-        return addMaterial(Collections.singleton(name));
+        try {
+            lock.lock();
+
+            // Search for existing entry
+            MaterialData found = nameToInfo.get(name.toLowerCase());
+            if (found != null) {
+                return found;
+            }
+
+            // Add new entry
+            MaterialData newEntry = new MaterialData((char) idToInfo.size(), name);
+            idToInfo.add(newEntry);
+            nameToInfo.put(name.toLowerCase(), newEntry);
+            return newEntry;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void addNameEntries(MaterialData materialData, Collection<String> names) {
+        for (String name : names) {
+            nameToInfo.put(name.toLowerCase(), materialData);
+        }
+    }
+
+    /**
+     * Gets the material representing air.
+     *
+     * @return The material representing air.
+     */
+    public MaterialData getAir() {
+        return air;
     }
 
     /**

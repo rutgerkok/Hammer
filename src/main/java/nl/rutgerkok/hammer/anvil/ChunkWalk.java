@@ -37,9 +37,11 @@ final class ChunkWalk {
             if (stream == null) {
                 return;
             }
-            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(ChunkRootTag.MINECRAFT);
+            CompoundTag chunkRootTag = AnvilNbtReader.readFromUncompressedStream(stream);
+            CompoundTag chunkTag = chunkRootTag.getCompound(ChunkRootTag.MINECRAFT);
+            ChunkDataVersion version = ChunkDataVersion.fromId(chunkRootTag.getInt(ChunkRootTag.DATA_VERSION));
 
-            AnvilChunk chunk = new AnvilChunk(gameFactory, chunkTag);
+            AnvilChunk chunk = new AnvilChunk(gameFactory, chunkTag, version);
             Result result = visitor.accept(chunk, progress);
             switch (result) {
                 case CHANGED:

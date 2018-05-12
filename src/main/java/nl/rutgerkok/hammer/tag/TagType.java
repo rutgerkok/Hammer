@@ -136,6 +136,15 @@ public final class TagType<T> {
         return clazz;
     }
 
+    /**
+     * Gets if the given value if of the type specified by this tag type.
+     * @param value The value.
+     * @return True if the type matches, false otherwise.
+     */
+    public boolean isOfType(Object value) {
+        return this.getValueType().isInstance(value);
+    }
+
     @Override
     public String toString() {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName());

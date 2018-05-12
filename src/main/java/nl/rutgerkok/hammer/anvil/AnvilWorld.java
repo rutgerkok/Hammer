@@ -39,8 +39,26 @@ public class AnvilWorld implements World {
     private final Path levelDat;
     private final RegionFileCache regionFileCache;
     private final CompoundTag tag;
+    private final ChunkDataVersion chunkDataVersion;
 
     public AnvilWorld(GlobalMaterialMap dictionary, Path levelDat) throws IOException {
+        this(dictionary, levelDat, ChunkDataVersion.latest());
+    }
+
+    /**
+     * Creates a new world in the Anvil world format.
+     *
+     * @param dictionary
+     *            Material dictionary.
+     * @param levelDat
+     *            Path to the level.dat file.
+     * @param dataVersion
+     *            The desired data version for new chunks. For existing chunks,
+     *            the data-format is auto-detected.
+     * @throws IOException
+     *             Thrown if reading the level.dat file fails.
+     */
+    public AnvilWorld(GlobalMaterialMap dictionary, Path levelDat, ChunkDataVersion dataVersion) throws IOException {
         if (!levelDat.getFileName().toString().equals(LEVEL_DAT_NAME)) {
             throw new IOException("Expected a " + LEVEL_DAT_NAME + " file, got \""
                     + levelDat.getName(levelDat.getNameCount() - 1) + "\"");
@@ -49,11 +67,12 @@ public class AnvilWorld implements World {
         this.tag = Files.exists(levelDat) ? AnvilNbtReader.readFromCompressedFile(levelDat) : new CompoundTag();
         this.gameFactory = new AnvilGameFactory(initMaterialMap(dictionary));
         this.regionFileCache = new RegionFileCache(getRegionDirectory());
+        this.chunkDataVersion = dataVersion;
     }
 
     @Override
     public ChunkAccess<AnvilChunk> getChunkAccess() {
-        return new AnvilChunkAccess(gameFactory, regionFileCache);
+        return new AnvilChunkAccess(gameFactory, regionFileCache, chunkDataVersion);
     }
 
     /**

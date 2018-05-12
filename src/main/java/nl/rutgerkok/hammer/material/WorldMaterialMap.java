@@ -11,13 +11,6 @@ public interface WorldMaterialMap {
     static final String MINECRAFT_PREFIX = "minecraft:";
 
     /**
-     * Gets the material representing air.
-     *
-     * @return The material representing air.
-     */
-    MaterialData getAir();
-
-    /**
      * Gets the global material map belonging to this world.
      * 
      * @return The global map.

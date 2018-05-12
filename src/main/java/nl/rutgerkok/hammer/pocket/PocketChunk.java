@@ -127,11 +127,6 @@ public final class PocketChunk implements Chunk {
     }
 
     @Override
-    public short getMaterialId(int x, int y, int z) {
-        return bytes[OFFSET_BLOCK_IDS + (y | (z << CHUNK_Y_BITS) | (x << (CHUNK_Y_BITS + CHUNK_Z_BITS)))];
-    }
-
-    @Override
     public int getSizeX() {
         return CHUNK_X_SIZE;
     }

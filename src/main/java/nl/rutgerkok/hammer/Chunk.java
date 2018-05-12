@@ -61,24 +61,6 @@ public interface Chunk {
     MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException;
 
     /**
-     * Gets the material id at the given position.
-     *
-     * @param x
-     *            X position of the block, <code>0 <= x < {@link #getSizeX()}
-     *            </code>.
-     * @param y
-     *            Y position of the block, <code>0 <= y < {@link #getSizeZ()}
-     *            </code>.
-     * @param z
-     *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
-     *            </code>.
-     * @return The id.
-     * @throws IndexOutOfBoundsException
-     *             If the x, y or z is outside this chunk.
-     */
-    short getMaterialId(int x, int y, int z);
-
-    /**
      * Gets the size of the chunk on the x-axis.
      *
      * @return The size in blocks.

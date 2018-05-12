@@ -43,15 +43,6 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         registerVanillaMaterials(blocksFile);
     }
 
-    @Override
-    public MaterialData getAir() {
-        try {
-            return globalMap.getMaterialById(0);
-        } catch (MaterialNotFoundException e) {
-            throw new IllegalStateException("No air material for this world; corrupted or unreadable world?");
-        }
-    }
-
     /**
      * Extracts the base name ("minecraft:stone") from a {@link MaterialData}
      * object ("minecraft:stone[variant=stone]").

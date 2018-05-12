@@ -20,10 +20,12 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
     private final RegionFileCache cache;
     private final Claim claim;
     private final AnvilGameFactory gameFactory;
+    private final ChunkDataVersion chunkDataVersion;
 
-    public AnvilChunkAccess(AnvilGameFactory gameFactory, RegionFileCache cache) {
+    public AnvilChunkAccess(AnvilGameFactory gameFactory, RegionFileCache cache, ChunkDataVersion chunkDataVersion) {
         this.gameFactory = gameFactory;
         this.cache = cache;
+        this.chunkDataVersion = chunkDataVersion;
 
         this.claim = cache.claim();
     }
@@ -38,12 +40,14 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
         try (InputStream stream = getChunkInputStream(chunkX, chunkZ)) {
             if (stream == null) {
                 // Chunk doesn't exist yet
-                return AnvilChunk.newEmptyChunk(gameFactory, chunkX, chunkZ);
+                return AnvilChunk.newEmptyChunk(gameFactory, chunkDataVersion, chunkX, chunkZ);
             }
 
             // Read the chunk
-            CompoundTag chunkTag = AnvilNbtReader.readFromUncompressedStream(stream).getCompound(ChunkRootTag.MINECRAFT);
-            return new AnvilChunk(gameFactory, chunkTag);
+            CompoundTag chunkRootTag = AnvilNbtReader.readFromUncompressedStream(stream);
+            CompoundTag chunkTag = chunkRootTag.getCompound(ChunkRootTag.MINECRAFT);
+            ChunkDataVersion version = ChunkDataVersion.fromId(chunkRootTag.getInt(ChunkRootTag.DATA_VERSION));
+            return new AnvilChunk(gameFactory, chunkTag, version);
         }
     }
 

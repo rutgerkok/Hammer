@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * A map that holds tags any supported {@link TagType tag type}. Maps can, and
@@ -110,6 +113,26 @@ public final class CompoundTag implements JSONAware {
      */
     public CompoundTag copy() {
         return new CompoundTag(this);
+    }
+
+    /**
+     * Gets an immutable map of all entries of the given type.
+     *
+     * @param ofType
+     *            The type.
+     * @return The entries.
+     */
+    public <T> Map<CompoundKey<T>, T> entries(TagType<T> ofType) {
+        ImmutableMap.Builder<CompoundKey<T>, T> entries = ImmutableMap.builder();
+        for (Entry<CompoundKey<?>, Object> entry : this.map.entrySet()) {
+            Object value = entry.getValue();
+            if (ofType.isOfType(value)) {
+                @SuppressWarnings("unchecked")
+                CompoundKey<T> key = (CompoundKey<T>) entry.getKey();
+                entries.put(key, ofType.cast(entry.getValue()));
+            }
+        }
+        return entries.build();
     }
 
     /**
@@ -285,19 +308,21 @@ public final class CompoundTag implements JSONAware {
      * @param key
      *            Name of the tag, case insensitive.
      * @param length
-     *            Length of the integer array.
+     *            Length of the integer array. If this is absent, but an int
+     *            array of any length exists, that array is returned. Otherwise,
+     *            a zero-sized array is returned.
      * @return The integer array.
      */
-    public int[] getIntArray(CompoundKey<int[]> key, int length) {
+    public int[] getIntArray(CompoundKey<int[]> key, OptionalInt length) {
         Object value = map.get(key);
         if (value instanceof int[]) {
             int[] array = (int[]) value;
-            if (array.length == length) {
+            if (!length.isPresent() || array.length == length.getAsInt()) {
                 return array;
             }
         }
 
-        int[] array = new int[length];
+        int[] array = new int[length.getAsInt()];
         map.put(key, array);
         return array;
     }
@@ -344,6 +369,34 @@ public final class CompoundTag implements JSONAware {
             return ((Number) value).longValue();
         }
         return 0;
+    }
+
+    /**
+     * Gets the long array with the given tag name. If the given tag does not
+     * exist, is not a long array or has an incorrect length, an empty array of
+     * the given length is returned. Changes to the array will write through to
+     * this compound tag.
+     *
+     * @param key
+     *            Name of the tag, case insensitive.
+     * @param length
+     *            Length of the long array. If this is absent, but a long array
+     *            of any length exists, that array is returned. Otherwise, a
+     *            zero-sized array is returned.
+     * @return The long array.
+     */
+    public long[] getLongArray(CompoundKey<long[]> key, OptionalInt length) {
+        Object value = map.get(key);
+        if (value instanceof long[]) {
+            long[] array = (long[]) value;
+            if (!length.isPresent() || array.length == length.getAsInt()) {
+                return array;
+            }
+        }
+
+        long[] array = new long[length.getAsInt()];
+        map.put(key, array);
+        return array;
     }
 
     /**
@@ -395,6 +448,7 @@ public final class CompoundTag implements JSONAware {
         return map.isEmpty();
     }
 
+
     /**
      * Gets whether the value with the given key is of the given type.
      *
@@ -412,7 +466,7 @@ public final class CompoundTag implements JSONAware {
         if (value == null) {
             return false;
         }
-        return tagType.getValueType().isInstance(value);
+        return tagType.isOfType(value);
     }
 
     /**
