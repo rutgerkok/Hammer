@@ -15,7 +15,7 @@ import com.google.common.base.CaseFormat;
  *
  */
 public final class TagType<T> {
-    private static TagType<?>[] ALL_BY_ID = new TagType[12];
+    private static TagType<?>[] ALL_BY_ID = new TagType[13];
 
     public static final TagType<Byte> BYTE = register(1, Byte.class);
     public static final TagType<byte[]> BYTE_ARRAY = register(7, byte[].class);
@@ -27,6 +27,7 @@ public final class TagType<T> {
     @SuppressWarnings("rawtypes")
     public static final TagType<ListTag> LIST = register(9, ListTag.class);
     public static final TagType<Long> LONG = register(4, Long.class);
+    public static final TagType<long[]> LONG_ARRAY = register(12, long[].class);
     public static final TagType<Short> SHORT = register(2, Short.class);
     public static final TagType<String> STRING = register(8, String.class);
 

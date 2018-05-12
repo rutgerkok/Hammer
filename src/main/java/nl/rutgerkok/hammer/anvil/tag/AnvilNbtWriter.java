@@ -87,6 +87,12 @@ public class AnvilNbtWriter {
             writeList(dataOutput, (ListTag<?>) value);
         } else if (tagType == TagType.LONG) {
             dataOutput.writeLong((Long) value);
+        } else if (tagType == TagType.LONG_ARRAY) {
+            long[] intArray = (long[]) value;
+            dataOutput.writeInt(intArray.length);
+            for (long longInteger : intArray) {
+                dataOutput.writeLong(longInteger);
+            }
         } else if (tagType == TagType.BYTE_ARRAY) {
             byte[] byteArray = (byte[]) value;
             dataOutput.writeInt(byteArray.length);

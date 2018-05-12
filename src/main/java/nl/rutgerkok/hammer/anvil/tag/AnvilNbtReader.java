@@ -155,6 +155,17 @@ public final class AnvilNbtReader {
         if (type == TagType.LONG) {
             return type.cast(dataInput.readLong());
         }
+        if (type == TagType.LONG_ARRAY) {
+            int size = dataInput.readInt();
+            if (size < 0 || size > MAX_ARRAY_SIZE) {
+                throw new IOException("Invalid long array size: " + size);
+            }
+            long[] array = new long[size];
+            for (int i = 0; i < size; i++) {
+                array[i] = dataInput.readLong();
+            }
+            return type.cast(array);
+        }
         if (type == TagType.BYTE_ARRAY) {
             int blobSize = dataInput.readInt();
             byte[] result = new byte[blobSize];

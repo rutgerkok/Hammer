@@ -61,6 +61,12 @@ public class PocketNbtWriter {
             writeList(outputStream, (ListTag<?>) value);
         } else if (tagType == TagType.LONG) {
             LittleEndian.writeLong(outputStream, (Long) value);
+        } else if (tagType == TagType.LONG_ARRAY) {
+            long[] longArray = (long[]) value;
+            LittleEndian.writeInt(outputStream, longArray.length);
+            for (long longInteger : longArray) {
+                LittleEndian.writeLong(outputStream, longInteger);
+            }
         } else if (tagType == TagType.BYTE_ARRAY) {
             byte[] byteArray = (byte[]) value;
             LittleEndian.writeInt(outputStream, byteArray.length);

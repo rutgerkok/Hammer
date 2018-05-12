@@ -159,6 +159,17 @@ public final class PocketNbtReader {
         if (type == TagType.LONG) {
             return type.cast(LittleEndian.readLong(dataInput));
         }
+        if (type == TagType.LONG) {
+            int size = LittleEndian.readInt(dataInput);
+            if (size < 0 || size > MAX_ARRAY_SIZE) {
+                throw new IOException("Invalid long array size: " + size);
+            }
+            long[] array = new long[size];
+            for (int i = 0; i < size; i++) {
+                array[i] = LittleEndian.readLong(dataInput);
+            }
+            return type.cast(array);
+        }
         if (type == TagType.BYTE_ARRAY) {
             int blobSize = LittleEndian.readInt(dataInput);
             byte[] result = new byte[blobSize];
