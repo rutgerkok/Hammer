@@ -10,17 +10,16 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterators;
+
 import nl.rutgerkok.hammer.ChunkAccess;
 import nl.rutgerkok.hammer.pocket.PocketLevelDb.ChunkKeyType;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtReader;
 import nl.rutgerkok.hammer.pocket.tag.PocketNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
-
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
 
 /**
  * Provides access to the chunks stored in LevelDb.
@@ -100,28 +99,29 @@ final class PocketChunkAccess implements ChunkAccess<PocketChunk>, Iterable<Pock
     public Iterator<PocketChunk> iterator() {
         checkState();
 
-        Iterator<PocketChunk> chunkIterator = Iterators.transform(pocketLevelDb.iterator(), new Function<Entry<byte[], byte[]>, PocketChunk>() {
+        Iterator<PocketChunk> chunkIterator = Iterators.transform(pocketLevelDb.iterator(),
+                new Function<Entry<byte[], byte[]>, PocketChunk>() {
 
-            @Override
-            public PocketChunk apply(Entry<byte[], byte[]> entry) {
-                // Examine the key
-                byte[] key = entry.getKey();
-                ChunkKeyType type = pocketLevelDb.getChunkKeyTypeOrNull(key);
-                if (type != ChunkKeyType.TERRAIN) {
-                    return null;
-                }
+                    @Override
+                    public PocketChunk apply(Entry<byte[], byte[]> entry) {
+                        // Examine the key
+                        byte[] key = entry.getKey();
+                        ChunkKeyType type = pocketLevelDb.getChunkKeyTypeOrNull(key);
+                        if (type != ChunkKeyType.TERRAIN) {
+                            return null;
+                        }
 
-                // Get chunk data
-                byte[] terrainData = entry.getValue();
-                int chunkX = pocketLevelDb.getChunkX(key);
-                int chunkZ = pocketLevelDb.getChunkZ(key);
-                try {
-                    return getRemainingDataForChunk(chunkX, chunkZ, terrainData);
-                } catch (IOException e) {
-                    throw Throwables.propagate(e);
-                }
-            }
-        });
+                        // Get chunk data
+                        byte[] terrainData = entry.getValue();
+                        int chunkX = pocketLevelDb.getChunkX(key);
+                        int chunkZ = pocketLevelDb.getChunkZ(key);
+                        try {
+                            return getRemainingDataForChunk(chunkX, chunkZ, terrainData);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
         return Iterators.filter(chunkIterator, Predicates.notNull());
     }
 

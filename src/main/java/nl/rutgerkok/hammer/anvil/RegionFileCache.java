@@ -12,10 +12,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
-import nl.rutgerkok.hammer.util.DirectoryUtil;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+
+import nl.rutgerkok.hammer.util.DirectoryUtil;
 
 /**
  * A simple cache for region files. Ensures that a region file isn't opened
@@ -107,7 +107,6 @@ class RegionFileCache {
     }
 
     // Directory stream is closed by the close method of the returned instance
-    @SuppressWarnings("resource")
     DirectoryStream<RegionFile> getRegionFiles() throws IOException {
         final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder);
         return new DirectoryStream<RegionFile>() {

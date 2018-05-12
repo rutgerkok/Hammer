@@ -14,8 +14,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.google.common.base.Throwables;
-
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 import nl.rutgerkok.hammer.util.NumberMap;
 
@@ -45,66 +43,25 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         registerVanillaMaterials(blocksFile);
     }
 
-    private void registerVanillaMaterials(URL blocksFile) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(blocksFile.openStream(), StandardCharsets.UTF_8))) {
-            JSONArray list = (JSONArray) JSONValue.parseWithException(reader);
-            for (Object entry : list) {
-                JSONArray listEntry = (JSONArray) entry;
-                short blockId = ((Number) listEntry.get(0)).shortValue();
-                byte blockData = ((Number) listEntry.get(1)).byteValue();
-                String blockName = (String) listEntry.get(2);
-
-                // The next operation assumes all remaining elements in the list
-                // are strings. We catch the ClassCastException below if this is
-                // not the case
-                @SuppressWarnings("unchecked")
-                List<String> alternatives = listEntry.subList(3, listEntry.size());
-                this.register(blockId, blockData, blockName, alternatives);
-            }
-        } catch (ClassCastException | ArrayIndexOutOfBoundsException | IOException | ParseException e) {
-            // Invalid JSON, should be impossible as we're providing the JSON
-            throw Throwables.propagate(e);
+    @Override
+    public MaterialData getAir() {
+        try {
+            return globalMap.getMaterialById(0);
+        } catch (MaterialNotFoundException e) {
+            throw new IllegalStateException("No air material for this world; corrupted or unreadable world?");
         }
     }
 
     /**
-     * Registers a block type.
+     * Extracts the base name ("minecraft:stone") from a {@link MaterialData}
+     * object ("minecraft:stone[variant=stone]").
      * 
-     * @param blockId
-     *            Anvil block id.
-     * @param blockData
-     *            Anvil block data.
-     * @param fullName
-     *            Name, like "minecraft:stone[variant=stone]" or
-     *            "minecraft:air". If the blockData is not 0, the brackets must
-     *            be present.
-     * @param aliases
-     *            Alternative names for the block, like "minecraft:podzol" for
-     *            "minecraft:dirt[variant=podzol]". This list won't be modified,
-     *            only read by this method.
+     * @param materialData
+     *            The material.
+     * @return The base name.
      */
-    protected final void register(short blockId, byte blockData, String fullName, List<String> aliases) {
-        String baseName = getBaseName(fullName);
-        List<String> names = new ArrayList<>();
-        // Allow lookup by full name and aliases
-        names.add(fullName);
-        names.addAll(aliases);
-
-        // Allow lookup by base name when block data is 0
-        if (blockData == 0 && !baseName.equals(fullName)) {
-            names.add(baseName);
-        }
-
-        // Also allow lookup in blockname:blockdata format
-        names.add(baseName + ":" + blockData);
-
-        // Register in the various registries
-        MaterialData materialData = globalMap.addMaterial(names);
-        char ida = (char) (blockId << 4 | blockData);
-        char idh = materialData.getId();
-        idhToAnvil.put(idh, ida);
-        anvilToIdh.put(ida, idh);
+    public String getBaseName(MaterialData materialData) {
+        return getBaseName(materialData.getName());
     }
 
     /**
@@ -125,46 +82,9 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         return fullBlockName.substring(0, bracketIndex);
     }
 
-    /**
-     * Extracts the base name ("minecraft:stone") from a {@link MaterialData}
-     * object ("minecraft:stone[variant=stone]").
-     * 
-     * @param materialData
-     *            The material.
-     * @return The base name.
-     */
-    public String getBaseName(MaterialData materialData) {
-        return getBaseName(materialData.getName());
-    }
-
     @Override
-    public MaterialData getAir() {
-        try {
-            return globalMap.getMaterialById(0);
-        } catch (MaterialNotFoundException e) {
-            throw new IllegalStateException("No air material for this world; corrupted or unreadable world?");
-        }
-    }
-
-    /**
-     * Gets the Anvil block id and data as a combined value (blockId * 16 +
-     * blockData). You can extract the block data using
-     * {@code getMinecraftId(..) & 0xf} and the block id using
-     * {@code getMinecraftId(..) >> 4}.
-     *
-     * @param materialData
-     *            The material to get the block id for.
-     * @return The Anvil block id and data.
-     * @throws MaterialNotFoundException
-     *             If the material is not available in this world (like the
-     *             Nether Reactor).
-     */
-    public final char getMinecraftId(MaterialData materialData) throws MaterialNotFoundException {
-        try {
-            return idhToAnvil.getTranslatedId(materialData.getId());
-        } catch (NoSuchElementException e) {
-            throw new MaterialNotFoundException(materialData.getName());
-        }
+    public GlobalMaterialMap getGlobal() {
+        return globalMap;
     }
 
     /**
@@ -207,9 +127,87 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         return getMaterialData((short) blockId, blockData);
     }
 
-    @Override
-    public GlobalMaterialMap getGlobal() {
-        return globalMap;
+    /**
+     * Gets the Anvil block id and data as a combined value (blockId * 16 +
+     * blockData). You can extract the block data using
+     * {@code getMinecraftId(..) & 0xf} and the block id using
+     * {@code getMinecraftId(..) >> 4}.
+     *
+     * @param materialData
+     *            The material to get the block id for.
+     * @return The Anvil block id and data.
+     * @throws MaterialNotFoundException
+     *             If the material is not available in this world (like the
+     *             Nether Reactor).
+     */
+    public final char getMinecraftId(MaterialData materialData) throws MaterialNotFoundException {
+        try {
+            return idhToAnvil.getTranslatedId(materialData.getId());
+        } catch (NoSuchElementException e) {
+            throw new MaterialNotFoundException(materialData.getName());
+        }
+    }
+
+    /**
+     * Registers a block type.
+     * 
+     * @param blockId
+     *            Anvil block id.
+     * @param blockData
+     *            Anvil block data.
+     * @param fullName
+     *            Name, like "minecraft:stone[variant=stone]" or
+     *            "minecraft:air". If the blockData is not 0, the brackets must
+     *            be present.
+     * @param aliases
+     *            Alternative names for the block, like "minecraft:podzol" for
+     *            "minecraft:dirt[variant=podzol]". This list won't be modified,
+     *            only read by this method.
+     */
+    protected final void register(short blockId, byte blockData, String fullName, List<String> aliases) {
+        String baseName = getBaseName(fullName);
+        List<String> names = new ArrayList<>();
+        // Allow lookup by full name and aliases
+        names.add(fullName);
+        names.addAll(aliases);
+
+        // Allow lookup by base name when block data is 0
+        if (blockData == 0 && !baseName.equals(fullName)) {
+            names.add(baseName);
+        }
+
+        // Also allow lookup in blockname:blockdata format
+        names.add(baseName + ":" + blockData);
+
+        // Register in the various registries
+        MaterialData materialData = globalMap.addMaterial(names);
+        char ida = (char) (blockId << 4 | blockData);
+        char idh = materialData.getId();
+        idhToAnvil.put(idh, ida);
+        anvilToIdh.put(ida, idh);
+    }
+
+    private void registerVanillaMaterials(URL blocksFile) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(blocksFile.openStream(), StandardCharsets.UTF_8))) {
+            JSONArray list = (JSONArray) JSONValue.parseWithException(reader);
+            for (Object entry : list) {
+                JSONArray listEntry = (JSONArray) entry;
+                short blockId = ((Number) listEntry.get(0)).shortValue();
+                byte blockData = ((Number) listEntry.get(1)).byteValue();
+                String blockName = (String) listEntry.get(2);
+
+                // The next operation assumes all remaining elements in the list
+                // are strings. We catch the ClassCastException below if this is
+                // not the case
+                @SuppressWarnings("unchecked")
+                List<String> alternatives = listEntry.subList(3, listEntry.size());
+                this.register(blockId, blockData, blockName, alternatives);
+            }
+        } catch (ClassCastException | ArrayIndexOutOfBoundsException | IOException | ParseException e) {
+            // Invalid JSON, should be impossible as we're providing the JSON
+            throw new RuntimeException(e);
+        }
     }
 
 }

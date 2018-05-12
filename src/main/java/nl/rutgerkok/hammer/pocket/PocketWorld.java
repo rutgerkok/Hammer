@@ -33,7 +33,7 @@ public class PocketWorld implements World {
      *            objects between worlds.
      * @param levelDat
      *            The level.dat file of the Pocket Edition world.
-     * 
+     *
      * @throws IOException
      *             If an IO error occurs reading the level.dat file.
      */
@@ -51,12 +51,6 @@ public class PocketWorld implements World {
         this.levelDb = new PocketLevelDb(levelDbFolder);
     }
 
-    private PocketGameFactory initGameFactory(GlobalMaterialMap dictionary) {
-        URL vanillaMaterials = getClass().getResource("/blocks_pe.json");
-        BlockDataMaterialMap materialMap = new BlockDataMaterialMap(dictionary, vanillaMaterials);
-        return new PocketGameFactory(materialMap);
-    }
-
     @Override
     public ChunkAccess<PocketChunk> getChunkAccess() throws IOException {
         return new PocketChunkAccess(gameFactory, levelDb);
@@ -72,6 +66,12 @@ public class PocketWorld implements World {
         // In the pocket edition, the root tag is the tag with all the
         // information
         return rootLevelTag;
+    }
+
+    private PocketGameFactory initGameFactory(GlobalMaterialMap dictionary) {
+        URL vanillaMaterials = getClass().getResource("/blocks_pe.json");
+        BlockDataMaterialMap materialMap = new BlockDataMaterialMap(dictionary, vanillaMaterials);
+        return new PocketGameFactory(materialMap);
     }
 
     @Override
