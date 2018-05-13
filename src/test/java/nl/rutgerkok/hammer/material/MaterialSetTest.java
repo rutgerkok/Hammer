@@ -5,16 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import nl.rutgerkok.hammer.material.GlobalMaterialMap;
-import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.MaterialSet;
-
 public class MaterialSetTest {
 
     @Test
     public void testAdd() {
         GlobalMaterialMap dictionary = new GlobalMaterialMap();
-        MaterialData material = dictionary.addMaterial("foo");
+        MaterialData material = dictionary.addMaterial(MaterialName.ofBaseName("test:foo"));
 
         MaterialSet set = new MaterialSet();
         assertFalse(set.contains(material));
@@ -33,7 +29,7 @@ public class MaterialSetTest {
     @Test
     public void testRemove() {
         GlobalMaterialMap dictionary = new GlobalMaterialMap();
-        MaterialData material = dictionary.addMaterial("foo");
+        MaterialData material = dictionary.addMaterial(MaterialName.ofBaseName("test:foo"));
 
         MaterialSet set = new MaterialSet();
         set.add(material);

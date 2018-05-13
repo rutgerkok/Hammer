@@ -40,37 +40,22 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         this.idhToAnvil = new NumberMap();
         this.anvilToIdh = new NumberMap();
 
-        registerVanillaMaterials(blocksFile);
-    }
-
-    /**
-     * Extracts the base name ("minecraft:stone") from a {@link MaterialData}
-     * object ("minecraft:stone[variant=stone]").
-     * 
-     * @param materialData
-     *            The material.
-     * @return The base name.
-     */
-    public String getBaseName(MaterialData materialData) {
-        return getBaseName(materialData.getName());
-    }
-
-    /**
-     * Extracts the base name ("minecraft:stone") from a full block name
-     * ("minecraft:stone[variant=stone]"). If the given input is already a base
-     * block name (like "minecraft:air"), the input is simply returned.
-     * 
-     * @param fullBlockName
-     *            The full block name.
-     * @return The base name.
-     */
-    private String getBaseName(String fullBlockName) {
-        int bracketIndex = fullBlockName.indexOf('[');
-        if (bracketIndex == -1) {
-            // Already a base name
-            return fullBlockName;
+        try {
+            registerVanillaMaterials(blocksFile);
+        } catch (java.text.ParseException e) {
+            throw new RuntimeException("Failed to load Vanilla materials", e);
         }
-        return fullBlockName.substring(0, bracketIndex);
+    }
+
+    /**
+     * @param materialData
+     *            The material data.
+     * @return The base name.
+     * @deprecated Use {@link MaterialData#getBaseName()}
+     */
+    @Deprecated
+    public String getBaseName(MaterialData materialData) {
+        return materialData.getBaseName();
     }
 
     @Override
@@ -80,7 +65,7 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
 
     /**
      * Gets the material data object belonging to the given block id and data.
-     * 
+     *
      * @param blockId
      *            The block id.
      * @param blockData
@@ -100,7 +85,7 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
 
     /**
      * Gets the material data object belonging to the given block name and data.
-     * 
+     *
      * @param blockName
      *            The block id.
      * @param blockData
@@ -111,7 +96,7 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
      */
     public MaterialData getMaterialData(String blockName, byte blockData) throws MaterialNotFoundException {
         // Get material data for base name
-        MaterialData withoutBlockData = globalMap.getMaterialByName(blockName);
+        MaterialData withoutBlockData = globalMap.getMaterialByName(MaterialName.ofBaseName(blockName));
 
         // Now get the block id, and use it to find the right material data
         int blockId = getMinecraftId(withoutBlockData) >> 4;
@@ -135,13 +120,13 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         try {
             return idhToAnvil.getTranslatedId(materialData.getId());
         } catch (NoSuchElementException e) {
-            throw new MaterialNotFoundException(materialData.getName());
+            throw new MaterialNotFoundException(materialData.getMaterialName());
         }
     }
 
     /**
      * Registers a block type.
-     * 
+     *
      * @param blockId
      *            Anvil block id.
      * @param blockData
@@ -154,21 +139,24 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
      *            Alternative names for the block, like "minecraft:podzol" for
      *            "minecraft:dirt[variant=podzol]". This list won't be modified,
      *            only read by this method.
+     * @throws java.text.ParseException
+     *             If the format of the material name is invalid.
      */
-    protected final void register(short blockId, byte blockData, String fullName, List<String> aliases) {
-        String baseName = getBaseName(fullName);
-        List<String> names = new ArrayList<>();
+    protected final void register(short blockId, byte blockData, String fullName, List<String> aliases)
+            throws java.text.ParseException {
+        MaterialName parsedFullName = MaterialName.parse(fullName);
+        String baseName = parsedFullName.getBaseName();
+        List<MaterialName> names = new ArrayList<>();
         // Allow lookup by full name and aliases
-        names.add(fullName);
-        names.addAll(aliases);
+        names.add(parsedFullName);
+        for (String alias : aliases) {
+            names.add(MaterialName.parse(alias));
+        }
 
         // Allow lookup by base name when block data is 0
         if (blockData == 0 && !baseName.equals(fullName)) {
-            names.add(baseName);
+            names.add(MaterialName.ofBaseName(baseName));
         }
-
-        // Also allow lookup in blockname:blockdata format
-        names.add(baseName + ":" + blockData);
 
         // Register in the various registries
         MaterialData materialData = globalMap.addMaterial(names);
@@ -178,7 +166,7 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         anvilToIdh.put(ida, idh);
     }
 
-    private void registerVanillaMaterials(URL blocksFile) {
+    private void registerVanillaMaterials(URL blocksFile) throws java.text.ParseException {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(blocksFile.openStream(), StandardCharsets.UTF_8))) {
             JSONArray list = (JSONArray) JSONValue.parseWithException(reader);

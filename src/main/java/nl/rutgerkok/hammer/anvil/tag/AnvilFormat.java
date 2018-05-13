@@ -27,12 +27,11 @@ public final class AnvilFormat {
         public static final CompoundKey<byte[]> BIOMES = CompoundKey.of("Biomes");
         public static final CompoundKey<ListTag<CompoundTag>> ENTITIES = CompoundKey.of("Entities");
         public static final CompoundKey<Long> INHABITED_TIME = CompoundKey.of("InhabitedTime");
-        public static final CompoundKey<Boolean> LIGHT_POPULATED = CompoundKey.of("LightPopulated");
         public static final CompoundKey<ListTag<CompoundTag>> SECTIONS = CompoundKey.of("Sections");
-        public static final CompoundKey<Boolean> TERRAIN_POPULATED = CompoundKey.of("TerrainPopulated");
         public static final CompoundKey<ListTag<CompoundTag>> TILE_ENTITIES = CompoundKey.of("TileEntities");
         public static final CompoundKey<Integer> X_POS = CompoundKey.of("xPos");
         public static final CompoundKey<Integer> Z_POS = CompoundKey.of("zPos");
+        public static final CompoundKey<CompoundTag> HEIGHT_MAPS = CompoundKey.of("Heightmaps");
     }
 
     /**
@@ -71,13 +70,21 @@ public final class AnvilFormat {
     }
 
     /**
-     * Old chunk section format (Minecraft 1.2 - 1.12)
+     * Tags that were in the base chunk tag, but have since been removed.
+     *
+     */
+    public static class OldChunkTag {
+        public static final CompoundKey<Boolean> LIGHT_POPULATED = CompoundKey.of("LightPopulated");
+        public static final CompoundKey<Boolean> TERRAIN_POPULATED = CompoundKey.of("TerrainPopulated");
+    }
+
+    /**
+     * Old chunk section format (Minecraft 1.2 - 1.12), no longer in use.
      */
     public static class OldSectionTag {
         public static final CompoundKey<byte[]> BLOCK_DATA = CompoundKey.of("Data");
         public static final CompoundKey<byte[]> BLOCK_IDS = CompoundKey.of("Blocks");
         public static final CompoundKey<byte[]> EXT_BLOCK_IDS = CompoundKey.of("Add");
-        public static final CompoundKey<Byte> INDEX = CompoundKey.of("Y");
     }
 
     /**

@@ -5,7 +5,7 @@ import java.util.List;
 import nl.rutgerkok.hammer.anvil.AnvilChunk;
 import nl.rutgerkok.hammer.anvil.ChunkDataVersion;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
-import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldSectionTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -24,6 +24,7 @@ public abstract class ChunkBlocks {
     static final int SECTION_Z_BITS = 4;
     static final int SECTION_Z_SIZE = AnvilChunk.CHUNK_Z_SIZE;
     static final int TOTAL_SIZE = SECTION_X_SIZE * SECTION_Y_SIZE * SECTION_Z_SIZE;
+    static final int TOTAL_SIZE_NIBBLE = TOTAL_SIZE / 2;
 
     /**
      * Creates a block lookup using either the old or the new block id storage
@@ -59,16 +60,14 @@ public abstract class ChunkBlocks {
             // Do a guess (correct only if no chunk sections are omitted at
             // and below this section index)
             CompoundTag section = sections.get(sectionIndex);
-            if (section != null
-                    && section.getByte(OldSectionTag.INDEX) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
                 return section;
             }
         }
 
         // Search for section
         for (CompoundTag section : sections) {
-            if (section != null
-                    && section.getByte(OldSectionTag.INDEX) == sectionIndex) {
+            if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
                 return section;
             }
         }

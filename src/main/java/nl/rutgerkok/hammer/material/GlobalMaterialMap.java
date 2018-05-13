@@ -31,41 +31,43 @@ public final class GlobalMaterialMap {
 
     private final List<MaterialData> idToInfo = new ArrayList<>();
     private final Lock lock = new ReentrantLock();
-    private final Map<String, MaterialData> nameToInfo = new HashMap<>();
+    private final Map<MaterialName, MaterialData> nameToInfo = new HashMap<>();
 
     private final MaterialData air;
 
     public GlobalMaterialMap() {
-        this.air = addMaterial("minecraft:air");
+        this.air = addMaterial(MaterialName.ofBaseName("minecraft:air"));
     }
 
     /**
      * Adds a material entry to this material map.
      *
-     * <p>A material may have multiple names, like "reeds" and "sugar cane". You
+     * <p>
+     * A material may have multiple names, like "reeds" and "sugar cane". You
      * will be able to look up the material by any of these names using
-     * {@link #getMaterialByName(String)}.
+     * {@link #getMaterialByName(MaterialName)}.
      *
-     * <p>If any of these names is already in use for a material, that material
-     * is returned instead. However, any new names for the material supplied to
+     * <p>
+     * If any of these names is already in use for a material, that material is
+     * returned instead. However, any new names for the material supplied to
      * this method are still registered for use with
-     * {@link #getMaterialByName(String)}.
+     * {@link #getMaterialByName(MaterialName)}.
      *
      * @param names
      *            All names of the material.
      * @return The idh of the material.
      */
-    public MaterialData addMaterial(Collection<String> names) {
+    public MaterialData addMaterial(Collection<MaterialName> names) {
         try {
             lock.lock();
 
             // Search for existing entry
-            String firstFoundName = null;
-            for (String name : names) {
+            MaterialName firstFoundName = null;
+            for (MaterialName name : names) {
                 if (firstFoundName == null) {
                     firstFoundName = name;
                 }
-                MaterialData found = nameToInfo.get(name.toLowerCase());
+                MaterialData found = nameToInfo.get(name);
                 if (found != null) {
                     // Return existing material instead, but add possible new
                     // aliases first
@@ -94,12 +96,12 @@ public final class GlobalMaterialMap {
      *            Name of the material.
      * @return The idh of the material.
      */
-    public MaterialData addMaterial(String name) {
+    public MaterialData addMaterial(MaterialName name) {
         try {
             lock.lock();
 
             // Search for existing entry
-            MaterialData found = nameToInfo.get(name.toLowerCase());
+            MaterialData found = nameToInfo.get(name);
             if (found != null) {
                 return found;
             }
@@ -107,16 +109,16 @@ public final class GlobalMaterialMap {
             // Add new entry
             MaterialData newEntry = new MaterialData((char) idToInfo.size(), name);
             idToInfo.add(newEntry);
-            nameToInfo.put(name.toLowerCase(), newEntry);
+            nameToInfo.put(name, newEntry);
             return newEntry;
         } finally {
             lock.unlock();
         }
     }
 
-    private void addNameEntries(MaterialData materialData, Collection<String> names) {
-        for (String name : names) {
-            nameToInfo.put(name.toLowerCase(), materialData);
+    private void addNameEntries(MaterialData materialData, Collection<MaterialName> names) {
+        for (MaterialName name : names) {
+            nameToInfo.put(name, materialData);
         }
     }
 
@@ -163,10 +165,10 @@ public final class GlobalMaterialMap {
      * @throws MaterialNotFoundException
      *             If no material exists with the given name.
      */
-    public MaterialData getMaterialByName(String name) throws MaterialNotFoundException {
+    public MaterialData getMaterialByName(MaterialName name) throws MaterialNotFoundException {
         try {
             lock.lock();
-            MaterialData returnValue = nameToInfo.get(name.toLowerCase());
+            MaterialData returnValue = nameToInfo.get(name);
             if (returnValue == null) {
                 throw new MaterialNotFoundException(name);
             }

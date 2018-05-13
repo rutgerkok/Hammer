@@ -9,13 +9,48 @@ import java.util.Objects;
  * @see GlobalMaterialMap#addMaterial(Collection) Creating instances
  */
 public final class MaterialData {
-    MaterialData(char idh, String name) {
+
+    private final char idh;
+    private final MaterialName name;
+
+    MaterialData(char idh, MaterialName name) {
         this.idh = idh;
         this.name = Objects.requireNonNull(name);
     }
 
-    private final char idh;
-    private final String name;
+    /**
+     * Gets the base name, like "minecraft:grass" in "minecraft:grass[snowy=false]"
+     * @return The base name.
+     */
+    public String getBaseName() {
+        return name.getBaseName();
+    }
+
+    /**
+     * Gets the Hammer id of this material.
+     *
+     * @return The Hammer id.
+     */
+    public char getId() {
+        return idh;
+    }
+
+    /**
+     * Gets the parsed material name.
+     * @return The material name.
+     */
+    public MaterialName getMaterialName() {
+        return name;
+    }
+
+    /**
+     * Gets the (Mojang/mod provided) name of this material, like "minecraft:grass[snowy=false]".
+     *
+     * @return The name.
+     */
+    public String getName() {
+        return name.toString();
+    }
 
     /**
      * {@inheritDoc}
@@ -28,24 +63,6 @@ public final class MaterialData {
      */
     @Override
     public String toString() {
-        return name;
-    }
-
-    /**
-     * Gets the (Mojang/mod provided) name of this material.
-     * 
-     * @return The name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Gets the Hammer id of this material.
-     * 
-     * @return The Hammer id.
-     */
-    public char getId() {
-        return idh;
+        return name.toString();
     }
 }

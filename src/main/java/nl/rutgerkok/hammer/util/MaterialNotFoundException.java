@@ -1,5 +1,7 @@
 package nl.rutgerkok.hammer.util;
 
+import nl.rutgerkok.hammer.material.MaterialName;
+
 /**
  * Thrown when a material is not found by the material map.
  *
@@ -24,8 +26,8 @@ public class MaterialNotFoundException extends RuntimeException {
      * @param materialName
      *            The material name.
      */
-    public MaterialNotFoundException(String materialName) {
-        super(materialName);
+    public MaterialNotFoundException(MaterialName materialName) {
+        super(materialName.toString());
     }
 
     /**

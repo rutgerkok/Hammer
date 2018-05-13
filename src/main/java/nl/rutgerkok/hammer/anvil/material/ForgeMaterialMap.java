@@ -1,10 +1,12 @@
 package nl.rutgerkok.hammer.anvil.material;
 
 import java.net.URL;
+import java.text.ParseException;
 import java.util.Collections;
 
 import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.GlobalMaterialMap;
+import nl.rutgerkok.hammer.material.MaterialName;
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.ListTag;
@@ -32,13 +34,18 @@ public class ForgeMaterialMap extends BlockDataMaterialMap {
         try {
             // Check if block already exists (loaded from our vanilla states
             // file)
-            this.globalMap.getMaterialByName(name);
+            this.globalMap.getMaterialByName(MaterialName.ofBaseName(name));
         } catch (MaterialNotFoundException e) {
             // Nope, so register it
             for (int i = 0; i <= MAX_BLOCK_DATA; i++) {
                 // Block states unfortunately aren't saved to the level.dat,
                 // so we just assume all data values are valid block states
-                super.register((short) id, (byte) i, name + "[dataValue=" + i + "]", Collections.<String> emptyList());
+                try {
+                    super.register((short) id, (byte) i, name + "[data_value=" + i + "]",
+                            Collections.<String>emptyList());
+                } catch (ParseException e1) {
+                    throw new RuntimeException("Could not register " + name + " (block id " + id + ")", e);
+                }
             }
         }
 

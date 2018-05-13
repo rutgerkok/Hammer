@@ -12,8 +12,6 @@ import java.util.Set;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * A map that holds tags any supported {@link TagType tag type}. Maps can, and
  * almost always do, hold tags of different types together in one map.
@@ -113,26 +111,6 @@ public final class CompoundTag implements JSONAware {
      */
     public CompoundTag copy() {
         return new CompoundTag(this);
-    }
-
-    /**
-     * Gets an immutable map of all entries of the given type.
-     *
-     * @param ofType
-     *            The type.
-     * @return The entries.
-     */
-    public <T> Map<CompoundKey<T>, T> entries(TagType<T> ofType) {
-        ImmutableMap.Builder<CompoundKey<T>, T> entries = ImmutableMap.builder();
-        for (Entry<CompoundKey<?>, Object> entry : this.map.entrySet()) {
-            Object value = entry.getValue();
-            if (ofType.isOfType(value)) {
-                @SuppressWarnings("unchecked")
-                CompoundKey<T> key = (CompoundKey<T>) entry.getKey();
-                entries.put(key, ofType.cast(entry.getValue()));
-            }
-        }
-        return entries.build();
     }
 
     /**
@@ -448,7 +426,6 @@ public final class CompoundTag implements JSONAware {
         return map.isEmpty();
     }
 
-
     /**
      * Gets whether the value with the given key is of the given type.
      *
@@ -467,6 +444,16 @@ public final class CompoundTag implements JSONAware {
             return false;
         }
         return tagType.isOfType(value);
+    }
+
+
+    /**
+     * Removes a child tag if it exists.
+     * @param key Key of the child tag.
+     * @return True if the child tag was removed, false if there was no child tag with that key.
+     */
+    public boolean remove(CompoundKey<?> key) {
+        return this.map.remove(key) != null;
     }
 
     /**
@@ -605,7 +592,7 @@ public final class CompoundTag implements JSONAware {
      *            Value of the tag.
      */
     public void setList(CompoundKey<ListTag<?>> name, ListTag<?> value) {
-        map.put(name, value);
+        map.put(name, Objects.requireNonNull(value));
     }
 
     /**
@@ -619,6 +606,19 @@ public final class CompoundTag implements JSONAware {
      */
     public void setLong(CompoundKey<Long> key, long value) {
         map.put(key, value);
+    }
+
+    /**
+     * Sets the long array tag with the given value. This will override the tag
+     * (if any) with the same name (case insensitive).
+     *
+     * @param key
+     *            Name of the tag.
+     * @param value
+     *            Value of the tag.
+     */
+    public void setLongArray(CompoundKey<long[]> key, long[] value) {
+        map.put(key, Objects.requireNonNull(value));
     }
 
     /**
@@ -715,4 +715,5 @@ public final class CompoundTag implements JSONAware {
         }
         return obj1.equals(obj2);
     }
+
 }

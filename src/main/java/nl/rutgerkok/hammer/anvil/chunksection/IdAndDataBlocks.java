@@ -3,6 +3,7 @@ package nl.rutgerkok.hammer.anvil.chunksection;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldChunkTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldSectionTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
@@ -12,10 +13,6 @@ import nl.rutgerkok.hammer.tag.TagType;
 import nl.rutgerkok.hammer.util.NibbleArray;
 
 final class IdAndDataBlocks extends ChunkBlocks {
-
-    private static final int TOTAL_SIZE_NIBBLE = TOTAL_SIZE / 2;
-
-
 
     static int getPositionInSectionArray(int xInSection, int yInSection, int zInSection) {
         return yInSection << (SECTION_X_BITS + SECTION_Z_BITS)
@@ -40,7 +37,7 @@ final class IdAndDataBlocks extends ChunkBlocks {
     private CompoundTag createChunkSection(CompoundTag chunkTag, int y) {
         CompoundTag chunkSection = new CompoundTag();
         int sectionIndex = y >>> SECTION_Y_BITS;
-        chunkSection.setByte(OldSectionTag.INDEX, (byte) sectionIndex);
+        chunkSection.setByte(SectionTag.INDEX, (byte) sectionIndex);
         chunkSection.setByteArray(OldSectionTag.BLOCK_IDS, new byte[TOTAL_SIZE]);
         chunkSection.setByteArray(OldSectionTag.BLOCK_DATA, new byte[TOTAL_SIZE_NIBBLE]);
         chunkSection.setByteArray(SectionTag.BLOCK_LIGHT, new byte[TOTAL_SIZE_NIBBLE]);
@@ -50,7 +47,7 @@ final class IdAndDataBlocks extends ChunkBlocks {
         chunkTag.getList(ChunkTag.SECTIONS, TagType.COMPOUND).add(chunkSection);
 
         // Mark chunk as needing light update
-        chunkTag.setBoolean(ChunkTag.LIGHT_POPULATED, false);
+        chunkTag.setBoolean(OldChunkTag.LIGHT_POPULATED, false);
 
         return chunkSection;
     }
