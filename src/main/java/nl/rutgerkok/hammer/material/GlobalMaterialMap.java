@@ -1,5 +1,6 @@
 package nl.rutgerkok.hammer.material;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -157,7 +158,7 @@ public final class GlobalMaterialMap {
     }
 
     /**
-     * Gets the material with the given name. The name is case insensitive.
+     * Gets the material with the given name.
      *
      * @param name
      *            Name of the material.
@@ -175,6 +176,25 @@ public final class GlobalMaterialMap {
             return returnValue;
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * Gets the material with the given name. If no prefix like "minecraft:" is
+     * used, it is added and the name is changed to lowercase. This is to
+     * support names like "Dirt", which gets translated to "minecraft:dirt".
+     *
+     * @param fullName
+     *            Name of the material.
+     * @return The material.
+     * @throws MaterialNotFoundException
+     *             If no material exists with the given name.
+     */
+    public MaterialData getMaterialByName(String fullName) throws MaterialNotFoundException {
+        try {
+            return getMaterialByName(MaterialName.parse(fullName));
+        } catch (ParseException e) {
+            throw new MaterialNotFoundException(fullName, e);
         }
     }
 

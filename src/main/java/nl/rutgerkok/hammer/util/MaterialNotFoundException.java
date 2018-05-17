@@ -1,5 +1,7 @@
 package nl.rutgerkok.hammer.util;
 
+import java.text.ParseException;
+
 import nl.rutgerkok.hammer.material.MaterialName;
 
 /**
@@ -43,11 +45,34 @@ public class MaterialNotFoundException extends RuntimeException {
     }
 
     /**
+     * Constructs a new exception with the given raw material name.
+     *
+     * @param materialName
+     *            The raw material name.
+     * @param e
+     *            The reason why parsing failed.
+     */
+    public MaterialNotFoundException(String materialName, ParseException e) {
+        super(materialName, e);
+    }
+
+    /**
      * Gets the name of the material that was not found.
      *
      * @return The name.
      */
     public String getMaterial() {
-        return getMessage();
+        return super.getMessage();
+    }
+
+    @Override
+    public String getMessage() {
+        Throwable cause = this.getCause();
+        if (cause instanceof ParseException) {
+            int charNumber = ((ParseException) cause).getErrorOffset();
+            return "Invalid material " + super.getMessage() + "; error at char " + charNumber + ": "
+                    + cause.getMessage();
+        }
+        return super.getMessage();
     }
 }
