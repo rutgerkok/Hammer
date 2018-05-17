@@ -1,8 +1,8 @@
 # Hammer
-World editor library for Minecraft.
 
-This is a library written in Java, intended to be used by programs that need to interact with Minecraft level files.
-It has support for both the Java version of Minecraft and the Pocket Edition.
+[![Build Status](https://travis-ci.com/rutgerkok/Hammer.svg?branch=master)](https://travis-ci.com/rutgerkok/Hammer)
+
+World editor library for Minecraft, written in Java. It is intended to be used by programs that need to interact with Minecraft level files. It has support for both the Java version of Minecraft and the Pocket Edition.
 
 ## Compiling
 This project uses [Maven](https://maven.apache.org/). Download link and Git clone URLs are in the sidebar.
