@@ -6,6 +6,7 @@ import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.ItemStack;
 import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
+import nl.rutgerkok.hammer.material.MaterialName;
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
@@ -16,11 +17,18 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
  *
  * <p> Both the Minecraft 1.8+ format with named ids and the Minecraft 1.2 - 1.7
  * format with numeric ids are supported. </p>
- * 
+ *
  * @see GameFactory#createItemStack(CompoundTag)
  *
  */
 final class AnvilItemStack implements ItemStack {
+
+    private enum Format {
+        BLOCK_ID_DATA,
+        BLOCK_NAME_DATA,
+        BLOCK_NAME
+    }
+
     private static final CompoundKey<Short> BLOCK_DATA_TAG = CompoundKey.of("Damage");
     private static final CompoundKey<String> BLOCK_ID_TAG = CompoundKey.of("id");
     private static final CompoundKey<Byte> COUNT_TAG = CompoundKey.of("Count");
@@ -40,6 +48,16 @@ final class AnvilItemStack implements ItemStack {
     }
 
 
+    private Format getFormat() {
+        if (tag.isType(BLOCK_ID_TAG, TagType.STRING)) {
+            if (tag.containsKey(BLOCK_DATA_TAG)) {
+                return Format.BLOCK_NAME_DATA;
+            }
+            return Format.BLOCK_NAME;
+        }
+        return Format.BLOCK_ID_DATA;
+    }
+
     /**
      * Gets the material and data represented as one object.
      *
@@ -57,14 +75,13 @@ final class AnvilItemStack implements ItemStack {
             // Maybe used as armor/tool damage value?
             blockData = 0;
         }
-        if (this.isBlockIdInStringFormat()) {
-            String blockId = tag.getString(BLOCK_ID_TAG);
+        if (tag.isType(BLOCK_ID_TAG, TagType.STRING)) {
+            String blockName = tag.getString(BLOCK_ID_TAG);
             try {
-                return materialMap.getMaterialData(blockId, (byte) blockData);
+                return materialMap.getMaterialData(blockName, (byte) blockData);
             } catch (MaterialNotFoundException e) {
-                // Try without block data, maybe block data is used as damage
-                // value
-                return materialMap.getMaterialData(blockId, (byte) 0);
+                // Ignore block data, add whatever we find
+                return materialMap.getGlobal().addMaterial(MaterialName.ofBaseName(blockName));
             }
         } else {
             short blockId = tag.getShort(OLD_BLOCK_ID_TAG);
@@ -80,9 +97,11 @@ final class AnvilItemStack implements ItemStack {
     }
 
     /**
-     * Gets the raw block data of this item.
+     * Gets the raw block data of this item. Minecraft 1.13 and newer don't use
+     * block data, so for items touched by those versions this will return 0.
      *
      * @return The block data.
+     * @see #getMaterialData() Method that works in any Minecraft version.
      */
     public short getRawBlockDataValue() {
         return tag.getShort(BLOCK_DATA_TAG);
@@ -105,10 +124,6 @@ final class AnvilItemStack implements ItemStack {
         }
     }
 
-    private boolean isBlockIdInStringFormat() {
-        return tag.isType(BLOCK_ID_TAG, TagType.STRING);
-    }
-
     @Override
     public void setCount(byte count) {
         tag.setByte(COUNT_TAG, count);
@@ -116,14 +131,23 @@ final class AnvilItemStack implements ItemStack {
 
     @Override
     public void setMaterialData(MaterialData materialData) throws MaterialNotFoundException {
-        char anvilId = materialMap.getMinecraftId(materialData);
-        if (isBlockIdInStringFormat()) {
-            String baseBlockName = materialMap.getBaseName(materialData);
-            tag.setString(BLOCK_ID_TAG, baseBlockName);
-        } else {
-            tag.setShort(OLD_BLOCK_ID_TAG, (short) (anvilId >> 4));
+        switch (getFormat()) {
+            case BLOCK_ID_DATA:
+                char anvilId = materialMap.getMinecraftId(materialData);
+                tag.setShort(OLD_BLOCK_ID_TAG, (short) (anvilId >> 4));
+                tag.setShort(BLOCK_DATA_TAG, (short) (anvilId & 0xf));
+                break;
+            case BLOCK_NAME:
+                tag.setString(BLOCK_ID_TAG, materialData.getBaseName());
+                break;
+            case BLOCK_NAME_DATA:
+                char anvilIdForData = materialMap.getMinecraftId(materialData);
+                tag.setString(BLOCK_ID_TAG, materialData.getBaseName());
+                tag.setShort(BLOCK_DATA_TAG, (short) (anvilIdForData & 0xf));
+                break;
+            default:
+                throw new RuntimeException("Unknown format: " + getFormat());
         }
-        tag.setShort(BLOCK_DATA_TAG, (short) (anvilId & 0xf));
     }
 
     @Override
