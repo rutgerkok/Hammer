@@ -21,7 +21,7 @@ public enum ChunkDataVersion {
      * @return The version.
      */
     public static ChunkDataVersion fromId(int versionId) {
-        if (versionId == 0) {
+        if (versionId <= 1343) {
             return ORIGINAL_ANVIL;
         }
         return FLAT_ANVIL;
