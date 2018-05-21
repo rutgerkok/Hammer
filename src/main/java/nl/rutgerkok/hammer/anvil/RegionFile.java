@@ -9,7 +9,7 @@ package nl.rutgerkok.hammer.anvil;
 
 /*
  * 2011 February 16
- * 
+ *
  * This source code is based on the work of Scaevolus (see notice above). It has
  * been slightly modified by Mojang AB (constants instead of magic numbers, a
  * chunk timestamp header, and auto-formatted according to our formatter
@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
@@ -95,7 +96,12 @@ public class RegionFile {
         }
     }
 
-    static final int CHUNK_HEADER_BYTES = 5;
+    static final int CHUNK_HEADER_BYTES = 4;
+    /**
+     * Two sectors at the beginning of the file are in use for storing the chunk
+     * offsets and last modified times.
+     */
+    private static final int HEADER_SECTORS = 2;
 
     private static final byte emptySector[] = new byte[4096];
 
@@ -120,7 +126,7 @@ public class RegionFile {
     /**
      * Creates a new {@link RegionFile} instance. Instances are created by the
      * {@link RegionFileCache} class.
-     * 
+     *
      * @param path
      *            The path to the region file.
      */
@@ -199,8 +205,27 @@ public class RegionFile {
      * @throws IOException
      *             If an IO error occurs.
      */
-    void close() throws IOException {
-        file.close();
+    protected synchronized void close() throws IOException {
+        int sectorsFree = 0;
+        int totalSectors = sectorFree.size() - HEADER_SECTORS;
+        for (int i = HEADER_SECTORS; i < sectorFree.size(); i++) {
+            if (sectorFree.get(i)) {
+                sectorsFree++;
+            }
+        }
+
+        if (sectorsFree == totalSectors) {
+            // Region file no longer needed
+            file.close();
+            Files.delete(this.fileName);
+            return;
+        }
+        if (((double) sectorsFree) / totalSectors > 0.5) {
+            // A resize is worth it
+            shrinkAndClose();
+        } else {
+            file.close();
+        }
     }
 
     // various small debug printing helpers
@@ -235,14 +260,14 @@ public class RegionFile {
      * @throws IOException
      *             If an IO error occurs.
      */
-    public void deleteChunk(int x, int z) throws IOException {
+    public synchronized void deleteChunk(int x, int z) throws IOException {
         checkBounds(x, z);
 
         if (!hasChunk(x, z)) {
             return;
         }
 
-        int offset = getOffset(x, z);
+        int offset = getOffsetAndSize(x, z);
         int sectorNumber = offset >> 8;
         int numSectors = offset & 0xFF;
 
@@ -262,12 +287,6 @@ public class RegionFile {
         }
     }
 
-    public OutputStream getChunkOutputStream(int x, int z) {
-        checkBounds(x, z);
-
-        return new DeflaterOutputStream(new ChunkBuffer(x, z));
-    }
-
     /**
      * Gets an (uncompressed) stream representing the chunk data returns null if
      * the chunk is not found.
@@ -283,7 +302,7 @@ public class RegionFile {
     public synchronized InputStream getChunkInputStream(int chunkX, int chunkZ) throws IOException {
         checkBounds(chunkX, chunkZ);
 
-        int offset = getOffset(chunkX, chunkZ);
+        int offset = getOffsetAndSize(chunkX, chunkZ);
         if (offset == 0) {
             // debugln("READ", x, z, "miss");
             return null;
@@ -323,12 +342,29 @@ public class RegionFile {
         throw new IOException("Unknown version " + version);
     }
 
-    private int getOffset(int x, int z) {
+    /**
+     * Gets a buffer for writing. Once this buffer is closed, the bytes are
+     * actually written.
+     *
+     * @param x
+     *            The x of the chunk in the region file.
+     * @param z
+     *            The z of the chunk in the region file.
+     * @return The buffer.
+     */
+    public OutputStream getChunkOutputStream(int x, int z) {
+        // Not synchronized - data is only written on output, so not needed yet
+        checkBounds(x, z);
+
+        return new DeflaterOutputStream(new ChunkBuffer(x, z));
+    }
+
+    private int getOffsetAndSize(int x, int z) {
         return offsets[x + z * REGION_CHUNK_COUNT];
     }
 
     public boolean hasChunk(int x, int z) {
-        return getOffset(x, z) != 0;
+        return getOffsetAndSize(x, z) != 0;
     }
 
     /* the modification date of the region file when it was first opened */
@@ -348,6 +384,79 @@ public class RegionFile {
         file.writeInt(value);
     }
 
+    /**
+     * Called by {@link #close()} when it determines that a lot of space could
+     * be saved. This method rewrites the region file to be more compact.
+     *
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    private void shrinkAndClose() throws IOException {
+        Path tempPath = this.fileName.resolveSibling(this.fileName.getFileName().toString() + "-TEMP" + System.currentTimeMillis());
+        try (RandomAccessFile newFile = new RandomAccessFile(tempPath.toFile(), "rw")) {
+            // Just write empty file offsets for now, we will correct them later
+            for (int i = 0; i < SECTOR_INTS; i++) {
+                newFile.writeInt(0);
+            }
+            // But we can already write the correct time stamps
+            for (int i = 0; i < SECTOR_INTS; i++) {
+                newFile.writeInt(this.chunkTimestamps[i]);
+            }
+            int currentSectorNumber = 2;
+            for (int z = 0; z < REGION_CHUNK_COUNT; z++) {
+                for (int x = 0; x < REGION_CHUNK_COUNT; x++) {
+                    int oldChunkOffset = getOffsetAndSize(x, z);
+                    if (oldChunkOffset == 0) {
+                        // No chunk at this position
+                        continue;
+                    }
+
+                    int oldSectorNumber = oldChunkOffset >> 8;
+                    int oldNumSectors = oldChunkOffset & 0xFF;
+
+                    if (oldSectorNumber + oldNumSectors > sectorFree.size()) {
+                        debugln("READ", x, z, "invalid sector");
+                        continue;
+                    }
+
+                    // Start reading old chunk
+                    file.seek(oldSectorNumber * SECTOR_BYTES);
+                    int chunkLengthIncludingVersion = file.readInt();
+                    int fullLength = CHUNK_HEADER_BYTES + chunkLengthIncludingVersion;
+
+                    if (fullLength > SECTOR_BYTES * oldNumSectors) {
+                        debugln("READ", x, z, "invalid length: " + fullLength + " > 4096 * " + oldNumSectors);
+                        continue;
+                    }
+
+                    // Write empty sectors in preparation
+                    newFile.seek(currentSectorNumber * SECTOR_BYTES);
+                    int sectorsNeeded = fullLength / SECTOR_BYTES + 1;
+                    for (int i = 0; i < sectorsNeeded; i++) {
+                        newFile.write(emptySector);
+                    }
+
+                    // Jump back, write size, write data
+                    newFile.seek(currentSectorNumber * SECTOR_BYTES);
+                    newFile.writeInt(chunkLengthIncludingVersion);
+                    byte[] compressedChunk = new byte[chunkLengthIncludingVersion];
+                    file.read(compressedChunk);
+                    newFile.write(compressedChunk);
+
+                    // Update index
+                    newFile.seek((x + z * REGION_CHUNK_COUNT) * 4);
+                    newFile.writeInt((currentSectorNumber << 8) | sectorsNeeded);
+
+                    // On to next chunk
+                    currentSectorNumber += sectorsNeeded;
+                }
+            }
+        } finally {
+            file.close();
+        }
+        Files.move(tempPath, fileName, StandardCopyOption.REPLACE_EXISTING);
+    }
+
     /* write a chunk data to the region file at specified sector number */
     private void write(int sectorNumber, byte[] data, int length) throws IOException {
         debugln(" " + sectorNumber);
@@ -360,10 +469,11 @@ public class RegionFile {
     /* write a chunk at (x,z) with length bytes of data to disk */
     protected synchronized void write(int x, int z, byte[] data, int length) {
         try {
-            int offset = getOffset(x, z);
+            int offset = getOffsetAndSize(x, z);
             int sectorNumber = offset >> 8;
             int sectorsAllocated = offset & 0xFF;
-            int sectorsNeeded = (length + CHUNK_HEADER_BYTES) / SECTOR_BYTES + 1;
+            // Find enough space for chunk length + int size + byte version
+            int sectorsNeeded = (length + CHUNK_HEADER_BYTES + 1) / SECTOR_BYTES + 1;
 
             // maximum chunk size is 1MB
             if (sectorsNeeded >= 256) {

@@ -2,18 +2,21 @@ package nl.rutgerkok.hammer.anvil;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
+import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterators;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import nl.rutgerkok.hammer.util.DirectoryUtil;
 
@@ -41,11 +44,30 @@ class RegionFileCache {
     /**
      * Cache to prevent the same region file from being opened twice.
      */
-    private final Map<Path, Reference<RegionFile>> cache = new HashMap<>();
-    private volatile int claims;
+    private final LoadingCache<Path, RegionFile> cache = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .removalListener(notification -> {
+                try {
+                    ((RegionFile) notification.getValue()).close();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            })
+            .build(new CacheLoader<Path, RegionFile>() {
 
-    private Object lock = new Object();
+                @Override
+                public RegionFile load(Path key) throws IOException {
+                    // Create the region folder if needed
+                    if (!Files.exists(regionFolder)) {
+                        Files.createDirectories(regionFolder);
+                    }
 
+                    return new RegionFile(key);
+                }
+            });
+
+    private final AtomicInteger claims = new AtomicInteger();
     private final Path regionFolder;
 
     public RegionFileCache(Path regionFolder) {
@@ -59,14 +81,14 @@ class RegionFileCache {
      * @return The claim.
      */
     Claim claim() {
-        claims++;
+        claims.incrementAndGet();
         return new Claim();
     }
 
     /**
      * Counts the amount of region files. This method takes a while to execute
      * and the result is not cached.
-     * 
+     *
      * @return The amount of region files.
      * @throws IOException
      *             If an IO error occurs counting the files.
@@ -77,7 +99,7 @@ class RegionFileCache {
 
     /**
      * Gets the region file that contains the given chunk.
-     * 
+     *
      * @param chunkX
      *            The chunk x.
      * @param chunkZ
@@ -89,68 +111,50 @@ class RegionFileCache {
     RegionFile getRegionFile(int chunkX, int chunkZ) throws IOException {
         Path file = regionFolder.resolve("r." + (chunkX >> 5) + "." + (chunkZ >> 5) + "." + FILE_EXTENSION);
 
-        // Check for cached reference
-        Reference<RegionFile> ref = cache.get(file);
-        if (ref != null) {
-            RegionFile regionFile = ref.get();
-            if (regionFile != null) {
-                return regionFile;
+        try {
+            return cache.get(file);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
             }
+            // This code should never be reached
+            throw new UncheckedExecutionException(cause);
         }
-
-        // Create the region folder if needed
-        if (!Files.exists(regionFolder)) {
-            Files.createDirectories(regionFolder);
-        }
-
-        return loadRegionFile(file);
     }
 
     // Directory stream is closed by the close method of the returned instance
     DirectoryStream<RegionFile> getRegionFiles() throws IOException {
-        final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder);
+        final DirectoryStream<Path> files = Files.newDirectoryStream(regionFolder, "*.mca");
         return new DirectoryStream<RegionFile>() {
 
             @Override
             public void close() throws IOException {
+                cache.cleanUp();
                 files.close();
             }
 
             @Override
             public Iterator<RegionFile> iterator() {
-                return Iterators.transform(files.iterator(), new Function<Path, RegionFile>() {
-
-                    @Override
-                    public RegionFile apply(Path input) {
-                        return loadRegionFile(input);
+                return Iterators.transform(files.iterator(), input -> {
+                    try {
+                        return cache.get(input);
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof IOException) {
+                            throw new UncheckedIOException((IOException) cause);
+                        }
+                        throw new UncheckedExecutionException(cause);
                     }
                 });
             }
         };
     }
 
-    private RegionFile loadRegionFile(Path file) {
-        RegionFile reg = new RegionFile(file);
-        cache.put(file, new SoftReference<RegionFile>(reg));
-        return reg;
-    }
-
     private void release() {
-        claims--;
+        int claims = this.claims.decrementAndGet();
         if (claims == 0) {
-            synchronized (lock) {
-                for (Reference<RegionFile> ref : cache.values()) {
-                    try {
-                        RegionFile region = ref.get();
-                        if (region != null) {
-                            region.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                cache.clear();
-            }
+            cache.invalidateAll();
         }
     }
 }
