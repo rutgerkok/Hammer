@@ -39,7 +39,8 @@ final class ChunkWalk {
             }
             CompoundTag chunkRootTag = AnvilNbtReader.readFromUncompressedStream(stream);
             CompoundTag chunkTag = chunkRootTag.getCompound(ChunkRootTag.MINECRAFT);
-            ChunkDataVersion version = ChunkDataVersion.fromId(chunkRootTag.getInt(ChunkRootTag.DATA_VERSION));
+            int versionId = chunkRootTag.getInt(ChunkRootTag.DATA_VERSION);
+            ChunkDataVersion version = ChunkDataVersion.fromId(versionId);
 
             AnvilChunk chunk = new AnvilChunk(gameFactory, chunkTag, version);
             Result result = visitor.accept(chunk, progress);
@@ -49,6 +50,7 @@ final class ChunkWalk {
                     try (OutputStream outputStream = region.getChunkOutputStream(chunkX, chunkZ)) {
                         CompoundTag root = new CompoundTag();
                         root.setCompound(ChunkRootTag.MINECRAFT, chunk.getTag());
+                        root.setInt(ChunkRootTag.DATA_VERSION, versionId);
                         AnvilNbtWriter.writeUncompressedToStream(outputStream, root);
                     }
                     break;

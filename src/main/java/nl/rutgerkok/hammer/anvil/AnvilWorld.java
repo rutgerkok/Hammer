@@ -54,7 +54,7 @@ public class AnvilWorld implements World {
      *            Path to the level.dat file.
      * @param dataVersion
      *            The desired data version for new chunks. For existing chunks,
-     *            the data-format is auto-detected.
+     *            the existing data-format is left untouched.
      * @throws IOException
      *             Thrown if reading the level.dat file fails.
      */

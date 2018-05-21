@@ -37,13 +37,10 @@ public abstract class ChunkBlocks {
      * @return The block lookup.
      */
     public static ChunkBlocks create(ChunkDataVersion dataVersion, BlockDataMaterialMap materialMap) {
-        switch (dataVersion) {
-            case FLAT_ANVIL:
-                return new PalettedBlocks(materialMap.getGlobal());
-            case ORIGINAL_ANVIL:
-                return new IdAndDataBlocks(materialMap);
-            default:
-                throw new UnsupportedOperationException("Cannot read " + dataVersion);
+        if (dataVersion.getId() > ChunkDataVersion.MINECRAFT_1_12_2.getId()) {
+            return new PalettedBlocks(materialMap.getGlobal());
+        } else {
+            return new IdAndDataBlocks(materialMap);
         }
     }
 

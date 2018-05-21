@@ -51,6 +51,7 @@ public final class AnvilChunk implements Chunk {
     private final CompoundTag chunkTag;
     private final AnvilGameFactory gameFactory;
     private final ChunkBlocks chunkSections;
+    private final ChunkDataVersion version;
 
     /**
      * Creates a new chunk from the given data tag.
@@ -66,6 +67,8 @@ public final class AnvilChunk implements Chunk {
     AnvilChunk(AnvilGameFactory gameFactory, CompoundTag chunkTag, ChunkDataVersion dataVersion) {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
         this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
+        this.version = Objects.requireNonNull(dataVersion, "dataVersion");
+
         this.chunkSections = ChunkBlocks.create(dataVersion, gameFactory.getMaterialMap());
     }
 
@@ -146,6 +149,14 @@ public final class AnvilChunk implements Chunk {
     @Override
     public List<CompoundTag> getTileEntities() {
         return chunkTag.getList(ChunkTag.TILE_ENTITIES, TagType.COMPOUND);
+    }
+
+    /**
+     * Gets the Minecraft version used to save this chunk.
+     * @return The version.
+     */
+    public ChunkDataVersion getVersion() {
+        return version;
     }
 
     @Override
