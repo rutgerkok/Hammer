@@ -20,12 +20,10 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
     private final RegionFileCache cache;
     private final Claim claim;
     private final AnvilGameFactory gameFactory;
-    private final ChunkDataVersion chunkDataVersion;
 
-    public AnvilChunkAccess(AnvilGameFactory gameFactory, RegionFileCache cache, ChunkDataVersion chunkDataVersion) {
+    public AnvilChunkAccess(AnvilGameFactory gameFactory, RegionFileCache cache) {
         this.gameFactory = gameFactory;
         this.cache = cache;
-        this.chunkDataVersion = chunkDataVersion;
 
         this.claim = cache.claim();
     }
@@ -40,7 +38,7 @@ final class AnvilChunkAccess implements ChunkAccess<AnvilChunk> {
         try (InputStream stream = getChunkInputStream(chunkX, chunkZ)) {
             if (stream == null) {
                 // Chunk doesn't exist yet
-                return AnvilChunk.newEmptyChunk(gameFactory, chunkDataVersion, chunkX, chunkZ);
+                return AnvilChunk.newEmptyChunk(gameFactory, ChunkDataVersion.latest(), chunkX, chunkZ);
             }
 
             // Read the chunk

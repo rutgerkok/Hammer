@@ -145,17 +145,11 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
     protected final void register(short blockId, byte blockData, String fullName, List<String> aliases)
             throws java.text.ParseException {
         MaterialName parsedFullName = MaterialName.parse(fullName);
-        String baseName = parsedFullName.getBaseName();
         List<MaterialName> names = new ArrayList<>();
         // Allow lookup by full name and aliases
         names.add(parsedFullName);
         for (String alias : aliases) {
             names.add(MaterialName.parse(alias));
-        }
-
-        // Allow lookup by base name when block data is 0
-        if (blockData == 0 && !baseName.equals(fullName)) {
-            names.add(MaterialName.ofBaseName(baseName));
         }
 
         // Register in the various registries
