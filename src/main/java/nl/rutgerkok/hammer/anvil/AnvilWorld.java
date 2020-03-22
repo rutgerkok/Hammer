@@ -1,7 +1,5 @@
 package nl.rutgerkok.hammer.anvil;
 
-import static nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LFML_ITEM_DATA_TAG;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -12,15 +10,12 @@ import nl.rutgerkok.hammer.ChunkAccess;
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.PlayerFile;
 import nl.rutgerkok.hammer.World;
-import nl.rutgerkok.hammer.anvil.material.ForgeMaterialMap;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
 import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
-import nl.rutgerkok.hammer.tag.ListTag;
-import nl.rutgerkok.hammer.tag.TagType;
 import nl.rutgerkok.hammer.util.Visitor;
 
 /**
@@ -32,7 +27,6 @@ public class AnvilWorld implements World {
     public static final String LEVEL_DAT_NAME = "level.dat";
 
     private static final String PLAYER_DIRECTORY = "playerdata";
-    private static final String PLAYER_DIRECTORY_OLD = "players";
     private static final String REGION_FOLDER_NAME = "region";
 
     private final AnvilGameFactory gameFactory;
@@ -108,14 +102,7 @@ public class AnvilWorld implements World {
      * @return The player directory.
      */
     public Path getPlayerDirectory() {
-        // Try modern file
-        Path dir = getDirectory(PLAYER_DIRECTORY);
-        if (dir != null) {
-            return dir;
-        }
-
-        // Try again with old file
-        return getDirectory(PLAYER_DIRECTORY_OLD);
+        return getDirectory(PLAYER_DIRECTORY);
     }
 
     private Path getRegionDirectory() {
@@ -132,13 +119,6 @@ public class AnvilWorld implements World {
      */
     private BlockDataMaterialMap initMaterialMap(GlobalMaterialMap dictionary) {
         URL vanillaBlocks = getClass().getResource("/blocks_pc.json");
-        if (tag.containsKey(LevelRootTag.FML)) {
-            CompoundTag fmlTag = tag.getCompound(LevelRootTag.FML);
-            if (fmlTag.containsKey(LFML_ITEM_DATA_TAG)) {
-                ListTag<CompoundTag> forgeBlocks = fmlTag.getList(LFML_ITEM_DATA_TAG, TagType.COMPOUND);
-                return new ForgeMaterialMap(dictionary, vanillaBlocks, forgeBlocks);
-            }
-        }
         return new BlockDataMaterialMap(dictionary, vanillaBlocks);
     }
 

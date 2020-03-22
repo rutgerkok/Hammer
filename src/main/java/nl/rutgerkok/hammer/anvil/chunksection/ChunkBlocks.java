@@ -37,11 +37,7 @@ public abstract class ChunkBlocks {
      * @return The block lookup.
      */
     public static ChunkBlocks create(ChunkDataVersion dataVersion, BlockDataMaterialMap materialMap) {
-        if (dataVersion.getId() > ChunkDataVersion.MINECRAFT_1_12_2.getId()) {
-            return new PalettedBlocks(materialMap.getGlobal());
-        } else {
-            return new IdAndDataBlocks(materialMap);
-        }
+        return new PalettedBlocks(materialMap.getGlobal());
     }
 
     static CompoundTag getChunkSection(CompoundTag chunkTag, int y) {
