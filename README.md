@@ -22,3 +22,10 @@ section of your `pom.xml` file:
 
 All public methods are documented using JavaDocs. To get started, create an instance of either `AnvilWorld` or
 `PocketWorld`. You can then use the various methods on those classes to inspect or modify the level.
+
+## Updating blocks_pc.json
+You can extract a new block list from the Minecraft Server as follows:
+
+    java -cp server.jar net.minecraft.data.Main --reports
+
+This will create a file `reports/blocks.json`.
