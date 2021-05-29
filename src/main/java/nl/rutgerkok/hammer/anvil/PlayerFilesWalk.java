@@ -78,6 +78,10 @@ final class PlayerFilesWalk {
     private void walkPlayerFiles(Visitor<PlayerFile> consumer, UnitsProgress progress) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(world.getPlayerDirectory())) {
             for (Path file : stream) {
+                if (!file.toString().endsWith(".dat")) {
+                    continue;
+                }
+                Path oldPlayerFile = file.getParent().resolve(file.getFileName().toString() + "_old");
                 CompoundTag tag = AnvilNbtReader.readFromCompressedFile(file);
                 PlayerFile playerFile = new PlayerFile(world.getGameFactory(), tag);
                 Result result = consumer.accept(playerFile, progress);
@@ -87,6 +91,7 @@ final class PlayerFilesWalk {
                         break;
                     case DELETE:
                         Files.delete(file);
+                        Files.deleteIfExists(oldPlayerFile);
                         break;
                     case NO_CHANGES:
                         break;
