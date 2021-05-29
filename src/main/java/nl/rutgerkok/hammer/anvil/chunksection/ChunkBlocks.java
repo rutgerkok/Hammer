@@ -6,8 +6,8 @@ import nl.rutgerkok.hammer.anvil.AnvilChunk;
 import nl.rutgerkok.hammer.anvil.ChunkDataVersion;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
-import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
+import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
 
@@ -36,7 +36,7 @@ public abstract class ChunkBlocks {
      *            The material map.
      * @return The block lookup.
      */
-    public static ChunkBlocks create(ChunkDataVersion dataVersion, BlockDataMaterialMap materialMap) {
+    public static ChunkBlocks create(ChunkDataVersion dataVersion, WorldMaterialMap materialMap) {
         return new PalettedBlocks(materialMap.getGlobal());
     }
 

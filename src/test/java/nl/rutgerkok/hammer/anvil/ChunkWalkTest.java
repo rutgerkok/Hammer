@@ -18,7 +18,7 @@ public class ChunkWalkTest {
 
     @Before
     public void loadWorld() throws IOException {
-        Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
+        Path levelDat = TestFile.get("anvil_1_13/level.dat");
         world = new AnvilWorld(new GlobalMaterialMap(), levelDat);
     }
 
@@ -26,8 +26,8 @@ public class ChunkWalkTest {
     public void testStatistics() throws IOException {
         CountingChunkVisitor chunkVisitor = new CountingChunkVisitor();
         world.walkChunks(chunkVisitor);
-        assertEquals(575, chunkVisitor.chunksSeen.get());
-        assertEquals(611, chunkVisitor.entitiesSeen.get());
-        assertEquals(17, chunkVisitor.tileEntitiesSeen.get());
+        assertEquals(5014, chunkVisitor.chunksSeen.get());
+        assertEquals(427, chunkVisitor.entitiesSeen.get());
+        assertEquals(113, chunkVisitor.tileEntitiesSeen.get());
     }
 }

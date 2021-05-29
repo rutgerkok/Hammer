@@ -34,13 +34,13 @@ public class PlayerFileWalkTest {
 
     @Test
     public void testBasicUsage() throws IOException {
-        Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
+        Path levelDat = TestFile.get("anvil_1_13/level.dat");
         World world = new AnvilWorld(new GlobalMaterialMap(), levelDat);
 
         TestVisitor visitor = new TestVisitor();
         world.walkPlayerFiles(visitor);
 
-        assertEquals("This world has two player data tags, one in its own file, one in the level.dat", 2, visitor.fileCount);
+        assertEquals("This world has one player data tag", 1, visitor.fileCount);
     }
 
 }

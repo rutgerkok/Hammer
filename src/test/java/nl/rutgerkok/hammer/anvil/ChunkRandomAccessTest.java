@@ -24,7 +24,7 @@ public class ChunkRandomAccessTest {
 
     @Before
     public void loadWorld() throws IOException {
-        Path levelDat = TestFile.get("anvil_1_7_10/level.dat");
+        Path levelDat = TestFile.get("anvil_1_13/level.dat");
         world = new AnvilWorld(new GlobalMaterialMap(), levelDat);
     }
 

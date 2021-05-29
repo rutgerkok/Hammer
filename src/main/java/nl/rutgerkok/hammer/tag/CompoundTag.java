@@ -300,6 +300,11 @@ public final class CompoundTag implements JSONAware {
             }
         }
 
+        if (!length.isPresent()) {
+            // Just return an empty array
+            return new int[0];
+        }
+
         int[] array = new int[length.getAsInt()];
         map.put(key, array);
         return array;
@@ -327,7 +332,7 @@ public final class CompoundTag implements JSONAware {
         }
 
         // Put list in map so that changes to it are reflected in this map
-        ListTag<T> list = new ListTag<T>(type);
+        ListTag<T> list = new ListTag<>(type);
         map.put(key, list);
         return list;
     }
@@ -372,6 +377,11 @@ public final class CompoundTag implements JSONAware {
             }
         }
 
+        if (!length.isPresent()) {
+            return new long[0]; // Just return an empty array
+        }
+
+        // Create a new array
         long[] array = new long[length.getAsInt()];
         map.put(key, array);
         return array;

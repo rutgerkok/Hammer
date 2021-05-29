@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+
+import com.google.common.collect.ImmutableMap;
 
 public class BlockStatesMaterialMap implements WorldMaterialMap {
 
@@ -54,7 +54,7 @@ public class BlockStatesMaterialMap implements WorldMaterialMap {
         return globalMap;
     }
 
-    private void register(int stateId, String minecraftKey, Map<String, String> properties) {
+    private void register(long stateId, String minecraftKey, Map<String, String> properties) {
         this.globalMap.addMaterial(MaterialName.create(minecraftKey, properties));
     }
 
@@ -68,7 +68,7 @@ public class BlockStatesMaterialMap implements WorldMaterialMap {
                 JSONArray states = (JSONArray) value.get("states");
                 for (Object stateObject : states) {
                     JSONObject state = (JSONObject) stateObject;
-                    int stateId = (int) state.get("id");
+                    long stateId = ((Number) state.get("id")).longValue();
                     Map<String, String> properties = parsePropertyMap((Map<?, ?>) state.get("properties"));
                     register(stateId, minecraftKey, properties);
                 }
