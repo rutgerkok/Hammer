@@ -2,8 +2,6 @@ package nl.rutgerkok.hammer;
 
 import java.io.IOException;
 
-import nl.rutgerkok.hammer.anvil.AnvilWorld;
-import nl.rutgerkok.hammer.pocket.PocketWorld;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Visitor;
@@ -11,10 +9,6 @@ import nl.rutgerkok.hammer.util.Visitor;
 /**
  * Represents a Minecraft world.
  *
- * <p>
- * Implementations like {@link AnvilWorld} and {@link PocketWorld} are provided
- * for the various level formats of Minecraft. This interface exposes all
- * methods common to all world formats.
  *
  * <p>
  * For each world on disk, there may only be one {@link World} instance live.
