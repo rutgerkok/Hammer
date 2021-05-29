@@ -34,18 +34,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.tinfoiled.mcpe.leveldb</groupId>
-			<artifactId>leveldb-api</artifactId>
-			<version>0.8-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.tinfoiled.mcpe.leveldb</groupId>
-			<artifactId>leveldb</artifactId>
-			<version>0.8-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
