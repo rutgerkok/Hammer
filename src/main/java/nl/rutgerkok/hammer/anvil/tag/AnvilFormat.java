@@ -38,6 +38,8 @@ public final class AnvilFormat {
      * Entity format
      */
     public static class EntityTag {
+        public static final CompoundKey<CompoundTag> BLOCK_STATE = CompoundKey.of("BlockState");
+        public static final CompoundKey<CompoundTag> DISPLAY_STATE = CompoundKey.of("DisplayState");
         public static final CompoundKey<CompoundTag> ITEM = CompoundKey.of("Item");
         public static final CompoundKey<ListTag<CompoundTag>> ITEMS = CompoundKey.of("Items");
     }
@@ -111,12 +113,20 @@ public final class AnvilFormat {
      * Tile entity format
      */
     public static class TileEntityTag {
-        public static final CompoundKey<Integer> FLOWER_POT_BLOCK_DATA = CompoundKey.of("Data");
-        public static final CompoundKey<String> FLOWER_POT_BLOCK_NAME = CompoundKey.of("Item");
+        public static final CompoundKey<ListTag<CompoundTag>> BEEHIVE_BEES = CompoundKey.of("Bees");
+        /**
+         * Appears in the {@link #BEEHIVE_BEES} list.
+         */
+        public static final CompoundKey<CompoundTag> BEEHIVE_ENTITY_DATA = CompoundKey.of("EntityData");
         public static final CompoundKey<String> ID = CompoundKey.of("id");
         public static final CompoundKey<ListTag<CompoundTag>> ITEMS = CompoundKey.of("Items");
-        public static final CompoundKey<Integer> PISTON_BLOCK_DATA = CompoundKey.of("blockData");
-        public static final CompoundKey<Integer> PISTON_BLOCK_ID = CompoundKey.of("blockId");
+        public static final CompoundKey<ListTag<CompoundTag>> MOB_SPAWNER_SPAWN_POTENTIALS = CompoundKey
+                .of("SpawnPotentials");
+        /**
+         * Appears in the {@link #MOB_SPAWNER_SPAWN_POTENTIALS} list.
+         */
+        public static final CompoundKey<CompoundTag> MOB_SPAWNER_ENTITY = CompoundKey.of("Entity");
+        public static final CompoundKey<CompoundTag> PISTON_BLOCK_STATE = CompoundKey.of("blockState");
         public static final ImmutableList<CompoundKey<String>> SIGN_LINE_NAMES = ImmutableList.of(
                 CompoundKey.<String> of("Text1"),
                 CompoundKey.<String> of("Text2"),
@@ -125,6 +135,7 @@ public final class AnvilFormat {
         public static final CompoundKey<Integer> X_POS = CompoundKey.of("x");
         public static final CompoundKey<Integer> Y_POS = CompoundKey.of("y");
         public static final CompoundKey<Integer> Z_POS = CompoundKey.of("z");
+
     }
     // Level.dat Forge Mod Loader tag format
     public static final CompoundKey<ListTag<CompoundTag>> LFML_ITEM_DATA_TAG = CompoundKey.of("ItemData");
