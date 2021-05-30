@@ -50,7 +50,7 @@ final class PalettedBlocks extends ChunkBlocks {
         chunkSection.setByteArray(SectionTag.BLOCK_LIGHT, new byte[TOTAL_SIZE_NIBBLE]);
         chunkSection.setByteArray(SectionTag.SKY_LIGHT, new byte[TOTAL_SIZE_NIBBLE]);
         List<CompoundTag> palette = chunkSection.getList(SectionTag.PALETTE, TagType.COMPOUND);
-        palette.add(materialMap.serializeMaterialData(materialMap.getGlobal().getAir(), new CompoundTag()));
+        palette.add(materialMap.serializeToBlockState(materialMap.getGlobal().getAir(), new CompoundTag()));
 
         // Add the new section
         chunkTag.getList(ChunkTag.SECTIONS, TagType.COMPOUND).add(chunkSection);
@@ -64,14 +64,14 @@ final class PalettedBlocks extends ChunkBlocks {
     private char findOrCreateMaterialId(CompoundTag sectionTag, MaterialData material) {
         ListTag<CompoundTag> materialsTag = sectionTag.getList(SectionTag.PALETTE, TagType.COMPOUND);
         for (int i = 0; i < materialsTag.size(); i++) {
-            MaterialData foundMaterial = this.materialMap.parseMaterialData(materialsTag.get(i));
+            MaterialData foundMaterial = this.materialMap.parseBlockState(materialsTag.get(i));
             if (foundMaterial.equals(material)) {
                 return (char) i;
             }
         }
 
         // Ok, we need to add a new material
-        CompoundTag newMaterial = materialMap.serializeMaterialData(material, new CompoundTag());
+        CompoundTag newMaterial = materialMap.serializeToBlockState(material, new CompoundTag());
         materialsTag.add(newMaterial);
 
         // Check if it will fit in the chunk array
@@ -105,7 +105,7 @@ final class PalettedBlocks extends ChunkBlocks {
         int position = getPositionInSectionArray(x, y & 0xf, z);
         int blockId = FretArray.get(blockStates, bitsPerBlock, position);
         CompoundTag material = section.getList(SectionTag.PALETTE, TagType.COMPOUND).get(blockId);
-        return materialMap.parseMaterialData(material);
+        return materialMap.parseBlockState(material);
     }
 
     int log2(int value) {

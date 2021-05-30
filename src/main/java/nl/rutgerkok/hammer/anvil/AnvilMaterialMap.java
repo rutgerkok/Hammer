@@ -36,7 +36,7 @@ public class AnvilMaterialMap implements WorldMaterialMap {
         return oldBlockIds.getMaterialData(id, data);
     }
 
-    public MaterialData getOldMaterialData(String blockName, byte blockData) {
+    public MaterialData getMaterialDataFromOldIds(String blockName, byte blockData) {
         return this.oldBlockIds.getMaterialData(blockName, blockData);
     }
 
@@ -79,7 +79,7 @@ public class AnvilMaterialMap implements WorldMaterialMap {
      *            The NBT tag.
      * @return The material.
      */
-    public MaterialData parseMaterialData(CompoundTag tag) {
+    public MaterialData parseBlockState(CompoundTag tag) {
         String name = tag.getString(MaterialTag.NAME);
         if (name.isEmpty()) {
             return this.getGlobal().getAir();
@@ -106,7 +106,7 @@ public class AnvilMaterialMap implements WorldMaterialMap {
      * @param target
      * @return The NBT tag.
      */
-    public CompoundTag serializeMaterialData(MaterialData data, CompoundTag target) {
+    public CompoundTag serializeToBlockState(MaterialData data, CompoundTag target) {
         MaterialName material = data.getMaterialName();
 
         target.setString(MaterialTag.NAME, material.getBaseName());

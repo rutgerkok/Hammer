@@ -95,7 +95,7 @@ final class AnvilItemStack implements ItemStack {
 
                 String blockName = tag.getString(BLOCK_ID_TAG);
                 try {
-                    return materialMap.getOldMaterialData(blockName, (byte) blockData);
+                    return materialMap.getMaterialDataFromOldIds(blockName, (byte) blockData);
                 } catch (MaterialNotFoundException e) {
                     // Ignore block data, add whatever we find
                     return materialMap.getGlobal().addMaterial(MaterialName.ofBaseName(blockName));

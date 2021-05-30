@@ -90,6 +90,15 @@ public final class AnvilFormat {
     }
 
     /**
+     * Old tags on tile entities, no longer in use.
+     *
+     */
+    public static class OldTileEntityTag {
+        public static final CompoundKey<Integer> PISTON_BLOCK_ID = CompoundKey.of("blockState");
+        public static final CompoundKey<Integer> PISTON_BLOCK_DATA = CompoundKey.of("blockState");
+    }
+
+    /**
      * Player data format
      */
     public static class PlayerTag {
@@ -137,6 +146,4 @@ public final class AnvilFormat {
         public static final CompoundKey<Integer> Z_POS = CompoundKey.of("z");
 
     }
-    // Level.dat Forge Mod Loader tag format
-    public static final CompoundKey<ListTag<CompoundTag>> LFML_ITEM_DATA_TAG = CompoundKey.of("ItemData");
 }
