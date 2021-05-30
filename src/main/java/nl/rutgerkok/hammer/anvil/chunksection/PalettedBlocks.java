@@ -76,7 +76,7 @@ final class PalettedBlocks extends ChunkBlocks {
 
         // Check if it will fit in the chunk array
         int highestId = materialsTag.size() - 1;
-        int bitsNeededPerBlock = Integer.SIZE - Integer.numberOfLeadingZeros(highestId);
+        int bitsNeededPerBlock = FretArray.toSafeBitCount(Integer.SIZE - Integer.numberOfLeadingZeros(highestId));
         long[] currentBlockStates = sectionTag.getLongArray(SectionTag.BLOCK_STATES, OptionalInt.empty());
         int currentBitsPerBlock = currentBlockStates.length * Long.SIZE / BLOCKS_PER_SECTION;
         if (currentBitsPerBlock < bitsNeededPerBlock) {

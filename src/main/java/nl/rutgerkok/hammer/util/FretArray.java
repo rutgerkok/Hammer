@@ -162,7 +162,45 @@ public final class FretArray {
         } else {
             array[arrayPos] = ((valueInArray & LOW_BITS) << 32) | (array[arrayPos] & LOW_BITS);
             array[arrayPos + 1] = ((valueInArray & HIGH_BITS) >>> 32) | (array[arrayPos + 1] & HIGH_BITS);
-            System.out.println(array);
+        }
+    }
+
+    /**
+     * Modern Minecraft versions (1.16+) use only bit counts that are factors of 64,
+     * so that boundaries of longs are no longer crossed. This ensures better
+     * compression.
+     *
+     * @param i
+     *            The original bit count.
+     * @return The safe bit count. For example, 5 becomes 8, but 16 stays 16.
+     */
+    public static int toSafeBitCount(int i) {
+        if (i <= 0 || i > 32) {
+            throw new IllegalArgumentException("Cannot convert " + i + "-bit to safe bit count");
+        }
+        switch (i) {
+            case 1:
+                return 1;
+            case 2:
+                return 2;
+            case 3:
+            case 4:
+                return 4;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                return 8;
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 14:
+            case 15:
+            case 16:
+                return 16;
+            default:
+                return 32;
         }
     }
 
