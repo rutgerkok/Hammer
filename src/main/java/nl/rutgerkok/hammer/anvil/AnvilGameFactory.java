@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import nl.rutgerkok.hammer.GameFactory;
 import nl.rutgerkok.hammer.ItemStack;
-import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 
 /**
@@ -13,9 +12,9 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
  */
 public final class AnvilGameFactory implements GameFactory {
 
-    private final WorldMaterialMap materialMap;
+    private final AnvilMaterialMap materialMap;
 
-    public AnvilGameFactory(WorldMaterialMap materialMap) {
+    public AnvilGameFactory(AnvilMaterialMap materialMap) {
         this.materialMap = Objects.requireNonNull(materialMap, "materialMap");
     }
 
@@ -25,7 +24,7 @@ public final class AnvilGameFactory implements GameFactory {
     }
 
     @Override
-    public WorldMaterialMap getMaterialMap() {
+    public AnvilMaterialMap getMaterialMap() {
         return materialMap;
     }
 

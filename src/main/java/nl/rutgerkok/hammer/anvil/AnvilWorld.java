@@ -13,9 +13,7 @@ import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.material.BlockStatesMaterialMap;
 import nl.rutgerkok.hammer.material.GlobalMaterialMap;
-import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Visitor;
 
@@ -118,9 +116,9 @@ public class AnvilWorld implements World {
      *            Global material dictionary.
      * @return The id map.
      */
-    private WorldMaterialMap initMaterialMap(GlobalMaterialMap dictionary) {
+    private AnvilMaterialMap initMaterialMap(GlobalMaterialMap dictionary) {
         URL vanillaBlocks = getClass().getResource("/blocks_pc.json");
-        return new BlockStatesMaterialMap(dictionary, vanillaBlocks);
+        return new AnvilMaterialMap(dictionary, vanillaBlocks);
     }
 
     /**

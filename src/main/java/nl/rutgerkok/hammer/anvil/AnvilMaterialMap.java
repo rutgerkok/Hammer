@@ -1,4 +1,4 @@
-package nl.rutgerkok.hammer.material;
+package nl.rutgerkok.hammer.anvil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,7 +17,15 @@ import org.json.simple.parser.ParseException;
 
 import com.google.common.collect.ImmutableMap;
 
-public class BlockStatesMaterialMap implements WorldMaterialMap {
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.MaterialTag;
+import nl.rutgerkok.hammer.material.GlobalMaterialMap;
+import nl.rutgerkok.hammer.material.MaterialData;
+import nl.rutgerkok.hammer.material.MaterialName;
+import nl.rutgerkok.hammer.material.WorldMaterialMap;
+import nl.rutgerkok.hammer.tag.CompoundKey;
+import nl.rutgerkok.hammer.tag.CompoundTag;
+
+public class AnvilMaterialMap implements WorldMaterialMap {
 
     /**
      * Used to parse a property map to a map of <String, String>.
@@ -43,7 +52,7 @@ public class BlockStatesMaterialMap implements WorldMaterialMap {
 
     private final GlobalMaterialMap globalMap;
 
-    public BlockStatesMaterialMap(GlobalMaterialMap materialDictionary, URL blocksFile) {
+    public AnvilMaterialMap(GlobalMaterialMap materialDictionary, URL blocksFile) {
         this.globalMap = Objects.requireNonNull(materialDictionary);
 
         registerVanillaMaterials(blocksFile);
@@ -52,6 +61,31 @@ public class BlockStatesMaterialMap implements WorldMaterialMap {
     @Override
     public GlobalMaterialMap getGlobal() {
         return globalMap;
+    }
+
+    /**
+     * Parses the NBT tag into a material.
+     *
+     * @param tag
+     *            The NBT tag.
+     * @return The material.
+     */
+    public MaterialData parseMaterialData(CompoundTag tag) {
+        String name = tag.getString(MaterialTag.NAME);
+        if (name.isEmpty()) {
+            return this.globalMap.getAir();
+        }
+        if (!tag.containsKey(MaterialTag.PROPERTIES)) {
+            return this.globalMap.addMaterial(MaterialName.ofBaseName(name));
+        }
+
+        // Do a bit more effort to read the material
+        ImmutableMap.Builder<String, String> properties = ImmutableMap.builder();
+        Set<Entry<CompoundKey<?>, Object>> propertyTags = tag.getCompound(MaterialTag.PROPERTIES).entrySet();
+        for (Entry<CompoundKey<?>, Object> property : propertyTags) {
+            properties.put(property.getKey().getKeyName(), property.getValue().toString());
+        }
+        return this.globalMap.addMaterial(MaterialName.create(name, properties.build()));
     }
 
     private void register(long stateId, String minecraftKey, Map<String, String> properties) {
@@ -77,6 +111,33 @@ public class BlockStatesMaterialMap implements WorldMaterialMap {
             // Invalid JSON, should be impossible as we're providing the JSON
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Serializes the material into an NBT tag.
+     *
+     * @param data
+     *            The material.
+     * @param target
+     * @return The NBT tag.
+     */
+    public CompoundTag serializeMaterialData(MaterialData data, CompoundTag target) {
+        MaterialName material = data.getMaterialName();
+
+        target.setString(MaterialTag.NAME, material.getBaseName());
+        target.remove(MaterialTag.PROPERTIES);
+
+        if (!material.hasProperties()) {
+            return target; // Done!
+        }
+
+        // Add new properties
+        CompoundTag properties = target.getCompound(MaterialTag.PROPERTIES);
+        for (Entry<String, String> property : material.getProperties().entrySet()) {
+            properties.setString(CompoundKey.of(property.getKey()), property.getValue());
+        }
+
+        return target;
     }
 
 }

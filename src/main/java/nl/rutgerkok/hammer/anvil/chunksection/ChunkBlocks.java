@@ -3,11 +3,11 @@ package nl.rutgerkok.hammer.anvil.chunksection;
 import java.util.List;
 
 import nl.rutgerkok.hammer.anvil.AnvilChunk;
+import nl.rutgerkok.hammer.anvil.AnvilMaterialMap;
 import nl.rutgerkok.hammer.anvil.ChunkDataVersion;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.MaterialData;
-import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
 
@@ -36,8 +36,8 @@ public abstract class ChunkBlocks {
      *            The material map.
      * @return The block lookup.
      */
-    public static ChunkBlocks create(ChunkDataVersion dataVersion, WorldMaterialMap materialMap) {
-        return new PalettedBlocks(materialMap.getGlobal());
+    public static ChunkBlocks create(ChunkDataVersion dataVersion, AnvilMaterialMap materialMap) {
+        return new PalettedBlocks(materialMap);
     }
 
     static CompoundTag getChunkSection(CompoundTag chunkTag, int y) {
