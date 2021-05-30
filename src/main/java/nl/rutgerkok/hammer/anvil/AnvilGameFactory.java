@@ -12,6 +12,7 @@ import nl.rutgerkok.hammer.tag.CompoundTag;
  */
 public final class AnvilGameFactory implements GameFactory {
 
+
     private final AnvilMaterialMap materialMap;
 
     public AnvilGameFactory(AnvilMaterialMap materialMap) {

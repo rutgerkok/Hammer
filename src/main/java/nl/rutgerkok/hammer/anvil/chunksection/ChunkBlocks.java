@@ -37,6 +37,9 @@ public abstract class ChunkBlocks {
      * @return The block lookup.
      */
     public static ChunkBlocks create(ChunkDataVersion dataVersion, AnvilMaterialMap materialMap) {
+        if (dataVersion.isBefore(ChunkDataVersion.MINECRAFT_FLATTENING)) {
+            return new IdAndDataBlocks(materialMap);
+        }
         return new PalettedBlocks(materialMap);
     }
 

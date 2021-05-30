@@ -1,67 +1,76 @@
 package nl.rutgerkok.hammer.anvil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
-
 import com.google.common.collect.ImmutableMap;
 
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.MaterialTag;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
+import nl.rutgerkok.hammer.material.BlockStatesMaterialMap;
 import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.material.MaterialName;
 import nl.rutgerkok.hammer.material.WorldMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundKey;
 import nl.rutgerkok.hammer.tag.CompoundTag;
+import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 
 public class AnvilMaterialMap implements WorldMaterialMap {
 
-    /**
-     * Used to parse a property map to a map of <String, String>.
-     *
-     * @param propertiesOrNull
-     *            The incoming map, may be null (that's how the file format works).
-     *
-     * @return An immutable map.
-     */
-    private static ImmutableMap<String, String> parsePropertyMap(Map<?, ?> propertiesOrNull) {
-            if (propertiesOrNull == null) {
-            return ImmutableMap.of();
-            } else {
-                ImmutableMap.Builder<String, String> properties = ImmutableMap.builder();
-                for (Entry<?, ?> entry : propertiesOrNull.entrySet()) {
-                    String key = (String) entry.getKey();
-                    String value = (String) entry.getValue();
-                    properties.put(key, value);
-                }
-            return properties.build();
-            }
-        }
+    private final BlockDataMaterialMap oldBlockIds;
+    private final BlockStatesMaterialMap modernBlockIds;
 
-
-    private final GlobalMaterialMap globalMap;
-
-    public AnvilMaterialMap(GlobalMaterialMap materialDictionary, URL blocksFile) {
-        this.globalMap = Objects.requireNonNull(materialDictionary);
-
-        registerVanillaMaterials(blocksFile);
+    public AnvilMaterialMap(BlockDataMaterialMap oldBlockIds, BlockStatesMaterialMap modernBlockIds) {
+        this.oldBlockIds = Objects.requireNonNull(oldBlockIds, "oldBlockIds");
+        this.modernBlockIds = Objects.requireNonNull(modernBlockIds, "modernBlockIds");
     }
 
     @Override
     public GlobalMaterialMap getGlobal() {
-        return globalMap;
+        return modernBlockIds.getGlobal();
     }
+
+    public MaterialData getMaterialDataFromOldIds(short id, byte data) {
+        return oldBlockIds.getMaterialData(id, data);
+    }
+
+    public MaterialData getOldMaterialData(String blockName, byte blockData) {
+        return this.oldBlockIds.getMaterialData(blockName, blockData);
+    }
+
+    /**
+     * Gets the old block id and data as a combined value (blockId * 16 +
+     * blockData), as used by Minecraft 1.2 - 1.12. You can extract the block data
+     * using {@code getMinecraftId(..) & 0xf} and the block id using
+     * {@code getMinecraftId(..) >> 4}.
+     *
+     * @param materialData
+     *            The material to get the block id for.
+     * @return The old block id and data.
+     * @throws MaterialNotFoundException
+     *             If the material does not have an old id because it was added
+     *             after Minecraft 1.13 (or because it's from a mod, Bedrock Edition
+     *             exclusive, etc.)
+     */
+    public char getOldMinecraftId(MaterialData materialData) throws MaterialNotFoundException {
+        return this.oldBlockIds.getMinecraftId(materialData);
+    }
+
+    /**
+     * Gets the old block name, for example
+     * "minecraft:stained_hardened_clay[color=red]" for "minecraft:red_terracotta".
+     *
+     * @param materialData
+     *            The material.
+     * @return The old block name.
+     * @see #getOldMinecraftId(MaterialData) The old id and block data.
+     */
+    public MaterialName getOldMinecraftIdString(MaterialData materialData) {
+        return this.oldBlockIds.getCanonicalMinecraftName(materialData);
+    }
+
 
     /**
      * Parses the NBT tag into a material.
@@ -73,10 +82,11 @@ public class AnvilMaterialMap implements WorldMaterialMap {
     public MaterialData parseMaterialData(CompoundTag tag) {
         String name = tag.getString(MaterialTag.NAME);
         if (name.isEmpty()) {
-            return this.globalMap.getAir();
+            return this.getGlobal().getAir();
         }
         if (!tag.containsKey(MaterialTag.PROPERTIES)) {
-            return this.globalMap.addMaterial(MaterialName.ofBaseName(name));
+            // Already done
+            return this.getGlobal().addMaterial(MaterialName.ofBaseName(name));
         }
 
         // Do a bit more effort to read the material
@@ -85,32 +95,7 @@ public class AnvilMaterialMap implements WorldMaterialMap {
         for (Entry<CompoundKey<?>, Object> property : propertyTags) {
             properties.put(property.getKey().getKeyName(), property.getValue().toString());
         }
-        return this.globalMap.addMaterial(MaterialName.create(name, properties.build()));
-    }
-
-    private void register(long stateId, String minecraftKey, Map<String, String> properties) {
-        this.globalMap.addMaterial(MaterialName.create(minecraftKey, properties));
-    }
-
-    private void registerVanillaMaterials(URL blocksFile) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(blocksFile.openStream(), StandardCharsets.UTF_8))) {
-            JSONObject registry = (JSONObject) JSONValue.parseWithException(reader);
-            for (Object entryObject : registry.entrySet()) {
-                String minecraftKey = (String) ((Entry<?, ?>) entryObject).getKey();
-                JSONObject value = (JSONObject) ((Entry<?, ?>) entryObject).getValue();
-                JSONArray states = (JSONArray) value.get("states");
-                for (Object stateObject : states) {
-                    JSONObject state = (JSONObject) stateObject;
-                    long stateId = ((Number) state.get("id")).longValue();
-                    Map<String, String> properties = parsePropertyMap((Map<?, ?>) state.get("properties"));
-                    register(stateId, minecraftKey, properties);
-                }
-            }
-        } catch (ClassCastException | ArrayIndexOutOfBoundsException | IOException | ParseException e) {
-            // Invalid JSON, should be impossible as we're providing the JSON
-            throw new RuntimeException(e);
-        }
+        return this.getGlobal().addMaterial(MaterialName.create(name, properties.build()));
     }
 
     /**

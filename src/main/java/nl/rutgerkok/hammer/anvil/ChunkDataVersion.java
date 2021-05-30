@@ -20,6 +20,11 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
     public static final ChunkDataVersion MINECRAFT_1_12 = new ChunkDataVersion(1139);
     public static final ChunkDataVersion MINECRAFT_1_12_1 = new ChunkDataVersion(1241);
     public static final ChunkDataVersion MINECRAFT_1_12_2 = new ChunkDataVersion(1343);
+
+    /**
+     * From here on, block ids and data where replaced by block states.
+     */
+    public static final ChunkDataVersion MINECRAFT_FLATTENING = new ChunkDataVersion(1451);
     public static final ChunkDataVersion MINECRAFT_1_13 = new ChunkDataVersion(1519);
     public static final ChunkDataVersion MINECRAFT_1_13_1 = new ChunkDataVersion(1628);
     public static final ChunkDataVersion MINECRAFT_1_13_2 = new ChunkDataVersion(1631);

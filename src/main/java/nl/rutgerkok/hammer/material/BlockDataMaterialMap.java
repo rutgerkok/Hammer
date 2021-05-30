@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -33,12 +35,14 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
     protected final GlobalMaterialMap globalMap;
     private final NumberMap idhToAnvil;
     private final NumberMap anvilToIdh;
+    private final Map<Integer, MaterialName> idhToAnvilName;
 
     public BlockDataMaterialMap(GlobalMaterialMap materialDictionary, URL blocksFile) {
         this.globalMap = Objects.requireNonNull(materialDictionary);
 
         this.idhToAnvil = new NumberMap();
         this.anvilToIdh = new NumberMap();
+        this.idhToAnvilName = new HashMap<>();
 
         try {
             registerVanillaMaterials(blocksFile);
@@ -56,6 +60,24 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
     @Deprecated
     public String getBaseName(MaterialData materialData) {
         return materialData.getBaseName();
+    }
+
+    /**
+     * Gets the canonical name for the given material. For example, Minecraft 1.12
+     * worlds store red terracotta as "minecraft:stained_hardened_clay[color=red]",
+     * while {@link MaterialData#getBaseName()} will return
+     * "minecraft:red_terracotta".
+     *
+     * @param materialData
+     *            The material.
+     * @return The name.
+     */
+    public MaterialName getCanonicalMinecraftName(MaterialData materialData) {
+        MaterialName name = idhToAnvilName.get((int) materialData.getId());
+        if (name == null) {
+            return materialData.getMaterialName();
+        }
+        return name;
     }
 
     @Override
@@ -104,17 +126,16 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
     }
 
     /**
-     * Gets the Anvil block id and data as a combined value (blockId * 16 +
-     * blockData). You can extract the block data using
-     * {@code getMinecraftId(..) & 0xf} and the block id using
-     * {@code getMinecraftId(..) >> 4}.
+     * Gets the block id and data as a combined value (blockId * 16 + blockData).
+     * You can extract the block data using {@code getMinecraftId(..) & 0xf} and the
+     * block id using {@code getMinecraftId(..) >> 4}.
      *
      * @param materialData
      *            The material to get the block id for.
      * @return The Anvil block id and data.
      * @throws MaterialNotFoundException
-     *             If the material is not available in this world (like the
-     *             Nether Reactor).
+     *             If the material is not available in this world (like the Nether
+     *             Reactor).
      */
     public final char getMinecraftId(MaterialData materialData) throws MaterialNotFoundException {
         try {
@@ -158,6 +179,7 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
         char idh = materialData.getId();
         idhToAnvil.put(idh, ida);
         anvilToIdh.put(ida, idh);
+        idhToAnvilName.put((int) idh, parsedFullName);
     }
 
     private void registerVanillaMaterials(URL blocksFile) throws java.text.ParseException {

@@ -6,6 +6,7 @@ import java.util.Objects;
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.anvil.chunksection.ChunkBlocks;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldSectionTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -114,7 +115,7 @@ public final class AnvilChunk implements Chunk {
     public int getDepth() {
         int minSectionIndex = Integer.MAX_VALUE;
         for (CompoundTag section : this.getChunkSections()) {
-            if (!section.containsKey(SectionTag.BLOCK_STATES)) {
+            if (!section.containsKey(SectionTag.BLOCK_STATES) && !section.containsKey(OldSectionTag.BLOCK_IDS)) {
                 continue; // For some reason there's a section at sectionY = -5 that is always empty
             }
             int sectionIndex = section.getByte(SectionTag.INDEX);
@@ -141,7 +142,7 @@ public final class AnvilChunk implements Chunk {
     public int getHeight() {
         int maxSectionIndex = Integer.MIN_VALUE;
         for (CompoundTag section : this.getChunkSections()) {
-            if (!section.containsKey(SectionTag.BLOCK_STATES)) {
+            if (!section.containsKey(SectionTag.BLOCK_STATES) && !section.containsKey(OldSectionTag.BLOCK_IDS)) {
                 continue;
             }
             int sectionIndex = section.getByte(SectionTag.INDEX);

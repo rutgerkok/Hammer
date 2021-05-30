@@ -13,6 +13,8 @@ import nl.rutgerkok.hammer.World;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.LevelRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
+import nl.rutgerkok.hammer.material.BlockDataMaterialMap;
+import nl.rutgerkok.hammer.material.BlockStatesMaterialMap;
 import nl.rutgerkok.hammer.material.GlobalMaterialMap;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Visitor;
@@ -26,6 +28,7 @@ public class AnvilWorld implements World {
     public static final String LEVEL_DAT_NAME = "level.dat";
 
     private static final String PLAYER_DIRECTORY = "playerdata";
+    private static final String PLAYER_DIRECTORY_OLD = "players";
     private static final String REGION_FOLDER_NAME = "region";
 
     private final AnvilGameFactory gameFactory;
@@ -101,7 +104,14 @@ public class AnvilWorld implements World {
      * @return The player directory.
      */
     public Path getPlayerDirectory() {
-        return getDirectory(PLAYER_DIRECTORY);
+        // Try modern file
+        Path dir = getDirectory(PLAYER_DIRECTORY);
+        if (dir != null) {
+            return dir;
+        }
+
+        // Try again with old file
+        return getDirectory(PLAYER_DIRECTORY_OLD);
     }
 
     private Path getRegionDirectory() {
@@ -118,7 +128,12 @@ public class AnvilWorld implements World {
      */
     private AnvilMaterialMap initMaterialMap(GlobalMaterialMap dictionary) {
         URL vanillaBlocks = getClass().getResource("/blocks_pc.json");
-        return new AnvilMaterialMap(dictionary, vanillaBlocks);
+        URL oldBlocks = getClass().getResource("/blocks_pc_1_12.json");
+
+        BlockStatesMaterialMap modern = new BlockStatesMaterialMap(dictionary, vanillaBlocks);
+        BlockDataMaterialMap old = new BlockDataMaterialMap(dictionary, oldBlocks);
+
+        return new AnvilMaterialMap(old, modern);
     }
 
     /**
