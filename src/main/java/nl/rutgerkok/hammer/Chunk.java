@@ -27,6 +27,14 @@ public interface Chunk {
     int getChunkZ();
 
     /**
+     * Gets the dept of the chunk on the y-axis. The value is 0 for worlds in
+     * Minecraft 1.2 - Minecraft 1.16, and is -64 in Minecraft 1.18.
+     *
+     * @return The size in blocks.
+     */
+    int getDepth();
+
+    /**
      * Gets all entities in this chunk.
      *
      * @return The entities.
@@ -41,13 +49,21 @@ public interface Chunk {
     GameFactory getGameFactory();
 
     /**
+     * Gets the height of the chunk on the y-axis. The value is 256 for worlds in
+     * Minecraft 1.2 - Minecraft 1.16.
+     *
+     * @return The size in blocks.
+     */
+    int getHeight();
+
+    /**
      * Gets the block at the given location.
      *
      * @param x
      *            X position of the block, <code>0 <= x < {@link #getSizeX()}
      *            </code>.
      * @param y
-     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            Y position of the block, <code>0 <= y < {@link #getHeight()}
      *            </code>.
      * @param z
      *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
@@ -68,13 +84,6 @@ public interface Chunk {
     int getSizeX();
 
     /**
-     * Gets the size of the chunk on the y-axis.
-     *
-     * @return The size in blocks.
-     */
-    int getSizeY();
-
-    /**
      * Gets the size of the chunk on the z-axis.
      *
      * @return The size in blocks.
@@ -82,8 +91,8 @@ public interface Chunk {
     int getSizeZ();
 
     /**
-     * Gets direct access to the chunk data tag. Modifying the returned chunk
-     * data tag will modify the internal tag in this class.
+     * Gets direct access to the chunk data tag. Modifying the returned chunk data
+     * tag will modify the internal tag in this class.
      *
      * @return The chunk data tag.
      */
@@ -98,12 +107,12 @@ public interface Chunk {
 
     /**
      * Checks if the given block is out of bounds for this chunk.
-     * 
+     *
      * @param x
      *            X position of the block, <code>0 <= x < {@link #getSizeX()}
      *            </code> for the block to be in bounds.
      * @param y
-     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            Y position of the block, <code>0 <= y < {@link #getHeight()}
      *            </code> for the block to be in bounds.
      * @param z
      *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}
@@ -119,7 +128,7 @@ public interface Chunk {
      *            X position of the block, <code>0 <= x < {@link #getSizeX()}
      *            </code>.
      * @param y
-     *            Y position of the block, <code>0 <= y < {@link #getSizeY()}
+     *            Y position of the block, <code>0 <= y < {@link #getHeight()}
      *            </code>.
      * @param z
      *            Z position of the block, <code>0 <= z < {@link #getSizeZ()}

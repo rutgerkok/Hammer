@@ -1,0 +1,49 @@
+{
+  "minecraft:recipes/decorations/yellow_banner": {
+    "criteria": {
+      "has_yellow_wool": "2021-05-30 09:15:25 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/redstone/redstone_lamp": {
+    "criteria": {
+      "has_glowstone": "2021-05-30 09:15:09 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/painting": {
+    "criteria": {
+      "has_wool": "2021-05-30 09:15:25 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/yellow_bed": {
+    "criteria": {
+      "has_yellow_wool": "2021-05-30 09:15:25 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/bundle": {
+    "criteria": {
+      "has_string": "2021-05-29 21:35:03 +0200"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2021-05-29 22:00:28 +0200",
+      "minecraft:birch_forest": "2021-05-29 22:00:30 +0200",
+      "minecraft:dark_forest": "2021-05-29 21:36:10 +0200",
+      "minecraft:river": "2021-05-29 21:35:30 +0200",
+      "minecraft:wooded_hills": "2021-05-29 21:34:48 +0200"
+    },
+    "done": false
+  },
+  "minecraft:recipes/decorations/yellow_carpet": {
+    "criteria": {
+      "has_yellow_wool": "2021-05-30 09:15:25 +0200"
+    },
+    "done": true
+  },
+  "DataVersion": 2716
+}

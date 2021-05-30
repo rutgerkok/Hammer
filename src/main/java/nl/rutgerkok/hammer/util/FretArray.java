@@ -2,8 +2,9 @@ package nl.rutgerkok.hammer.util;
 
 /**
  * I made up this name myself. A fret array is represented internally as an
- * array of 64 bit Entrys (longs). In reality, it contains Entrys of any amount
- * of bits from 4 to 16.
+ * array of 64 bit numbers (longs). However, you need to view this as one
+ * continuous bitstream, that actually contains with bit sizes of 4 to 16. So
+ * you might have an 5-bit array.
  *
  */
 public final class FretArray {

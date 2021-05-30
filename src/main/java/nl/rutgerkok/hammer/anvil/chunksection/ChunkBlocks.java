@@ -41,20 +41,21 @@ public abstract class ChunkBlocks {
     }
 
     static CompoundTag getChunkSection(CompoundTag chunkTag, int y) {
-        if (y < 0 || y >= AnvilChunk.CHUNK_Y_SIZE) {
-            return null;
-        }
         List<CompoundTag> sections = chunkTag.getList(ChunkTag.SECTIONS,
                 TagType.COMPOUND);
 
-        int sectionIndex = y >>> SECTION_Y_BITS;
+        int sectionIndex = y >> SECTION_Y_BITS;
 
-        if (sectionIndex < sections.size()) {
-            // Do a guess (correct only if no chunk sections are omitted at
+        if (!sections.isEmpty()) {
+            // Do a quick guess (correct only if no chunk sections are omitted at
             // and below this section index)
-            CompoundTag section = sections.get(sectionIndex);
-            if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
-                return section;
+            int firstSectionIndex = sections.get(0).getByte(SectionTag.INDEX);
+            int posInList = sectionIndex - firstSectionIndex;
+            if (posInList < sections.size()) {
+                CompoundTag section = sections.get(posInList);
+                if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
+                    return section;
+                }
             }
         }
 
