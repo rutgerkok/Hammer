@@ -30,6 +30,18 @@ public class Chunk117RandomAccessTest {
     }
 
     @Test
+    public void testChunkHeight() throws IOException, MaterialNotFoundException {
+        try (ChunkAccess<?> chunkAccess = world.getChunkAccess()) {
+            Chunk chunk = chunkAccess.getChunk(Math.floorDiv(xyz[0], AnvilChunk.CHUNK_X_SIZE), Math
+                    .floorDiv(xyz[2], AnvilChunk.CHUNK_Z_SIZE));
+
+            assertEquals(-64, chunk.getDepth());
+            assertEquals(80, chunk.getHeight());
+        }
+
+    }
+
+    @Test
     public void testRetrieveChunk() throws IOException, MaterialNotFoundException {
         try (ChunkAccess<?> chunkAccess = world.getChunkAccess()) {
             Chunk chunk = chunkAccess.getChunk(Math.floorDiv(xyz[0], AnvilChunk.CHUNK_X_SIZE), Math

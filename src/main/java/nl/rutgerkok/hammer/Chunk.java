@@ -27,8 +27,8 @@ public interface Chunk {
     int getChunkZ();
 
     /**
-     * Gets the dept of the chunk on the y-axis. The value is 0 for worlds in
-     * Minecraft 1.2 - Minecraft 1.16, and is -64 in Minecraft 1.18.
+     * Gets the lowest y at which blocks can be placed, based on the currently
+     * available chunk sections.
      *
      * @return The size in blocks.
      */
@@ -49,8 +49,10 @@ public interface Chunk {
     GameFactory getGameFactory();
 
     /**
-     * Gets the height of the chunk on the y-axis. The value is 256 for worlds in
-     * Minecraft 1.2 - Minecraft 1.16.
+     * Gets y limit at which blocks can be placed, based on the currently available
+     * chunk sections. The highest value at which blocks can be placed is one lower
+     * than this. For example, if this method returns "80", then the highest block
+     * for which chunk sections are initialized is at y=79.
      *
      * @return The size in blocks.
      */

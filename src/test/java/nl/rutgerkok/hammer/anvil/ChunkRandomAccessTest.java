@@ -29,6 +29,17 @@ public class ChunkRandomAccessTest {
     }
 
     @Test
+    public void testChunkHeight() throws IOException, MaterialNotFoundException {
+        try (ChunkAccess<?> chunkAccess = world.getChunkAccess()) {
+            Chunk chunk = chunkAccess.getChunk(0, 9);
+
+            assertEquals(0, chunk.getDepth());
+            assertEquals(96, chunk.getHeight());
+        }
+
+    }
+
+    @Test
     public void testRetrieveChunk() throws IOException, MaterialNotFoundException {
         try (ChunkAccess<?> chunkAccess = world.getChunkAccess()) {
             Chunk chunk = chunkAccess.getChunk(0, 9);

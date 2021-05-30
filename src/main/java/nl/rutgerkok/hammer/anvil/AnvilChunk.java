@@ -151,7 +151,7 @@ public final class AnvilChunk implements Chunk {
         if (maxSectionIndex == Integer.MIN_VALUE) {
             return 256; // Don't know, probably a weird old chunk
         }
-        return maxSectionIndex * CHUNK_SECTION_Y_SIZE;
+        return maxSectionIndex * CHUNK_SECTION_Y_SIZE + CHUNK_SECTION_Y_SIZE;
     }
 
     @Override
