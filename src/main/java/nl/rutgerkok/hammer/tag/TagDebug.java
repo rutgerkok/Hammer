@@ -3,6 +3,7 @@ package nl.rutgerkok.hammer.tag;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -32,7 +33,9 @@ final class TagDebug {
 
     private static List<Object> toTypedList(ListTag<?> tag) {
         List<Object> typedList = new ArrayList<>();
-        typedList.add(tag.getListType().toString());
+        if (tag.isEmpty()) {
+            typedList.add("^=== empty list of " + tag.getListType().toString().toLowerCase(Locale.ROOT) + "");
+        }
         for (Object entry : tag) {
             typedList.add(toTypedValue(entry));
         }
@@ -46,7 +49,6 @@ final class TagDebug {
             Object value = entry.getValue();
 
             typedMap.put(keyName, toTypedValue(value));
-            typedMap.put(keyName + "_type", TagType.ofObject(value).toString());
         }
         return typedMap;
     }
@@ -57,6 +59,36 @@ final class TagDebug {
         }
         if (value instanceof ListTag) {
             return toTypedList((ListTag<?>) value);
+        }
+        if (value instanceof Byte) {
+            return "byte(" + value + ")";
+        }
+        if (value instanceof Short) {
+            return "short(" + value + ")";
+        }
+        if (value instanceof Integer) {
+            return "int(" + value + ")";
+        }
+        if (value instanceof Long) {
+            return "long(" + value + ")";
+        }
+        if (value instanceof Float) {
+            return "float(" + value + ")";
+        }
+        if (value instanceof Double) {
+            return "double(" + value + ")";
+        }
+        if (value instanceof String) {
+            return "str('" + value + "')";
+        }
+        if (value instanceof byte[] array) {
+            return List.of("^=== array of byte (length=" + array.length + ")");
+        }
+        if (value instanceof int[] array) {
+            return List.of("^=== array of int (length=" + array.length + ")");
+        }
+        if (value instanceof long[] array) {
+            return List.of("^=== array of long (length=" + array.length + ")");
         }
         return value;
     }
