@@ -1,6 +1,7 @@
 package nl.rutgerkok.hammer.tag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -82,13 +83,13 @@ final class TagDebug {
             return "str('" + value + "')";
         }
         if (value instanceof byte[]) {
-            return List.of("^=== array of byte (length=" + ((byte[]) value).length + ")");
+            return Collections.singletonList("^=== array of byte (length=" + ((byte[]) value).length + ")");
         }
         if (value instanceof int[]) {
-            return List.of("^=== array of int (length=" + ((int[]) value).length + ")");
+            return Collections.singletonList("^=== array of int (length=" + ((int[]) value).length + ")");
         }
         if (value instanceof long[]) {
-            return List.of("^=== array of long (length=" + ((long[]) value).length + ")");
+            return Collections.singletonList("^=== array of long (length=" + ((long[]) value).length + ")");
         }
         return value;
     }
