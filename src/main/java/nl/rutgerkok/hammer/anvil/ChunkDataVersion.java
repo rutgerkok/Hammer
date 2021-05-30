@@ -38,10 +38,8 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
     public static final ChunkDataVersion MINECRAFT_1_16_4 = new ChunkDataVersion(2584);
     public static final ChunkDataVersion MINECRAFT_1_16_5 = new ChunkDataVersion(2586);
 
-
     /**
-     * Gets the chunk data version from the version stored in the chunk root
-     * tag.
+     * Gets the chunk data version from the version stored in the chunk root tag.
      *
      * @param versionId
      *            The version id.
@@ -96,6 +94,7 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
 
     /**
      * Gets the raw id of the version.
+     *
      * @return The raw id.
      */
     public int getId() {
@@ -105,6 +104,18 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
     @Override
     public int hashCode() {
         return id * 31;
+    }
+
+    /**
+     * Returns true if this data version is from before the other.
+     *
+     * @param other
+     *            The other.
+     * @return True if the data version is from before, false if it's equal or
+     *         after.
+     */
+    public boolean isBefore(ChunkDataVersion other) {
+        return this.id < other.id;
     }
 
     @Override
