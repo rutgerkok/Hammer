@@ -81,14 +81,14 @@ final class TagDebug {
         if (value instanceof String) {
             return "str('" + value + "')";
         }
-        if (value instanceof byte[] array) {
-            return List.of("^=== array of byte (length=" + array.length + ")");
+        if (value instanceof byte[]) {
+            return List.of("^=== array of byte (length=" + ((byte[]) value).length + ")");
         }
-        if (value instanceof int[] array) {
-            return List.of("^=== array of int (length=" + array.length + ")");
+        if (value instanceof int[]) {
+            return List.of("^=== array of int (length=" + ((int[]) value).length + ")");
         }
-        if (value instanceof long[] array) {
-            return List.of("^=== array of long (length=" + array.length + ")");
+        if (value instanceof long[]) {
+            return List.of("^=== array of long (length=" + ((long[]) value).length + ")");
         }
         return value;
     }
