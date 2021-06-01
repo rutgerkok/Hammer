@@ -10,6 +10,7 @@ import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.tag.TagType;
+import nl.rutgerkok.hammer.util.FretArray;
 
 /**
  * Abstracts away the raw block ids of a chunk, which are different between
@@ -38,9 +39,16 @@ public abstract class ChunkBlocks {
      */
     public static ChunkBlocks create(ChunkDataVersion dataVersion, AnvilMaterialMap materialMap) {
         if (dataVersion.isBefore(ChunkDataVersion.MINECRAFT_FLATTENING)) {
+            // Very old
             return new IdAndDataBlocks(materialMap);
         }
-        return new PalettedBlocks(materialMap);
+        if (dataVersion.isAfter(ChunkDataVersion.MINECRAFT_1_15_2)) {
+            // Newest format
+            return new PalettedBlocks(FretArray.notCrossingCellBoundaries(), materialMap);
+        }
+
+        // In between
+        return new PalettedBlocks(FretArray.crossingCellBoundaries(), materialMap);
     }
 
     static CompoundTag getChunkSection(CompoundTag chunkTag, int y) {

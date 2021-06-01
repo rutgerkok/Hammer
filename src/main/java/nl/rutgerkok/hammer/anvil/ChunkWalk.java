@@ -62,6 +62,8 @@ final class ChunkWalk {
                 default:
                     throw new AssertionError("Unknown result: " + result);
             }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Runtime error in " + region.toString() + " " + chunkX + " " + chunkZ, e);
         }
     }
 

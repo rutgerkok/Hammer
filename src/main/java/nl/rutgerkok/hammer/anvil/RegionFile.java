@@ -457,6 +457,11 @@ public class RegionFile {
         Files.move(tempPath, fileName, StandardCopyOption.REPLACE_EXISTING);
     }
 
+    @Override
+    public String toString() {
+        return fileName.getFileName().toString();
+    }
+
     /* write a chunk data to the region file at specified sector number */
     private void write(int sectorNumber, byte[] data, int length) throws IOException {
         debugln(" " + sectorNumber);

@@ -21,15 +21,18 @@ final class PalettedBlocks extends ChunkBlocks {
 
     private static final int TOTAL_SIZE_4BIT_FRET = TOTAL_SIZE * 4 / Long.SIZE;
 
+    private static final int BLOCKS_PER_SECTION = SECTION_X_SIZE * SECTION_Y_SIZE * SECTION_Z_SIZE;
+
     static int getPositionInSectionArray(int xInSection, int yInSection, int zInSection) {
         return yInSection << (SECTION_X_BITS + SECTION_Z_BITS)
                 | zInSection << SECTION_X_BITS | xInSection;
     }
 
     private final AnvilMaterialMap materialMap;
-    private final int BLOCKS_PER_SECTION = SECTION_X_SIZE * SECTION_Y_SIZE * SECTION_Z_SIZE;
+    private final FretArray fretArray;
 
-    PalettedBlocks(AnvilMaterialMap materialMap) {
+    PalettedBlocks(FretArray fretArray, AnvilMaterialMap materialMap) {
+        this.fretArray = Objects.requireNonNull(fretArray, "fretArray");
         this.materialMap = Objects.requireNonNull(materialMap, "materialMap");
     }
 
@@ -76,13 +79,13 @@ final class PalettedBlocks extends ChunkBlocks {
 
         // Check if it will fit in the chunk array
         int highestId = materialsTag.size() - 1;
-        int bitsNeededPerBlock = FretArray.toSafeBitCount(Integer.SIZE - Integer.numberOfLeadingZeros(highestId));
+        int bitsNeededPerBlock = Integer.SIZE - Integer.numberOfLeadingZeros(highestId);
         long[] currentBlockStates = sectionTag.getLongArray(SectionTag.BLOCK_STATES, OptionalInt.empty());
         int currentBitsPerBlock = currentBlockStates.length * Long.SIZE / BLOCKS_PER_SECTION;
         if (currentBitsPerBlock < bitsNeededPerBlock) {
             // Nope, so resize the array
-            long[] resizedArray = FretArray.changeBitsPerEntry(currentBlockStates, currentBitsPerBlock,
-                    bitsNeededPerBlock);
+            long[] resizedArray = fretArray
+                    .changeBitsPerEntry(currentBlockStates, BLOCKS_PER_SECTION, currentBitsPerBlock, bitsNeededPerBlock);
             sectionTag.setLongArray(SectionTag.BLOCK_STATES, resizedArray);
         }
 
@@ -103,7 +106,7 @@ final class PalettedBlocks extends ChunkBlocks {
 
         int bitsPerBlock = blockStates.length * Long.SIZE / BLOCKS_PER_SECTION;
         int position = getPositionInSectionArray(x, y & 0xf, z);
-        int blockId = FretArray.get(blockStates, bitsPerBlock, position);
+        int blockId = fretArray.get(blockStates, bitsPerBlock, position);
         CompoundTag material = section.getList(SectionTag.PALETTE, TagType.COMPOUND).get(blockId);
         return materialMap.parseBlockState(material);
     }
@@ -124,7 +127,7 @@ final class PalettedBlocks extends ChunkBlocks {
         long[] blockStates = section.getLongArray(SectionTag.BLOCK_STATES, OptionalInt.empty());
         int bitsPerBlock = blockStates.length * Long.SIZE / BLOCKS_PER_SECTION;
         int position = getPositionInSectionArray(x, y & 0xf, z);
-        FretArray.set(blockStates, bitsPerBlock, position, materialId);
+        fretArray.set(blockStates, bitsPerBlock, position, materialId);
     }
 
 }

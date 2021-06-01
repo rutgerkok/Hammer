@@ -112,6 +112,18 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
     }
 
     /**
+     * Returns true if this data version is from after the other.
+     *
+     * @param other
+     *            The other.
+     * @return True if the data version is from after, false if it's equal or
+     *         before.
+     */
+    public boolean isAfter(ChunkDataVersion other) {
+        return this.id > other.id;
+    }
+
+    /**
      * Returns true if this data version is from before the other.
      *
      * @param other

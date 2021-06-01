@@ -11,29 +11,13 @@ public final class NumberMap {
 
     private char[] idMapping = new char[0];
 
-    public void put(char originalId, char translatedId) {
-        // Mapping to 0 (null) is special cased
-        if (translatedId == 0) {
-            if (originalId != 0) {
-                throw new IllegalArgumentException("Can't map to translated id of 0 (null) unless the original id is also 0");
-            }
-            return;
-        }
-
-        if (originalId >= idMapping.length) {
-            growToSize(originalId);
-        }
-
-        idMapping[originalId] = translatedId;
-    }
-
     public char getTranslatedId(char originalId) throws NoSuchElementException {
 
         if (originalId == 0) {
             return 0;
         }
 
-        if (originalId > idMapping.length) {
+        if (originalId >= idMapping.length) {
             throw new NoSuchElementException();
         }
 
@@ -61,5 +45,21 @@ public final class NumberMap {
         char[] newArray = new char[newSize];
         System.arraycopy(idMapping, 0, newArray, 0, idMapping.length);
         idMapping = newArray;
+    }
+
+    public void put(char originalId, char translatedId) {
+        // Mapping to 0 (null) is special cased
+        if (translatedId == 0) {
+            if (originalId != 0) {
+                throw new IllegalArgumentException("Can't map to translated id of 0 (null) unless the original id is also 0");
+            }
+            return;
+        }
+
+        if (originalId >= idMapping.length) {
+            growToSize(originalId);
+        }
+
+        idMapping[originalId] = translatedId;
     }
 }

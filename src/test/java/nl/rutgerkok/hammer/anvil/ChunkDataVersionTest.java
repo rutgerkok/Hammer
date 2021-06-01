@@ -12,6 +12,13 @@ import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 public class ChunkDataVersionTest {
 
     @Test
+    public void testAfter() throws IOException, MaterialNotFoundException {
+        assertFalse(ChunkDataVersion.MINECRAFT_1_12_2.isAfter(ChunkDataVersion.MINECRAFT_1_13));
+        assertFalse(ChunkDataVersion.MINECRAFT_1_12_2.isAfter(ChunkDataVersion.MINECRAFT_1_12_2));
+        assertTrue(ChunkDataVersion.MINECRAFT_1_12_2.isAfter(ChunkDataVersion.MINECRAFT_1_12_1));
+    }
+
+    @Test
     public void testBefore() throws IOException, MaterialNotFoundException {
         assertTrue(ChunkDataVersion.MINECRAFT_1_12_2.isBefore(ChunkDataVersion.MINECRAFT_1_13));
         assertFalse(ChunkDataVersion.MINECRAFT_1_12_2.isBefore(ChunkDataVersion.MINECRAFT_1_12_2));
