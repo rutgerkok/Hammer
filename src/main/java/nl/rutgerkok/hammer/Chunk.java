@@ -82,6 +82,17 @@ public interface Chunk {
     MaterialData getMaterial(int x, int y, int z) throws MaterialNotFoundException;
 
     /**
+     * Gets the point of interest data. The exact format is version-dependent. For
+     * Minecraft Java 1.16, this is a tag of sections, with each section containing
+     * a list of points of interest.
+     *
+     * @return A compound tag, will be empty if no data is stored for the chunk.
+     * @throws IOException
+     *             If reading the compound tag fails.
+     */
+    CompoundTag getPointsOfInterest() throws IOException;
+
+    /**
      * Gets the size of the chunk on the x-axis.
      *
      * @return The size in blocks.

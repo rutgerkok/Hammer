@@ -10,7 +10,9 @@ import nl.rutgerkok.hammer.anvil.chunksection.ChunkBlocks;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.EntitiesRootTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldChunkTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldSectionTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.PointsOfInterestRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.MaterialData;
 import nl.rutgerkok.hammer.tag.CompoundTag;
@@ -37,7 +39,14 @@ public final class AnvilChunk implements Chunk {
     private final AnvilGameFactory gameFactory;
     private final ChunkBlocks chunkSections;
     private final ChunkDataVersion version;
+
+    /**
+     * Only used if the entity data is stored in a separate file.
+     *
+     * @see #getEntities()
+     */
     private Optional<ListTag<CompoundTag>> entityTag = Optional.empty();
+    private Optional<CompoundTag> pointsOfInterestTag = Optional.empty();
 
     private final RegionNbtIo tagIo;
 
@@ -120,8 +129,9 @@ public final class AnvilChunk implements Chunk {
     @Override
     public ListTag<CompoundTag> getEntities() throws IOException {
         if (this.version.isBefore(ChunkDataVersion.MINECRAFT_ENTITY_SEPARATION)) {
-            return chunkTag.getList(ChunkTag.ENTITIES, TagType.COMPOUND);
+            return chunkTag.getList(OldChunkTag.ENTITIES, TagType.COMPOUND);
         }
+
         if (this.entityTag.isPresent()) {
             // Cached
             return this.entityTag.get();
@@ -165,6 +175,26 @@ public final class AnvilChunk implements Chunk {
     }
 
     @Override
+    public CompoundTag getPointsOfInterest() throws IOException {
+        if (!this.version.isAfter(ChunkDataVersion.MINECRAFT_1_13_2)) {
+            // Data didn't exist at the time
+            return new CompoundTag();
+        }
+
+        if (this.pointsOfInterestTag.isPresent()) {
+            // Cached
+            return this.pointsOfInterestTag.get();
+        }
+
+        // Load & cache
+        CompoundTag pointsOfInterest = this.tagIo.loadTag(RegionFileType.POINT_OF_INTEREST)
+                .map(tag -> tag.getCompound(PointsOfInterestRootTag.SECTIONS))
+                .orElseGet(CompoundTag::new);
+        this.pointsOfInterestTag = Optional.of(pointsOfInterest);
+        return pointsOfInterest;
+    }
+
+    @Override
     public int getSizeX() {
         return CHUNK_X_SIZE;
     }
@@ -194,9 +224,6 @@ public final class AnvilChunk implements Chunk {
     }
 
     boolean isEntityFileLoaded() {
-        if (version.isBefore(ChunkDataVersion.MINECRAFT_ENTITY_SEPARATION)) {
-            return false; // Will never be loaded from a separate file
-        }
         return this.entityTag.isPresent();
     }
 
@@ -225,7 +252,7 @@ public final class AnvilChunk implements Chunk {
             ListTag<CompoundTag> entities = getEntities();
             if (entities.isEmpty()) {
                 // Delete them
-                tagIo.deleteTag(RegionFileType.ENTITY, new CompoundTag());
+                tagIo.deleteTag(RegionFileType.ENTITY);
             } else {
                 // Save them
                 CompoundTag entityRoot = new CompoundTag();
@@ -236,8 +263,20 @@ public final class AnvilChunk implements Chunk {
             }
         }
 
-        // Save point of interest data
-
+        // Save points of interest (or delete them)
+        if (this.pointsOfInterestTag.isPresent()) {
+            CompoundTag pointsOfInterest = getPointsOfInterest();
+            if (pointsOfInterest.isEmpty()) {
+                // Delete them
+                tagIo.deleteTag(RegionFileType.POINT_OF_INTEREST);
+            } else {
+                // Save them
+                CompoundTag pointsOfInterestRoot = new CompoundTag();
+                pointsOfInterestRoot.setCompound(PointsOfInterestRootTag.SECTIONS, pointsOfInterest);
+                pointsOfInterestRoot.setInt(PointsOfInterestRootTag.DATA_VERSION, getVersion().getId());
+                tagIo.saveTag(RegionFileType.POINT_OF_INTEREST, pointsOfInterestRoot);
+            }
+        }
     }
 
     @Override

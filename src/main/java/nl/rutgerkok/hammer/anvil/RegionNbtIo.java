@@ -58,7 +58,15 @@ final class RegionNbtIo {
         }
     }
 
-    void deleteTag(RegionFileType type, CompoundTag tag) throws IOException {
+    /**
+     * Deletes the data of the chunk in the given region file type.
+     *
+     * @param type
+     *            The region file type.
+     * @throws IOException
+     *             If an IO error occurs.
+     */
+    void deleteTag(RegionFileType type) throws IOException {
         cache.getRegionFile(type, chunkX, chunkZ).deleteChunk(chunkX & 31, chunkZ & 31);
     }
 
