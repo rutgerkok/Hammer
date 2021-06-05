@@ -1,6 +1,6 @@
 # Hammer
 
-[![Build Status](https://travis-ci.com/rutgerkok/Hammer.svg?branch=master)](https://travis-ci.com/rutgerkok/Hammer)
+[![Build Status](https://img.shields.io/github/workflow/status/rutgerkok/Hammer/dev%20build)](https://github.com/rutgerkok/Hammer/actions?query=workflow%3A%22dev+build%22)
 
 World editor library for Minecraft, written in Java. It is intended to be used by programs that need to interact with Minecraft level files. It has support for both the Java version of Minecraft and the Pocket Edition.
 
