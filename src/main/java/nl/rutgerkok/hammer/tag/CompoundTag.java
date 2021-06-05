@@ -593,15 +593,15 @@ public final class CompoundTag implements JSONAware {
     }
 
     /**
-     * Sets the list tag with the given value. This will override the tag (if
-     * any) with the same name (case insensitive).
+     * Sets the list tag with the given value. This will override the tag (if any)
+     * with the same name (case insensitive).
      *
      * @param name
      *            Name of the tag.
      * @param value
      *            Value of the tag.
      */
-    public void setList(CompoundKey<ListTag<?>> name, ListTag<?> value) {
+    public void setList(CompoundKey<? extends ListTag<?>> name, ListTag<?> value) {
         map.put(name, Objects.requireNonNull(value));
     }
 

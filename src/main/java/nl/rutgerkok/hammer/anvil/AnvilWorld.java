@@ -29,7 +29,6 @@ public class AnvilWorld implements World {
 
     private static final String PLAYER_DIRECTORY = "playerdata";
     private static final String PLAYER_DIRECTORY_OLD = "players";
-    private static final String REGION_FOLDER_NAME = "region";
 
     private final AnvilGameFactory gameFactory;
     private final Path levelDat;
@@ -54,7 +53,7 @@ public class AnvilWorld implements World {
         this.levelDat = levelDat.toAbsolutePath();
         this.tag = Files.exists(levelDat) ? AnvilNbtReader.readFromCompressedFile(levelDat) : new CompoundTag();
         this.gameFactory = new AnvilGameFactory(initMaterialMap(dictionary));
-        this.regionFileCache = new RegionFileCache(getRegionDirectory());
+        this.regionFileCache = new RegionFileCache(levelDat.getParent());
     }
 
     @Override
@@ -112,10 +111,6 @@ public class AnvilWorld implements World {
 
         // Try again with old file
         return getDirectory(PLAYER_DIRECTORY_OLD);
-    }
-
-    private Path getRegionDirectory() {
-        return levelDat.resolveSibling(REGION_FOLDER_NAME);
     }
 
     /**

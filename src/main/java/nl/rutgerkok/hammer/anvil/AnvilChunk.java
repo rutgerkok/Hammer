@@ -1,11 +1,15 @@
 package nl.rutgerkok.hammer.anvil;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.anvil.chunksection.ChunkBlocks;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkTag;
+import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.EntitiesRootTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.OldSectionTag;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.SectionTag;
 import nl.rutgerkok.hammer.material.MaterialData;
@@ -29,49 +33,34 @@ public final class AnvilChunk implements Chunk {
      */
     public static final int MAX_BIOME_ID = 254;
 
-    /**
-     * Creates a new, empty chunk.
-     *
-     * @param gameFactory
-     *            Game factory.
-     * @param dataVersion
-     *            Data version used for creating the chunk.
-     * @param chunkX
-     *            Chunk x coordinate.
-     * @param chunkZ
-     *            Chunk z coordinate.
-     * @return The chunk.
-     */
-    static AnvilChunk newEmptyChunk(AnvilGameFactory gameFactory, ChunkDataVersion dataVersion, int chunkX,
-            int chunkZ) {
-        CompoundTag chunkTag = new CompoundTag();
-        chunkTag.setInt(ChunkTag.X_POS, chunkX);
-        chunkTag.setInt(ChunkTag.Z_POS, chunkZ);
-        return new AnvilChunk(gameFactory, chunkTag, dataVersion);
-    }
-
     private final CompoundTag chunkTag;
     private final AnvilGameFactory gameFactory;
     private final ChunkBlocks chunkSections;
     private final ChunkDataVersion version;
+    private Optional<ListTag<CompoundTag>> entityTag = Optional.empty();
+
+    private final RegionNbtIo tagIo;
 
     /**
      * Creates a new chunk from the given data tag.
      *
      * @param gameFactory
      *            Game factory, for interpreting the raw data.
-     * @param chunkTag
-     *            The data tag, with child tags like Biomes, Sections, etc.
-     * @param dataVersion
-     *            The data version: in which format is this chunk expected to
-     *            be?
+     * @param nbtIo
+     *            Loader/saver for the various compound tags of the chunk.
+     * @throws IOException
+     *             If the chunk fails to load.
      */
-    AnvilChunk(AnvilGameFactory gameFactory, CompoundTag chunkTag, ChunkDataVersion dataVersion) {
+    AnvilChunk(AnvilGameFactory gameFactory, RegionNbtIo nbtIo) throws IOException {
         this.gameFactory = Objects.requireNonNull(gameFactory, "gameFactory");
-        this.chunkTag = Objects.requireNonNull(chunkTag, "chunkTag");
-        this.version = Objects.requireNonNull(dataVersion, "dataVersion");
+        this.tagIo = Objects.requireNonNull(nbtIo, "nbtIo");
 
-        this.chunkSections = ChunkBlocks.create(dataVersion, gameFactory.getMaterialMap());
+        CompoundTag chunkRootTag = nbtIo.loadTag(RegionFileType.CHUNK)
+                .orElseGet(nbtIo::createEmptyChunkRootTag);
+        this.chunkTag = chunkRootTag.getCompound(ChunkRootTag.MINECRAFT);
+        this.version = ChunkDataVersion.fromId(chunkRootTag.getInt(ChunkRootTag.DATA_VERSION));
+
+        this.chunkSections = ChunkBlocks.create(version, gameFactory.getMaterialMap());
     }
 
     private void checkOutOfBounds(int x, int y, int z) {
@@ -83,8 +72,8 @@ public final class AnvilChunk implements Chunk {
     }
 
     /**
-     * Gets direct access to the biome array of this chunk. Modifying the byte
-     * array will modify the data of this chunk.
+     * Gets direct access to the biome array of this chunk. Modifying the byte array
+     * will modify the data of this chunk.
      *
      * @return The biome array.
      */
@@ -129,8 +118,21 @@ public final class AnvilChunk implements Chunk {
     }
 
     @Override
-    public List<CompoundTag> getEntities() {
-        return chunkTag.getList(ChunkTag.ENTITIES, TagType.COMPOUND);
+    public ListTag<CompoundTag> getEntities() throws IOException {
+        if (this.version.isBefore(ChunkDataVersion.MINECRAFT_ENTITY_SEPARATION)) {
+            return chunkTag.getList(ChunkTag.ENTITIES, TagType.COMPOUND);
+        }
+        if (this.entityTag.isPresent()) {
+            // Cached
+            return this.entityTag.get();
+        }
+
+        // Load & cache
+        ListTag<CompoundTag> entities = this.tagIo.loadTag(RegionFileType.ENTITY)
+                .map(tag -> tag.getList(EntitiesRootTag.ENTITIES, TagType.COMPOUND))
+                .orElse(new ListTag<>(TagType.COMPOUND));
+        this.entityTag = Optional.of(entities);
+        return entities;
     }
 
     @Override
@@ -184,15 +186,58 @@ public final class AnvilChunk implements Chunk {
 
     /**
      * Gets the Minecraft version used to save this chunk.
+     *
      * @return The version.
      */
     public ChunkDataVersion getVersion() {
         return version;
     }
 
+    boolean isEntityFileLoaded() {
+        if (version.isBefore(ChunkDataVersion.MINECRAFT_ENTITY_SEPARATION)) {
+            return false; // Will never be loaded from a separate file
+        }
+        return this.entityTag.isPresent();
+    }
+
     @Override
     public boolean isOutOfBounds(int x, int y, int z) {
         return x < 0 || x >= CHUNK_X_SIZE || z < 0 || z >= CHUNK_Z_SIZE;
+    }
+
+    /**
+     * Saves all data of the chunk to disk. Should be called through ChunkAccess or
+     * ChunkWalk, to avoid problems with file locks.
+     *
+     * @throws IOException
+     *             If saving fails.
+     */
+    void save() throws IOException {
+
+        // Save main data
+        CompoundTag root = new CompoundTag();
+        root.setCompound(ChunkRootTag.MINECRAFT, getTag());
+        root.setInt(ChunkRootTag.DATA_VERSION, getVersion().getId());
+        tagIo.saveTag(RegionFileType.CHUNK, root);
+
+        // Save entities (or delete them)
+        if (isEntityFileLoaded()) {
+            ListTag<CompoundTag> entities = getEntities();
+            if (entities.isEmpty()) {
+                // Delete them
+                tagIo.deleteTag(RegionFileType.ENTITY, new CompoundTag());
+            } else {
+                // Save them
+                CompoundTag entityRoot = new CompoundTag();
+                entityRoot.setList(EntitiesRootTag.ENTITIES, entities);
+                entityRoot.setIntArray(EntitiesRootTag.POSITION, new int[] { getChunkX(), getChunkZ() });
+                entityRoot.setInt(EntitiesRootTag.DATA_VERSION, getVersion().getId());
+                tagIo.saveTag(RegionFileType.ENTITY, entityRoot);
+            }
+        }
+
+        // Save point of interest data
+
     }
 
     @Override

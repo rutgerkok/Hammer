@@ -23,6 +23,13 @@ public interface ChunkAccess<T extends Chunk> extends Closeable {
     void close() throws IOException;
 
     /**
+     * Deletes a chunk from disk, along with all associated data. The deletion happens on the current thread.
+     * @param chunk The chunk to delete.
+     * @throws IOException If an IO error occurs.
+     */
+    void deleteChunk(T chunk) throws IOException;
+
+    /**
      * Gets the chunk at the given chunk coordinates. If the chunk does not
      * exist, a chunk consisting of only air blocks is returned.
      *

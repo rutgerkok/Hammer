@@ -35,6 +35,16 @@ public final class AnvilFormat {
     }
 
     /**
+     * Entities root tag format. (Entities are no longer saved in the chunks.)
+     *
+     */
+    public static class EntitiesRootTag {
+        public static final CompoundKey<ListTag<CompoundTag>> ENTITIES = CompoundKey.of("Entities");
+        public static final CompoundKey<int[]> POSITION = CompoundKey.of("Position");
+        public static final CompoundKey<Integer> DATA_VERSION = CompoundKey.of("DataVersion");
+    }
+
+    /**
      * Entity format
      */
     public static class EntityTag {

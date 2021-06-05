@@ -1,5 +1,6 @@
 package nl.rutgerkok.hammer;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import nl.rutgerkok.hammer.util.Progress;
@@ -19,7 +20,11 @@ public final class CountingChunkVisitor implements Visitor<Chunk> {
     @Override
     public Result accept(Chunk chunk, Progress progress) {
         chunksSeen.incrementAndGet();
-        entitiesSeen.addAndGet(chunk.getEntities().size());
+        try {
+            entitiesSeen.addAndGet(chunk.getEntities().size());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         tileEntitiesSeen.addAndGet(chunk.getTileEntities().size());
 
         return Result.NO_CHANGES;

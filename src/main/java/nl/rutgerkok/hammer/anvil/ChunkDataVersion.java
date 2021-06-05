@@ -42,6 +42,7 @@ public final class ChunkDataVersion implements Comparable<ChunkDataVersion> {
     public static final ChunkDataVersion MINECRAFT_1_16_3 = new ChunkDataVersion(2580);
     public static final ChunkDataVersion MINECRAFT_1_16_4 = new ChunkDataVersion(2584);
     public static final ChunkDataVersion MINECRAFT_1_16_5 = new ChunkDataVersion(2586);
+    public static final ChunkDataVersion MINECRAFT_ENTITY_SEPARATION = new ChunkDataVersion(2681);
 
     /**
      * Gets the chunk data version from the version stored in the chunk root tag.

@@ -1,5 +1,6 @@
 package nl.rutgerkok.hammer;
 
+import java.io.IOException;
 import java.util.List;
 
 import nl.rutgerkok.hammer.material.MaterialData;
@@ -38,8 +39,10 @@ public interface Chunk {
      * Gets all entities in this chunk.
      *
      * @return The entities.
+     * @throws IOException
+     *             If an IO error occurs while loading the entities.
      */
-    List<CompoundTag> getEntities();
+    List<CompoundTag> getEntities() throws IOException;
 
     /**
      * Gets the game factory used for this chunk.

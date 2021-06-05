@@ -122,6 +122,9 @@ public class RegionFile {
     private long lastModified = 0;
     private final int offsets[];
     private BooleanList sectorFree;
+    private int regionX;
+    private int regionZ;
+
 
     /**
      * Creates a new {@link RegionFile} instance. Instances are created by the
@@ -129,8 +132,15 @@ public class RegionFile {
      *
      * @param path
      *            The path to the region file.
+     * @param regionX
+     *            The x position of the region, in region coords.
+     * @param regionZ
+     *            The z position of the region, in region coords.
      */
-    RegionFile(Path path) {
+    RegionFile(Path path, int regionX, int regionZ) {
+        this.regionX = regionX;
+        this.regionZ = regionZ;
+
         offsets = new int[SECTOR_INTS];
         chunkTimestamps = new int[SECTOR_INTS];
 
@@ -361,6 +371,14 @@ public class RegionFile {
 
     private int getOffsetAndSize(int x, int z) {
         return offsets[x + z * REGION_CHUNK_COUNT];
+    }
+
+    public int getStartChunkX() {
+        return regionX << 5;
+    }
+
+    public int getStartChunkZ() {
+        return regionZ << 5;
     }
 
     public boolean hasChunk(int x, int z) {

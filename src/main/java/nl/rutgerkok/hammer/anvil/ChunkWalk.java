@@ -1,7 +1,6 @@
 package nl.rutgerkok.hammer.anvil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -9,7 +8,6 @@ import java.util.Objects;
 
 import nl.rutgerkok.hammer.anvil.RegionFileCache.Claim;
 import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
-import nl.rutgerkok.hammer.anvil.tag.AnvilNbtReader;
 import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
 import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
@@ -33,29 +31,23 @@ final class ChunkWalk {
 
     private void handleChunk(Progress progress, Visitor<? super AnvilChunk> visitor,
             RegionFile region, int chunkX, int chunkZ) throws IOException {
-        try (InputStream stream = region.getChunkInputStream(chunkX, chunkZ)) {
-            if (stream == null) {
-                return;
-            }
-            CompoundTag chunkRootTag = AnvilNbtReader.readFromUncompressedStream(stream);
-            CompoundTag chunkTag = chunkRootTag.getCompound(ChunkRootTag.MINECRAFT);
-            int versionId = chunkRootTag.getInt(ChunkRootTag.DATA_VERSION);
-            ChunkDataVersion version = ChunkDataVersion.fromId(versionId);
-
-            AnvilChunk chunk = new AnvilChunk(gameFactory, chunkTag, version);
+        try {
+            AnvilChunk chunk = new AnvilChunk(gameFactory,
+                    new RegionNbtIo(ChunkDataVersion.latest(), regionFileCache, chunkX, chunkZ));
             Result result = visitor.accept(chunk, progress);
             switch (result) {
+                // TODO handle distribution across region files
                 case CHANGED:
                     // Save the chunk
-                    try (OutputStream outputStream = region.getChunkOutputStream(chunkX, chunkZ)) {
+                    try (OutputStream outputStream = region.getChunkOutputStream(chunkX & 31, chunkZ & 31)) {
                         CompoundTag root = new CompoundTag();
                         root.setCompound(ChunkRootTag.MINECRAFT, chunk.getTag());
-                        root.setInt(ChunkRootTag.DATA_VERSION, versionId);
+                        root.setInt(ChunkRootTag.DATA_VERSION, chunk.getVersion().getId());
                         AnvilNbtWriter.writeUncompressedToStream(outputStream, root);
                     }
                     break;
                 case DELETE:
-                    region.deleteChunk(chunkX, chunkZ);
+                    region.deleteChunk(chunkX & 31, chunkZ & 31);
                     break;
                 case NO_CHANGES:
                     break;
@@ -63,7 +55,7 @@ final class ChunkWalk {
                     throw new AssertionError("Unknown result: " + result);
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException("Runtime error in " + region.toString() + " " + chunkX + " " + chunkZ, e);
+            throw new RuntimeException("Runtime error in " + chunkX + " " + chunkZ, e);
         }
     }
 
@@ -83,10 +75,13 @@ final class ChunkWalk {
     }
 
     private void walkRegionFile(Progress progress, Visitor<? super AnvilChunk> visitor, RegionFile regionFile) throws IOException {
-
-        for (int chunkX = 0; chunkX < RegionFile.REGION_CHUNK_COUNT; chunkX++) {
-            for (int chunkZ = 0; chunkZ < RegionFile.REGION_CHUNK_COUNT; chunkZ++) {
-                handleChunk(progress, visitor, regionFile, chunkX, chunkZ);
+        int startChunkX = regionFile.getStartChunkX();
+        int startChunkZ = regionFile.getStartChunkZ();
+        for (int localChunkX = 0; localChunkX < RegionFile.REGION_CHUNK_COUNT; localChunkX++) {
+            for (int localChunkZ = 0; localChunkZ < RegionFile.REGION_CHUNK_COUNT; localChunkZ++) {
+                if (regionFile.hasChunk(localChunkX, localChunkZ)) {
+                    handleChunk(progress, visitor, regionFile, startChunkX + localChunkX, startChunkZ + localChunkZ);
+                }
             }
         }
 
