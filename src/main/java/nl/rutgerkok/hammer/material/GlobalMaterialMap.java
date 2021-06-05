@@ -63,9 +63,11 @@ public final class GlobalMaterialMap {
             lock.lock();
 
             // Search for existing entry
-            MaterialName lastFoundName = null;
+            MaterialName firstFoundName = null;
             for (MaterialName name : names) {
-                lastFoundName = name;
+                if (firstFoundName == null) {
+                    firstFoundName = name;
+                }
 
                 MaterialData found = nameToInfo.get(name);
                 if (found != null) {
@@ -77,7 +79,7 @@ public final class GlobalMaterialMap {
             }
 
             // Add new entry
-            MaterialData newEntry = new MaterialData((char) idToInfo.size(), lastFoundName);
+            MaterialData newEntry = new MaterialData((char) idToInfo.size(), firstFoundName);
             idToInfo.add(newEntry);
             addNameEntries(newEntry, names);
             return newEntry;

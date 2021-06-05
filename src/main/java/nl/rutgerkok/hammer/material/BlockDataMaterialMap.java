@@ -152,34 +152,31 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
      *            Anvil block id.
      * @param blockData
      *            Anvil block data.
-     * @param fullName
-     *            Name, like "minecraft:stone[variant=stone]" or
-     *            "minecraft:air". If the blockData is not 0, the brackets must
-     *            be present.
-     * @param aliases
-     *            Alternative names for the block, like "minecraft:podzol" for
-     *            "minecraft:dirt[variant=podzol]". This list won't be modified,
-     *            only read by this method.
+     * @param names
+     *            Names, like "minecraft:granite" or "minecraft:air". If the
+     *            blockData is not 0, the brackets must be present. The first name
+     *            is the global name, the last name the canonical name for this map.
+     *            For example: ["minecraft:podzol",
+     *            "minecraft:dirt[variant=podzol]"]
      * @throws java.text.ParseException
      *             If the format of the material name is invalid.
      */
-    protected final void register(short blockId, byte blockData, String fullName, List<String> aliases)
+    protected final void register(short blockId, byte blockData, List<String> names)
             throws java.text.ParseException {
-        MaterialName parsedFullName = MaterialName.parse(fullName);
-        List<MaterialName> names = new ArrayList<>();
+        MaterialName canonicalName = MaterialName.parse(names.get(names.size() - 1));
+        List<MaterialName> parsedNames = new ArrayList<>();
         // Allow lookup by full name and aliases
-        names.add(parsedFullName);
-        for (String alias : aliases) {
-            names.add(MaterialName.parse(alias));
+        for (String name : names) {
+            parsedNames.add(MaterialName.parse(name));
         }
 
         // Register in the various registries
-        MaterialData materialData = globalMap.addMaterial(names);
+        MaterialData materialData = globalMap.addMaterial(parsedNames);
         char ida = (char) (blockId << 4 | blockData);
         char idh = materialData.getId();
         idhToAnvil.put(idh, ida);
         anvilToIdh.put(ida, idh);
-        idhToAnvilName.put((int) idh, parsedFullName);
+        idhToAnvilName.put((int) idh, canonicalName);
     }
 
     private void registerVanillaMaterials(URL blocksFile) throws java.text.ParseException {
@@ -190,14 +187,13 @@ public class BlockDataMaterialMap implements WorldMaterialMap {
                 JSONArray listEntry = (JSONArray) entry;
                 short blockId = ((Number) listEntry.get(0)).shortValue();
                 byte blockData = ((Number) listEntry.get(1)).byteValue();
-                String blockName = (String) listEntry.get(2);
 
                 // The next operation assumes all remaining elements in the list
                 // are strings. We catch the ClassCastException below if this is
                 // not the case
                 @SuppressWarnings("unchecked")
-                List<String> alternatives = listEntry.subList(3, listEntry.size());
-                this.register(blockId, blockData, blockName, alternatives);
+                List<String> names = listEntry.subList(2, listEntry.size());
+                this.register(blockId, blockData, names);
             }
         } catch (ClassCastException | ArrayIndexOutOfBoundsException | IOException | ParseException e) {
             // Invalid JSON, should be impossible as we're providing the JSON

@@ -35,6 +35,14 @@ public class OldMaterialMapTest {
     }
 
     @Test
+    public void testNewNameFromOld2() {
+        MaterialData material = map.getGlobal().getMaterialByName("minecraft:dirt[variant=podzol]");
+        assertEquals("minecraft:podzol", material.toString());
+        assertEquals("minecraft:dirt[variant=podzol]", map.getCanonicalMinecraftName(material).toString());
+        assertEquals(3 * 16 + 2, map.getMinecraftId(material));
+    }
+
+    @Test
     public void testOldNameFromNew() {
         MaterialData material = map.getGlobal().getMaterialByName("minecraft:red_terracotta");
         assertEquals("minecraft:red_terracotta", material.toString());
