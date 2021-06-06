@@ -24,7 +24,7 @@ public final class AnvilFormat {
      * Format of the base chunk tag.
      */
     public static class ChunkTag {
-        public static final CompoundKey<byte[]> BIOMES = CompoundKey.of("Biomes");
+        public static final CompoundKey<int[]> BIOMES = CompoundKey.of("Biomes");
         public static final CompoundKey<Long> INHABITED_TIME = CompoundKey.of("InhabitedTime");
         public static final CompoundKey<ListTag<CompoundTag>> SECTIONS = CompoundKey.of("Sections");
         public static final CompoundKey<ListTag<CompoundTag>> TILE_ENTITIES = CompoundKey.of("TileEntities");
@@ -85,6 +85,7 @@ public final class AnvilFormat {
      *
      */
     public static class OldChunkTag {
+        public static final CompoundKey<byte[]> BIOMES = CompoundKey.of("Biomes");
         public static final CompoundKey<ListTag<CompoundTag>> ENTITIES = CompoundKey.of("Entities");
         public static final CompoundKey<Boolean> LIGHT_POPULATED = CompoundKey.of("LightPopulated");
         public static final CompoundKey<Boolean> TERRAIN_POPULATED = CompoundKey.of("TerrainPopulated");

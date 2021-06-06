@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import nl.rutgerkok.hammer.Chunk;
 import nl.rutgerkok.hammer.anvil.chunksection.ChunkBlocks;
@@ -81,13 +82,15 @@ public final class AnvilChunk implements Chunk {
     }
 
     /**
-     * Gets direct access to the biome array of this chunk. Modifying the byte array
+     * Gets direct access to the biome array of this chunk. Modifying the int array
      * will modify the data of this chunk.
      *
      * @return The biome array.
+     * @see #getOldBiomeArray() If this method returns a zero-length array, then you
+     *      should try the old way of storing biomes.
      */
-    public byte[] getBiomeArray() {
-        return chunkTag.getByteArray(ChunkTag.BIOMES, CHUNK_X_SIZE * CHUNK_Z_SIZE);
+    public int[] getBiomeArray() {
+        return chunkTag.getIntArray(ChunkTag.BIOMES, OptionalInt.empty());
     }
 
     /**
@@ -172,6 +175,21 @@ public final class AnvilChunk implements Chunk {
         checkOutOfBounds(x, y, z);
 
         return chunkSections.getMaterial(chunkTag, x, y, z);
+    }
+
+    /**
+     * Gets direct access to the biome array of this chunk. Modifying the byte array
+     * will modify the data of this chunk.
+     *
+     * @return The biome array.
+     * @throws IllegalStateException
+     *             If the new biome store method is in use.
+     */
+    public byte[] getOldBiomeArray() {
+        if (chunkTag.isType(ChunkTag.BIOMES, TagType.INT_ARRAY)) {
+            throw new IllegalStateException("Chunk uses new biome storage format");
+        }
+        return chunkTag.getByteArray(OldChunkTag.BIOMES, CHUNK_X_SIZE * CHUNK_Z_SIZE);
     }
 
     @Override
