@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.collect.ImmutableList;
+
 import nl.rutgerkok.hammer.util.MaterialNotFoundException;
 
 /**
@@ -111,7 +113,8 @@ public final class GlobalMaterialMap {
             // Add new entry
             MaterialData newEntry = new MaterialData((char) idToInfo.size(), name);
             idToInfo.add(newEntry);
-            nameToInfo.put(name, newEntry);
+            addNameEntries(newEntry, ImmutableList.of(name));
+
             return newEntry;
         } finally {
             lock.unlock();
@@ -121,6 +124,14 @@ public final class GlobalMaterialMap {
     private void addNameEntries(MaterialData materialData, Collection<MaterialName> names) {
         for (MaterialName name : names) {
             nameToInfo.put(name, materialData);
+
+            // Add base name if not yet in use for some other variant
+            if (name.hasProperties()) {
+                MaterialName baseName = name.getBaseMaterialName();
+                if (!nameToInfo.containsKey(baseName)) {
+                    nameToInfo.put(baseName, materialData);
+                }
+            }
         }
     }
 

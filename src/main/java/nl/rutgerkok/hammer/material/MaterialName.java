@@ -133,6 +133,17 @@ public final class MaterialName {
     }
 
     /**
+     * Gets the material name when used without properties.
+     * @return The base material name.
+     */
+    public MaterialName getBaseMaterialName() {
+        if (this.properties.isEmpty()) {
+            return this; // Already a base material
+        }
+        return new MaterialName(this.name, ImmutableMap.of());
+    }
+
+    /**
      * Gets the base name of this material, like "minecraft:grass" in
      * "minecraft:grass[snowy=false]".
      *
@@ -159,7 +170,7 @@ public final class MaterialName {
 
     /**
      * Returns whether the material has properties, like {"facing": "north"}.
-     * 
+     *
      * @return True if the material has properties, false otherwise.
      */
     public boolean hasProperties() {
