@@ -1,15 +1,11 @@
 package nl.rutgerkok.hammer.anvil;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.util.Objects;
 
 import nl.rutgerkok.hammer.anvil.RegionFileCache.Claim;
-import nl.rutgerkok.hammer.anvil.tag.AnvilFormat.ChunkRootTag;
-import nl.rutgerkok.hammer.anvil.tag.AnvilNbtWriter;
-import nl.rutgerkok.hammer.tag.CompoundTag;
 import nl.rutgerkok.hammer.util.Progress;
 import nl.rutgerkok.hammer.util.Progress.UnitsProgress;
 import nl.rutgerkok.hammer.util.Result;
@@ -32,22 +28,15 @@ final class ChunkWalk {
     private void handleChunk(Progress progress, Visitor<? super AnvilChunk> visitor,
             RegionFile region, int chunkX, int chunkZ) throws IOException {
         try {
-            AnvilChunk chunk = new AnvilChunk(gameFactory,
-                    new RegionNbtIo(ChunkDataVersion.latest(), regionFileCache, chunkX, chunkZ));
+            RegionNbtIo regionNbtIo = new RegionNbtIo(ChunkDataVersion.latest(), regionFileCache, chunkX, chunkZ);
+            AnvilChunk chunk = new AnvilChunk(gameFactory, regionNbtIo);
             Result result = visitor.accept(chunk, progress);
             switch (result) {
-                // TODO handle distribution across region files
                 case CHANGED:
-                    // Save the chunk
-                    try (OutputStream outputStream = region.getChunkOutputStream(chunkX & 31, chunkZ & 31)) {
-                        CompoundTag root = new CompoundTag();
-                        root.setCompound(ChunkRootTag.MINECRAFT, chunk.getTag());
-                        root.setInt(ChunkRootTag.DATA_VERSION, chunk.getVersion().getId());
-                        AnvilNbtWriter.writeUncompressedToStream(outputStream, root);
-                    }
+                    chunk.save();
                     break;
                 case DELETE:
-                    region.deleteChunk(chunkX & 31, chunkZ & 31);
+                    regionNbtIo.deleteAllDataOfChunk();
                     break;
                 case NO_CHANGES:
                     break;
