@@ -62,7 +62,7 @@ public abstract class ChunkBlocks {
             // and below this section index)
             int firstSectionIndex = sections.get(0).getByte(SectionTag.INDEX);
             int posInList = sectionIndex - firstSectionIndex;
-            if (posInList < sections.size()) {
+            if (posInList >= 0 && posInList < sections.size()) {
                 CompoundTag section = sections.get(posInList);
                 if (section != null && section.getByte(SectionTag.INDEX) == sectionIndex) {
                     return section;
