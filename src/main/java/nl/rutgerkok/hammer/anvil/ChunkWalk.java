@@ -27,9 +27,11 @@ final class ChunkWalk {
 
     private void handleChunk(Progress progress, Visitor<? super AnvilChunk> visitor,
             RegionFile region, int chunkX, int chunkZ) throws IOException {
+        RegionNbtIo regionNbtIo = new RegionNbtIo(ChunkDataVersion.latest(), regionFileCache, chunkX, chunkZ);
+        boolean couldReadChunk = false;
         try {
-            RegionNbtIo regionNbtIo = new RegionNbtIo(ChunkDataVersion.latest(), regionFileCache, chunkX, chunkZ);
             AnvilChunk chunk = new AnvilChunk(gameFactory, regionNbtIo);
+            couldReadChunk = true;
             Result result = visitor.accept(chunk, progress);
             switch (result) {
                 case CHANGED:
@@ -45,6 +47,16 @@ final class ChunkWalk {
             }
         } catch (RuntimeException e) {
             throw new RuntimeException("Runtime error in " + chunkX + " " + chunkZ, e);
+        } catch (IOException e) {
+            if (couldReadChunk) {
+                // Initial read was successful, so there is chunk data
+                throw new IOException("IO error in " + chunkX + " " + chunkZ, e);
+            } else {
+                // There is no chunk data at all, delete from index
+                System.err.println("Failed to read " + chunkX + " " + chunkZ + ", deleting chunk.");
+                e.printStackTrace(System.err);
+                regionNbtIo.deleteTag(RegionFileType.CHUNK); // Remove from index, tag is corrupted
+            }
         }
     }
 
