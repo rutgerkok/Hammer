@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/github/workflow/status/rutgerkok/Hammer/dev%20build)](https://github.com/rutgerkok/Hammer/actions?query=workflow%3A%22dev+build%22)
 
-World editor library for Minecraft, written in Java. It is intended to be used by programs that need to interact with Minecraft level files. It has support for both the Java version of Minecraft and the Pocket Edition.
+World editor library for Minecraft, written in Java. It is intended to be used by programs that need to interact with Minecraft Java level files, from version 1.2 to version 1.17. (Newer versions may still work, as long as the data format doesn't change too much.)
 
 ## Compiling
 This project uses [Maven](https://maven.apache.org/). Download link and Git clone URLs are in the sidebar.
@@ -20,8 +20,7 @@ section of your `pom.xml` file:
         <scope>compile</scope>
     </dependency>
 
-All public methods are documented using JavaDocs. To get started, create an instance of either `AnvilWorld` or
-`PocketWorld`. You can then use the various methods on those classes to inspect or modify the level.
+All public methods are documented using JavaDocs. To get started, create an instance of `AnvilWorld`. You can then use the various methods on those classes to inspect or modify the level.
 
 ## Updating blocks_pc.json
 You can extract a new block list from the Minecraft Server as follows:
