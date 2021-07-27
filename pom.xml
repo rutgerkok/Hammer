@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.rutgerkok</groupId>
 	<artifactId>hammer</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>Hammer</name>
 	<description>Hammer is a library to view and edit Minecraft worlds</description>
 
