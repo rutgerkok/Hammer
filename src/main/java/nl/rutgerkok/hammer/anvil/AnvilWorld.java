@@ -53,7 +53,7 @@ public class AnvilWorld implements World {
         this.levelDat = levelDat.toAbsolutePath();
         this.tag = Files.exists(levelDat) ? AnvilNbtReader.readFromCompressedFile(levelDat) : new CompoundTag();
         this.gameFactory = new AnvilGameFactory(initMaterialMap(dictionary));
-        this.regionFileCache = new RegionFileCache(levelDat.getParent());
+        this.regionFileCache = new RegionFileCache(getRegionParentFolder());
     }
 
     @Override
@@ -111,6 +111,20 @@ public class AnvilWorld implements World {
 
         // Try again with old file
         return getDirectory(PLAYER_DIRECTORY_OLD);
+    }
+
+    public Path getRegionParentFolder() throws IOException {
+        if (Files.exists(this.levelDat.resolveSibling("region"))) {
+            // Just use the world folder
+            return this.levelDat.getParent();
+        }
+
+        // Try subfolders like DIM1 and DIM-1 (for CraftBukkit/Spigot/Paper/etc.)
+        return Files.list(this.levelDat.getParent())
+        .filter(Files::isDirectory)
+        .filter(path -> path.getFileName().toString().contains("DIM"))
+        .findAny()
+        .orElseThrow(() -> new IOException("World does not have a region folder"));
     }
 
     /**

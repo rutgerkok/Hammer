@@ -32,7 +32,11 @@ final class PlayerFilesWalk {
     }
 
     private int calculateTotalUnits() throws IOException {
-        int size = DirectoryUtil.countFiles(world.getPlayerDirectory());
+        Path playerDirectory = world.getPlayerDirectory();
+        if (playerDirectory == null) {
+            return 0;
+        }
+        int size = DirectoryUtil.countFiles(playerDirectory);
         if (world.getLevelTag().containsKey(LevelTag.PLAYER)) {
             size++;
         }
@@ -76,7 +80,11 @@ final class PlayerFilesWalk {
     }
 
     private void walkPlayerFiles(Visitor<PlayerFile> consumer, UnitsProgress progress) throws IOException {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(world.getPlayerDirectory())) {
+        Path playerDirectory = world.getPlayerDirectory();
+        if (playerDirectory == null) {
+            return;
+        }
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(playerDirectory)) {
             for (Path file : stream) {
                 if (!file.toString().endsWith(".dat")) {
                     continue;
