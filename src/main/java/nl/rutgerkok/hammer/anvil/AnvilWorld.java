@@ -87,8 +87,8 @@ public class AnvilWorld implements World {
     }
 
     /**
-     * Gets access to the main tag of the level.dat file, with subtags like
-     * SpawnX and GameRules.
+     * Gets access to the main tag of the level.dat file, with subtags like SpawnX
+     * and GameRules.
      *
      * @return The NBT root tag.
      */
@@ -121,10 +121,10 @@ public class AnvilWorld implements World {
 
         // Try subfolders like DIM1 and DIM-1 (for CraftBukkit/Spigot/Paper/etc.)
         return Files.list(this.levelDat.getParent())
-        .filter(Files::isDirectory)
-        .filter(path -> path.getFileName().toString().contains("DIM"))
-        .findAny()
-        .orElseThrow(() -> new IOException("World does not have a region folder"));
+                .filter(Files::isDirectory)
+                .filter(path -> path.getFileName().toString().startsWith("DIM"))
+                .findAny()
+                .orElseThrow(() -> new IOException("World does not have a region folder"));
     }
 
     /**
