@@ -26,6 +26,9 @@ public abstract class Progress {
 
         @Override
         public double getFraction() {
+            if (totalUnits == 0) {
+                return 1;
+            }
             return ((double) currentUnits) / totalUnits;
         }
 
@@ -70,7 +73,7 @@ public abstract class Progress {
      * @see UnitsProgress#increment()
      */
     public static final UnitsProgress ofUnits(int totalUnits) {
-        if (totalUnits <= 0) {
+        if (totalUnits < 0) {
             throw new IllegalArgumentException("totalUnits must be positive, was " + totalUnits);
         }
         return new UnitsProgress(totalUnits);
